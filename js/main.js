@@ -84,7 +84,14 @@
   }
 
   function advanceTime(mins) {
-    const maxTime = currentChapter === 3 ? 17 * 60 + 55 : currentChapter === 2 ? 18 * 60 + 55 : 16 * 60 + 5;
+    const maxTime =
+      currentChapter === 4
+        ? 17 * 60 + 25
+        : currentChapter === 3
+        ? 17 * 60 + 55
+        : currentChapter === 2
+        ? 18 * 60 + 55
+        : 16 * 60 + 5;
     state.timeMinutes = Math.min(maxTime, state.timeMinutes + mins);
   }
 
@@ -98,7 +105,9 @@
 
     $('micro-chapter').textContent =
       currentChapter === 3
-        ? 'Ch3 阿文的最後一天'
+        ? 'Ch4 阿文的最後一天'
+        : currentChapter === 4
+        ? 'Ch3 今天的紀錄，明天找得到'
         : currentChapter === 2
         ? 'Ch2 投稿前一晚'
         : 'Ch1 寄出之前';
@@ -114,7 +123,9 @@
       (currentChapter === 3 && state.ch3.interruptedByEarlyRevoke && state.ch3.rawLogLocation !== 'project');
 
     const readyToastNow =
-      currentChapter === 3
+      currentChapter === 4
+        ? window.BS.State.isCh4FullyComplete(state) && !state.handoverDone
+        : currentChapter === 3
         ? window.BS.State.isCh3FullyComplete(state) && !state.handoverDone
         : window.BS.State.canHandover(state) && !state.handoverDone;
 
@@ -142,8 +153,9 @@
   }
 
   function startChapter(chapter) {
-    currentChapter = chapter === 3 ? 3 : chapter === 2 ? 2 : 1;
+    currentChapter = chapter === 4 ? 4 : chapter === 3 ? 3 : chapter === 2 ? 2 : 1;
     handoverToastShown = false;
+    window.BS.Audio.stopTitleBgm(750);
     window.BS.UI.closeAllModals();
     window.BS.UI.closeDialogue();
     $('title-screen').classList.add('hidden');
@@ -154,7 +166,7 @@
     state.started = true;
     npcs = window.BS.Map.createNPCsForChapter(currentChapter);
 
-    if (currentChapter === 2 || currentChapter === 3) {
+    if (currentChapter === 2 || currentChapter === 3 || currentChapter === 4) {
       resetPlayer(2, 7, 5, 'right');
     } else {
       resetPlayer(2, 5, 5, 'up');
@@ -176,7 +188,10 @@
     fade.alpha = 0;
     state.started = false;
     $('title-screen').classList.remove('hidden');
-    window.BS.UI.setTitleCursor(currentChapter - 1);
+    const displayOrder = [1, 2, 4, 3];
+    const menuIdx = displayOrder.indexOf(currentChapter);
+    window.BS.UI.setTitleCursor(menuIdx >= 0 ? menuIdx : 0);
+    window.BS.Audio.startTitleBgm();
     refreshHUD();
   }
 
@@ -501,6 +516,11 @@
       startChapter(2);
     });
 
+    $('btn-start-ch4').addEventListener('click', () => {
+      window.BS.Audio.confirm();
+      startChapter(4);
+    });
+
     $('btn-start-ch3').addEventListener('click', () => {
       window.BS.Audio.confirm();
       startChapter(3);
@@ -592,7 +612,7 @@
       }
     }
 
-    nearbyTarget = window.BS.Map.findNearbyTarget(player.floor, player.x, player.y, player.dir, npcs);
+    nearbyTarget = window.BS.Map.findNearbyTarget(player.floor, player.x, player.y, player.dir, npcs, currentChapter);
     $('nearby-hint').textContent = nearbyTarget
       ? `按 A / 空白鍵互動：${nearbyTarget.label}`
       : '走近物件或同事查看提示 · START 選單 · SELECT 筆記';
@@ -715,8 +735,48 @@
       } else {
         drawQuestBubble(3, 7.1, '▲', c.misuploaded ? '#ef4444' : '#f59e0b', c.misuploaded ? '#ffffff' : '#1e293b');
       }
+    } else if (currentChapter === 4) {
+      // Chapter 3 (Internal 4): 今天的紀錄，明天找得到 cross-floor quest markers
+      const c = state.ch4;
+      const lookup = window.BS.State.evaluateCh4Lookup(state);
+      const allDone = lookup.allOk && !state.handoverDone;
+      const needInv = lookup.steps[0].cls !== 'ok';
+      const needRec = lookup.steps[1].cls !== 'ok' || lookup.steps[3].cls !== 'ok' || (c.rawFileLocation === 'team' && c.record.rawFileLink !== 'team');
+      const needRaw = c.rawFileLocation !== 'team';
+
+      if (player.floor === 2) {
+        if (needInv) {
+          drawQuestBubble(3, 2.5, '!', '#f59e0b', '#1e293b');
+        }
+        const wen = npcs.find((n) => n.id === 'npc_colleague');
+        if (wen && wen.floor === 2 && !c.clues.awenInfo) {
+          drawQuestBubble(wen.x, wen.y - 0.3, '!', '#38bdf8', '#0f172a');
+        }
+        if (!c.clues.instrumentFile || needRaw) {
+          drawQuestBubble(19, 2.5, '!', '#f59e0b', '#1e293b');
+        }
+        if (needRec) {
+          drawQuestBubble(16, 10.6, '!', c.rawFileLocation === 'team' && c.record.rawFileLink !== 'team' ? '#ef4444' : '#38bdf8', '#ffffff');
+        }
+        if (!c.clues.qingChecklistReq) {
+          drawQuestBubble(3, 7.1, '▼', '#38bdf8', '#0f172a');
+        }
+        if (allDone) {
+          drawQuestBubble(7, 2.5, '✓', '#22c55e', '#ffffff');
+        }
+      } else {
+        const qing = npcs.find((n) => n.id === 'npc_qing');
+        if (qing && qing.floor === 1 && (!c.clues.qingChecklistReq || allDone)) {
+          drawQuestBubble(qing.x, qing.y - 0.3, allDone ? '✓' : '!', allDone ? '#22c55e' : '#38bdf8', allDone ? '#ffffff' : '#0f172a');
+        }
+        const lead = npcs.find((n) => n.id === 'npc_lead');
+        if (lead && lead.floor === 1 && !allDone) {
+          drawQuestBubble(lead.x, lead.y - 0.3, '?', '#f59e0b', '#1e293b');
+        }
+        drawQuestBubble(3, 7.1, '▲', allDone ? '#22c55e' : '#f59e0b', allDone ? '#ffffff' : '#1e293b');
+      }
     } else {
-      // Chapter 3 cross-floor quest markers!
+      // Chapter 4 (Internal 3) cross-floor quest markers!
       const c = state.ch3;
       const allDone = window.BS.State.isCh3FullyComplete(state) && !state.handoverDone;
       const need1F =
@@ -818,8 +878,53 @@
     triggerA
   };
 
+  function setupTitleBgm() {
+    const bgmBtn = $('btn-title-bgm');
+    if (bgmBtn) {
+      window.BS.Audio.onBgmStateChange((status) => {
+        bgmBtn.classList.remove('locked', 'muted');
+        if (status === 'muted') {
+          bgmBtn.textContent = '🔇 音樂：關';
+          bgmBtn.classList.add('muted');
+        } else if (status === 'playing') {
+          bgmBtn.textContent = '🔊 音樂：開';
+        } else {
+          bgmBtn.textContent = '🎵 點擊開啟音樂';
+          bgmBtn.classList.add('locked');
+        }
+      });
+
+      bgmBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const status = window.BS.Audio.getTitleBgmStatus();
+        if (status === 'locked' || status === 'stopped') {
+          window.BS.Audio.startTitleBgm();
+        } else {
+          window.BS.Audio.toggleMute();
+        }
+      });
+    }
+
+    // Unlock autoplay gracefully on the user's very first interaction on Title Screen
+    const tryUnlock = (ev) => {
+      if (!isTitleVisible()) return;
+      if (bgmBtn && ev.target === bgmBtn) return;
+      if (ev.target && ev.target.closest && ev.target.closest('.cursor-menu-item')) return;
+      window.BS.Audio.unlockTitleBgmIfNeeded();
+    };
+    window.addEventListener('pointerdown', tryUnlock, { capture: true });
+    window.addEventListener('keydown', (ev) => {
+      if (!isTitleVisible()) return;
+      if (ev.key === 'Enter' || ev.key === ' ') return; // confirming chapter enters game immediately
+      window.BS.Audio.unlockTitleBgmIfNeeded();
+    }, { capture: true });
+
+    window.BS.Audio.startTitleBgm();
+  }
+
   setupButtons();
   setupGBAControls();
+  setupTitleBgm();
   refreshHUD();
   requestAnimationFrame(loop);
 })();

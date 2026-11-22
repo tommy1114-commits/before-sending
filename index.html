@@ -29,6 +29,7 @@
         <!-- GBA Animated Title Screen Overlay -->
         <section class="overlay-screen title-overlay" id="title-screen" role="dialog" aria-modal="true" aria-labelledby="title-heading">
           <canvas id="title-bg-canvas" width="384" height="256" aria-hidden="true"></canvas>
+          <button class="title-bgm-btn" id="btn-title-bgm" type="button" aria-label="切換首頁背景音樂">🎵 開啟首頁音樂</button>
           <div class="title-content">
             <div class="title-header-block">
               <div class="title-kicker">中研院 RCCI 實驗室 · 營業秘密情境 RPG</div>
@@ -52,15 +53,22 @@
                     <span class="menu-sub">研討會海報審閱・版本比對・誤傳補救</span>
                   </span>
                 </button>
-                <button class="cursor-menu-item" id="btn-start-ch3" data-idx="2" type="button" role="menuitem">
+                <button class="cursor-menu-item" id="btn-start-ch4" data-idx="2" type="button" role="menuitem">
                   <span class="menu-cursor">▶</span>
                   <span class="menu-body">
-                    <span class="menu-main">第三章　阿文的最後一天 <span class="menu-time">17:00</span></span>
+                    <span class="menu-main">第三章　今天的紀錄，明天找得到 <span class="menu-time">16:30</span></span>
+                    <span class="menu-sub">實驗紀錄更正留痕・原始檔歸檔・盤點清冊與隔天查找</span>
+                  </span>
+                </button>
+                <button class="cursor-menu-item" id="btn-start-ch3" data-idx="3" type="button" role="menuitem">
+                  <span class="menu-cursor">▶</span>
+                  <span class="menu-body">
+                    <span class="menu-main">第四章　阿文的最後一天 <span class="menu-time">17:00</span></span>
                     <span class="menu-sub">跨樓層研究交接・人物存取視角・門禁與權限終止</span>
                   </span>
                 </button>
               </div>
-              <div class="title-menu-footer">↑↓ 移動游標 · A / Enter 確認 · 三章皆可直接進入</div>
+              <div class="title-menu-footer">↑↓ 移動游標 · A / Enter 確認 · 四章皆可直接進入</div>
             </div>
           </div>
         </section>
@@ -120,7 +128,29 @@
           </div>
         </section>
 
-        <!-- Chapter 3: Offboarding Checklist & Access Perspective Preview Modal -->
+        <!-- Chapter 3 (Internal 4): Lab Record, Raw File Archive & Inventory Workbench -->
+        <section class="modal-overlay hidden" id="record-modal" role="dialog" aria-modal="true" aria-labelledby="record-title">
+          <div class="modal-window poster-window">
+            <div class="modal-header">
+              <span id="record-title">🧪 實驗紀錄整理、原始檔歸檔與盤點清冊</span>
+              <button class="modal-close" id="btn-record-close" type="button" aria-label="關閉整理系統">✕</button>
+            </div>
+            <div class="modal-body" id="record-body"></div>
+          </div>
+        </section>
+
+        <!-- Chapter 3 (Internal 4): Next-Day Qing Lookup Simulation Modal -->
+        <section class="modal-overlay hidden" id="lookup-modal" role="dialog" aria-modal="true" aria-labelledby="lookup-title">
+          <div class="modal-window poster-window">
+            <div class="modal-header">
+              <span id="lookup-title">🔍 模擬隔天盤點 — 小晴查找視角</span>
+              <button class="modal-close" id="btn-lookup-close" type="button" aria-label="關閉盤點模擬">✕</button>
+            </div>
+            <div class="modal-body" id="lookup-body"></div>
+          </div>
+        </section>
+
+        <!-- Chapter 4 (Internal 3): Offboarding Checklist & Access Perspective Preview Modal -->
         <section class="modal-overlay hidden" id="offboard-modal" role="dialog" aria-modal="true" aria-labelledby="offboard-title">
           <div class="modal-window poster-window">
             <div class="modal-header">

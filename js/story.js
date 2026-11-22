@@ -65,7 +65,9 @@
 
       if (handleCommonScenery(state, target.id)) return;
 
-      if (state.chapter === 3) {
+      if (state.chapter === 4) {
+        interactCh4(state, target);
+      } else if (state.chapter === 3) {
         interactCh3(state, target);
       } else if (state.chapter === 2) {
         interactCh2(state, target);
@@ -79,7 +81,9 @@
       if (state.introShown) return;
       state.introShown = true;
 
-      if (state.chapter === 3) {
+      if (state.chapter === 4) {
+        playCh4Intro();
+      } else if (state.chapter === 3) {
         playCh3Intro();
       } else if (state.chapter === 2) {
         playCh2Intro();
@@ -1409,14 +1413,14 @@
     }
 
     // =========================================================================
-    // CHAPTER 3: 阿文的最後一天
+    // CHAPTER 4 (Internal 3): 阿文的最後一天
     // =========================================================================
     function playCh3Intro() {
       window.BS.UI.startDialogue([
         {
           speaker: '同事 阿文（2F 辦公區旁）',
           portrait: 'colleague',
-          text: '下午五點了，今天就是我在實驗室的最後一天。\n「我把交接清單放在電腦裡了。對了，下個月改論文還要用之前開會那兩張圖。我原本的資料夾權限可以先留著嗎？」'
+          text: '下午五點了，今天就是我在實驗室的最後一天。\n「上次那批資料已經有清冊，我們從那裡找。我把交接清單放在電腦裡了。對了，下個月改論文還要用之前開會那兩張圖。我原本的資料夾權限可以先留著嗎？」'
         },
         {
           speaker: '同事 阿文',
@@ -1892,7 +1896,7 @@
           {
             speaker: '2F 值班桌（交班紀錄簿）',
             portrait: 'desk',
-            text: '第三章「阿文的最後一天」已經完成交班！要重新檢視通關畫面與交班紀錄，還是再挑戰其他路線呢？',
+            text: '第四章「阿文的最後一天」已經完成交班！要重新檢視通關畫面與交班紀錄，還是再挑戰其他路線呢？',
             choices: [
               {
                 label: '🏆 重新檢視通關畫面與交班紀錄',
@@ -1906,7 +1910,7 @@
                 }
               },
               {
-                label: '🔄 再玩一次第三章',
+                label: '🔄 再玩一次第四章',
                 onSelect: () => ctx.restartChapter()
               },
               {
@@ -1966,6 +1970,395 @@
               onSelect: () => {}
             }
           ]
+        }
+      ]);
+    }
+
+    // =========================================================================
+    // CHAPTER 3 (Internal 4): 今天的紀錄，明天找得到
+    // =========================================================================
+    function playCh4Intro() {
+      window.BS.UI.startDialogue([
+        {
+          speaker: '同事 阿文（2F 辦公區旁）',
+          portrait: 'colleague',
+          text: '下午四點半，阿文剛完成一組薄膜量測，拿著紀錄夾走過來：\n「原始檔還在儀器電腦裡，今天有一筆紀錄的樣品編號也寫錯了。你可以跟我一起整理嗎？明天小晴要盤點這批資料。」'
+        },
+        {
+          speaker: '同事 阿文',
+          portrait: 'colleague',
+          text: '我先回 2F 實驗區整理樣品盤。原始檔在 2F 實驗區的「儀器電腦」，當日紀錄卡在「實驗紀錄桌」；1F 大廳有小晴跟阿明組長，也可以先下樓問小晴明天會從哪裡開始查！'
+        },
+        {
+          speaker: '小安',
+          portrait: 'player',
+          text: '好！不管先下樓問 1F 小晴盤點清冊怎麼看，還是先在 2F 找阿文、查儀器電腦跟實驗紀錄桌都可以。最後再到值班桌或找小晴「模擬隔天盤點」驗收看看！'
+        }
+      ], () => {
+        ctx.moveNpcTo('npc_colleague', 2, 20, 5, 'left');
+        ctx.refreshHUD();
+      });
+    }
+
+    function completeCh4Handover(state) {
+      state.handoverDone = true;
+      state.timeMinutes = Math.max(state.timeMinutes, 17 * 60 + 10);
+      ctx.refreshHUD();
+      const result = window.BS.State.evaluateChapter4Handover(state);
+      if (result.hasRisk) {
+        window.BS.Audio.alert();
+      } else {
+        window.BS.Audio.fanfare();
+      }
+      window.BS.UI.openClearScreen(result, {
+        onReplay: () => ctx.restartChapter(),
+        onReturnMenu: () => ctx.returnToMenu(),
+        onStartChapter: (ch) => ctx.startChapter(ch)
+      });
+    }
+
+    function openCh4Lookup(state) {
+      ctx.advanceTime(2);
+      ctx.refreshHUD();
+      window.BS.UI.openLookupModal(state, {
+        onFix: () => {
+          ctx.refreshHUD();
+        },
+        onHandover: () => {
+          completeCh4Handover(state);
+        }
+      });
+    }
+
+    function openCh4Workbench(state, initialTab) {
+      if (!state.ch4.openedWorkbench) {
+        ctx.advanceTime(2);
+      }
+      window.BS.UI.openRecordModal(state, initialTab, {
+        onUpdate: () => {
+          ctx.advanceTime(1);
+          ctx.refreshHUD();
+        },
+        onOpenLookup: () => {
+          openCh4Lookup(state);
+        }
+      });
+      ctx.refreshHUD();
+    }
+
+    function interactCh4(state, target) {
+      switch (target.id) {
+        case 'npc_colleague':
+          handleCh4Colleague(state);
+          break;
+        case 'monitor':
+          handleCh4InstrumentPC(state);
+          break;
+        case 'samples':
+          handleCh4RecordDesk(state);
+          break;
+        case 'pc':
+          handleCh4OfficePC(state);
+          break;
+        case 'duty_desk':
+          handleCh4DutyDesk(state);
+          break;
+        case 'npc_qing':
+          handleCh4Qing(state);
+          break;
+        case 'npc_lead':
+          handleCh4Lead(state);
+          break;
+        case 'reception':
+          handleCh4Reception(state);
+          break;
+        case 'whiteboard':
+          window.BS.UI.startDialogue([
+            {
+              speaker: '2F 實驗白板',
+              portrait: 'whiteboard',
+              text: '白板寫著今日值班提醒：「1. 原始量測檔不可改寫，請原樣歸檔至團隊資料夾；2. 紀錄更正應保留原值與更正資訊；3. 盤點清冊只寫批次範圍，不寫配方參數。」'
+            }
+          ]);
+          break;
+      }
+    }
+
+    function handleCh4Colleague(state) {
+      const c = state.ch4;
+      if (!c.clues.awenInfo) {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '同事 阿文（2F 實驗區）',
+            portrait: 'colleague',
+            text: '小安太好了！我把今天這筆實驗紀錄（LAB-2026-1122-01）的正確資訊念給你帶進去：\n• 量測日期：2026-11-22\n• 記錄人：阿文\n• 實驗摘要：晴空計畫薄膜樣品 S08 室溫阻抗與穩定度基準量測'
+          },
+          {
+            speaker: '同事 阿文',
+            portrait: 'colleague',
+            text: '至於寫錯的那筆樣品編號：我剛剛核對樣品盤標籤和儀器原始檔名，紀錄卡上誤寫成「CS-2026-S03」，實際上應該是「CS-2026-S08」！'
+          },
+          {
+            speaker: '同事 阿文',
+            portrait: 'colleague',
+            text: '原始量測檔（CS_20261122_S08_RAW.csv）還在旁邊的「儀器電腦」裡，記得保持原始檔原樣不要去改它喔！你也可以去 2F 實驗紀錄桌比較一下「直接覆寫」跟「新增更正筆錄」有什麼差別。'
+          }
+        ], () => {
+          c.clues.awenInfo = true;
+          ctx.advanceTime(2);
+          ctx.refreshHUD();
+          window.BS.Audio.success();
+          window.BS.UI.showToast('✅ 已取得阿文線索（日期、S03→S08、摘要、記錄人），可在紀錄卡一鍵帶入！', false, 4400);
+        });
+        return;
+      }
+
+      const lookup = window.BS.State.evaluateCh4Lookup(state);
+      let tip = '線索都給你囉！可以在旁邊的 2F 實驗紀錄桌補齊當日紀錄與更正樣品編號，到 2F 儀器電腦把原始檔歸檔，再到 2F 值班電腦填寫整批資料盤點清冊！';
+      if (lookup.allOk) {
+        tip = '看起來全數整理到位了！可以回 2F 值班桌或下樓找 1F 小晴跑一次「模擬隔天盤點」驗收喔！';
+      } else if (c.rawFileLocation === 'team' && c.record.rawFileLink !== 'team') {
+        tip = '對了，原始檔移到團隊指定資料夾之後，別忘了回到實驗紀錄卡把「原始檔連結」也一起更新，不然明天小晴點連結會斷掉喔！';
+      }
+      window.BS.UI.startDialogue([
+        {
+          speaker: '同事 阿文（2F 實驗區）',
+          portrait: 'colleague',
+          text: tip
+        }
+      ]);
+    }
+
+    function handleCh4InstrumentPC(state) {
+      const c = state.ch4;
+      const firstTime = !c.clues.instrumentFile;
+      c.clues.instrumentFile = true;
+      if (c.record.rawFileLink === 'none') {
+        c.record.rawFileLink = 'instrument';
+      }
+      if (firstTime) {
+        ctx.advanceTime(2);
+        window.BS.Audio.success();
+        window.BS.UI.showToast('💾 已在儀器電腦找到原始量測檔 CS_20261122_S08_RAW.csv！', false, 3800);
+      }
+      ctx.refreshHUD();
+
+      const locName =
+        c.rawFileLocation === 'team'
+          ? '團隊指定資料夾（/TeamDrive/ClearSky_202611/01_RawData/）'
+          : c.rawFileLocation === 'personal'
+          ? '阿文個人工作區（/Users/Awen/Personal_Workspace/）'
+          : '儀器電腦本機（Instrument_PC:\\Temp_Raw\\）';
+
+      window.BS.UI.startDialogue([
+        {
+          speaker: '2F 儀器電腦（原始量測檔）',
+          portrait: 'monitor',
+          text:
+            `已定位今日原始量測檔：${c.rawFileName}（唯讀原樣，未更動）。\n` +
+            `• 目前存放位置：${locName}\n` +
+            `• 紀錄卡目前連結：${c.record.rawFileLink === 'team' ? '團隊指定資料夾' : c.record.rawFileLink === 'personal' ? '個人工作區' : '儀器電腦本機'}`,
+          choices: [
+            {
+              label: '📂 打開「步驟二：選擇原始檔存放位置」',
+              onSelect: () => openCh4Workbench(state, 'file')
+            },
+            {
+              label: '📝 打開「步驟一：當日實驗紀錄卡」',
+              onSelect: () => openCh4Workbench(state, 'record')
+            },
+            { label: '先離開儀器電腦', onSelect: () => {} }
+          ]
+        }
+      ]);
+    }
+
+    function handleCh4RecordDesk(state) {
+      openCh4Workbench(state, 'record');
+    }
+
+    function handleCh4OfficePC(state) {
+      openCh4Workbench(state, 'inventory');
+    }
+
+    function handleCh4Qing(state) {
+      const c = state.ch4;
+      const firstTime = !c.clues.qingChecklistReq;
+      c.clues.qingChecklistReq = true;
+      if (firstTime) {
+        ctx.advanceTime(2);
+        window.BS.Audio.select();
+        window.BS.UI.showToast('✅ 已向 1F 小晴確認明日盤點查找順序（清冊→紀錄→原始檔→更正歷程）！', false, 4400);
+      }
+      ctx.refreshHUD();
+
+      window.BS.UI.startDialogue([
+        {
+          speaker: '盤點同事 小晴（1F 大廳）',
+          portrait: 'qing',
+          text: firstTime
+            ? '嗨小安！明天早上我要盤點阿文今天那批量測資料。其實我找資料有一套固定順序：\n① 先看「盤點清冊」確認批次名稱（只要批次範圍、別把機密配方寫進清冊！）、類型、保護原因、指定存放位置跟負責人。'
+            : '準備好讓我用明天盤點的視角實際查查看這批資料了嗎？如果還有缺漏，測試完我會告訴你哪裡卡住，你隨時可以上樓修好再測！',
+          choices: firstTime
+            ? [
+                {
+                  label: '繼續聽小晴說明後續查找步驟',
+                  onSelect: () => {
+                    window.BS.UI.startDialogue([
+                      {
+                        speaker: '盤點同事 小晴（1F 大廳）',
+                        portrait: 'qing',
+                        text: '② 接著我會進清冊寫的團隊資料夾找「當日實驗紀錄」，核對日期、摘要和記錄人。\n③ 再從紀錄裡的連結點開「原始量測檔」。\n④ 如果編號有改過，我也需要確認是誰、何時、為什麼更正的！',
+                        choices: [
+                          {
+                            label: '🔍 先用小晴視角「模擬隔天盤點」看看目前狀態',
+                            onSelect: () => openCh4Lookup(state)
+                          },
+                          {
+                            label: '了解！我先上 2F 整理好再回來測',
+                            onSelect: () => {}
+                          }
+                        ]
+                      }
+                    ]);
+                  }
+                }
+              ]
+            : [
+                {
+                  label: '🔍 模擬隔天盤點（切換小晴查找視角）',
+                  onSelect: () => openCh4Lookup(state)
+                },
+                {
+                  label: '我再上 2F 確認整理一下',
+                  onSelect: () => {}
+                }
+              ]
+        }
+      ]);
+    }
+
+    function handleCh4Lead(state) {
+      const c = state.ch4;
+      c.clues.mingTipped = true;
+      ctx.refreshHUD();
+      const lookup = window.BS.State.evaluateCh4Lookup(state);
+      const firstIssue = lookup.steps.find((s) => s.cls !== 'ok');
+
+      let advice = '';
+      if (!firstIssue) {
+        advice = '我剛看過你們整理的紀錄、團隊資料夾原始檔、系統原生更正歷程與整批盤點清冊，四個環節全部串通無誤！可以回 2F 值班桌或找旁邊小晴跑完模擬盤點就完成交班囉。';
+      } else {
+        advice = `我幫你檢查目前還差哪裡：\n• 目前卡關點：${firstIssue.title}（${firstIssue.badge}）\n• 建議做法：${firstIssue.fix}`;
+      }
+
+      window.BS.UI.startDialogue([
+        {
+          speaker: '負責人 阿明組長（1F 大廳）',
+          portrait: 'lead',
+          text: advice,
+          choices: [
+            {
+              label: '請問更正實驗紀錄時，為什麼不能直接覆寫舊內容？',
+              onSelect: () => {
+                window.BS.UI.startDialogue([
+                  {
+                    speaker: '負責人 阿明組長（1F 大廳）',
+                    portrait: 'lead',
+                    text: '因為直接覆寫會讓原本的數字和變更原因消失，隔天盤點或日後遇到專利／營業秘密舉證時，沒辦法證明這筆資料當初為何修改！\n正確做法是「新增一筆更正紀錄」，保留原值、新值、時間、原因與更正人；若已不小心覆寫，也只能如實加上「事後補記」，不能偽裝成系統原生歷程。'
+                  }
+                ]);
+              }
+            },
+            {
+              label: '請問盤點清冊該怎麼寫才不會洩密又好找？',
+              onSelect: () => {
+                window.BS.UI.startDialogue([
+                  {
+                    speaker: '負責人 阿明組長（1F 大廳）',
+                    portrait: 'lead',
+                    text: '盤點清冊以「整批資料」為單位建立一筆即可（寫清楚資料名稱或範圍、資料類型、保護原因、指定存放位置、負責人）。千萬別把配方比例或製程溫度寫在清冊名稱裡——機密技術細節應該留在受控的實驗紀錄中！'
+                  }
+                ]);
+              }
+            },
+            { label: '謝謝阿明組長，我去整理！', onSelect: () => {} }
+          ]
+        }
+      ]);
+    }
+
+    function handleCh4Reception(state) {
+      window.BS.UI.startDialogue([
+        {
+          speaker: '1F 大門接待櫃台（盤點清冊填寫規範卡）',
+          portrait: 'reception',
+          text: '【實驗室盤點清冊五欄位規範】\n① 資料名稱或範圍：以「整批資料」命名，不寫機密配方或參數。\n② 資料類型：例「電子實驗紀錄＋儀器原始量測檔」。\n③ 保護原因：例「未公開量測成果／涉及論文與專利評估」。\n④ 指定存放位置：團隊受控資料夾路徑。\n⑤ 負責人：可聯繫之專案資料窗口。'
+        }
+      ]);
+    }
+
+    function handleCh4DutyDesk(state) {
+      if (state.handoverDone) {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '2F 值班桌（交班紀錄簿）',
+            portrait: 'desk',
+            text: '第三章「今天的紀錄，明天找得到」已經完成交班！要重新檢視通關畫面與交班紀錄，還是再試試不同路線呢？',
+            choices: [
+              {
+                label: '🏆 重新檢視通關畫面與交班紀錄',
+                onSelect: () => {
+                  const result = window.BS.State.evaluateChapter4Handover(state);
+                  window.BS.UI.openClearScreen(result, {
+                    onReplay: () => ctx.restartChapter(),
+                    onReturnMenu: () => ctx.returnToMenu(),
+                    onStartChapter: (ch) => ctx.startChapter(ch)
+                  });
+                }
+              },
+              {
+                label: '🔄 再玩一次第三章',
+                onSelect: () => ctx.restartChapter()
+              },
+              {
+                label: '🏠 返回首頁選單',
+                onSelect: () => ctx.returnToMenu()
+              },
+              { label: '先取消', onSelect: () => {} }
+            ]
+          }
+        ]);
+        return;
+      }
+
+      const lookup = window.BS.State.evaluateCh4Lookup(state);
+      const choices = [
+        {
+          label: '🔍 模擬隔天盤點（切換小晴查找視角）',
+          onSelect: () => openCh4Lookup(state)
+        }
+      ];
+
+      if (window.BS.State.canHandover(state)) {
+        choices.push({
+          label: lookup.allOk
+            ? '✍ 填寫第三章交班紀錄並完成本章'
+            : '✍ 直接以目前狀態填寫交班紀錄（列出未完成項目）',
+          onSelect: () => completeCh4Handover(state)
+        });
+      }
+
+      choices.push({ label: '先繼續在兩層樓整理', onSelect: () => {} });
+
+      window.BS.UI.startDialogue([
+        {
+          speaker: '2F 值班桌（模擬隔天盤點／交班）',
+          portrait: 'desk',
+          text: lookup.allOk
+            ? '太棒了！盤點清冊、當日實驗紀錄、團隊資料夾原始檔與系統原生更正歷程全數到位！要執行模擬隔天盤點，還是直接完成第三章交班？'
+            : '隨時可以在這裡切換「小晴查找視角」模擬隔天盤點，測試明天同事能不能依清冊找到檔案並看懂更正歷程！',
+          choices
         }
       ]);
     }

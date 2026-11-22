@@ -193,6 +193,60 @@ html, body {
   background: linear-gradient(180deg, rgba(5, 21, 34, 0.42) 0%, rgba(5, 21, 34, 0.08) 42%, rgba(5, 21, 34, 0.25) 100%);
 }
 
+.title-bgm-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 6;
+  background: rgba(8, 28, 48, 0.84);
+  color: #e6f4ff;
+  border: 1.5px solid rgba(125, 200, 248, 0.7);
+  border-radius: 999px;
+  padding: 4px 11px;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+  transition: transform 0.12s, background 0.15s, border-color 0.15s;
+}
+
+.title-bgm-btn:hover {
+  background: rgba(18, 55, 92, 0.94);
+  border-color: #ffd166;
+  color: #ffffff;
+}
+
+.title-bgm-btn.locked {
+  border-color: #ffd166;
+  color: #ffe9a8;
+  animation: bgmPulse 1.8s ease-in-out infinite;
+}
+
+.title-bgm-btn.muted {
+  opacity: 0.76;
+  border-color: rgba(148, 163, 184, 0.55);
+  color: #cbd5e1;
+}
+
+@keyframes bgmPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.45); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 209, 102, 0); }
+}
+
+@media (max-width: 640px) {
+  .title-content {
+    padding-top: 38px;
+  }
+  .title-bgm-btn {
+    top: 8px;
+    right: 10px;
+    padding: 3px 9px;
+    font-size: 10.5px;
+  }
+}
+
 .title-header-block {
   text-align: center;
   margin-top: 2px;
@@ -241,33 +295,33 @@ html, body {
 /* Classic Retro RPG Cursor Menu Box */
 .title-menu-box {
   width: 100%;
-  max-width: 470px;
-  background: rgba(11, 27, 45, 0.9);
+  max-width: 500px;
+  background: rgba(11, 27, 45, 0.91);
   border: 3px solid #f4ecd8;
   box-shadow: 0 0 0 2px #0a1b2e inset, 0 10px 26px rgba(0, 0, 0, 0.55);
   border-radius: 10px;
-  padding: 9px 11px 7px;
+  padding: 7px 10px 6px;
   backdrop-filter: blur(2px);
 }
 
 .title-menu-list, .pause-menu-list {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 
 .cursor-menu-item {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   text-align: left;
   font-family: var(--font-ui);
   background: rgba(255, 255, 255, 0.04);
   color: #dce9f7;
   border: 1.5px solid transparent;
   border-radius: 7px;
-  padding: 6px 9px;
+  padding: 4px 8px;
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
@@ -1649,6 +1703,114 @@ html, body {
   gap: 6px;
 }
 
+/* ===== Chapter 3 (Internal 4): Record Card, Correction Diff & Next-Day Lookup ===== */
+.rec-field-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 8px;
+  border-bottom: 1px dashed #d8ceb7;
+  font-size: 12.5px;
+}
+
+.rec-field-row:last-child {
+  border-bottom: none;
+}
+
+.rec-field-label {
+  font-weight: 800;
+  color: #2b384e;
+  min-width: 96px;
+}
+
+.rec-field-val {
+  flex: 1;
+  min-width: 150px;
+  color: #1f293b;
+}
+
+.rec-field-val.empty {
+  color: #9a5b13;
+  font-style: italic;
+}
+
+.corr-compare-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+@media (max-width: 600px) {
+  .corr-compare-box {
+    grid-template-columns: 1fr;
+  }
+}
+
+.corr-pane {
+  border: 1.5px solid #cfc3a6;
+  border-radius: 7px;
+  padding: 8px 10px;
+  background: #faf6eb;
+  font-size: 12px;
+}
+
+.corr-pane.native-ok {
+  border-color: #369364;
+  background: #eefaf4;
+}
+
+.corr-pane.retro-warn {
+  border-color: #d9822b;
+  background: #fff7ea;
+}
+
+.corr-pane.lost-danger {
+  border-color: #c94141;
+  background: #fff0f0;
+}
+
+.strike-old {
+  text-decoration: line-through;
+  color: #9a3412;
+  font-family: var(--font-mono);
+}
+
+.lookup-step-card {
+  border: 2px solid #cfc4a8;
+  border-radius: 8px;
+  padding: 9px 11px;
+  margin-bottom: 8px;
+  background: #fffdf7;
+}
+
+.lookup-step-card.ok {
+  border-color: #379465;
+  background: #effaf4;
+}
+
+.lookup-step-card.warn {
+  border-color: #d9822b;
+  background: #fff8eb;
+}
+
+.lookup-step-card.danger {
+  border-color: #c94141;
+  background: #fff1f1;
+}
+
+.lookup-fix-tip {
+  margin-top: 5px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: rgba(25, 45, 72, 0.06);
+  font-size: 12px;
+  color: #243b59;
+  font-weight: 600;
+}
+
 @media (max-width: 720px) {
   .app-shell {
     padding: 4px 6px;
@@ -1693,7 +1855,7 @@ html, body {
     height: 36px;
   }
   .title-content {
-    padding: 8px 10px;
+    padding: 38px 10px 8px;
   }
   .title-menu-box {
     padding: 7px 8px 6px;

@@ -160,6 +160,13 @@
         { id: 'npc_qing', sprite: 'qing', label: '接手同事 小晴', floor: 2, x: 16, y: 9, dir: 'up' }
       ];
     }
+    if (chapter === 4) {
+      return [
+        { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', floor: 1, x: 4, y: 11, dir: 'right' },
+        { id: 'npc_qing', sprite: 'qing', label: '盤點同事 小晴', floor: 1, x: 7, y: 12, dir: 'up' },
+        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', floor: 2, x: 9, y: 5, dir: 'left' }
+      ];
+    }
     return [
       { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', floor: 2, x: 8, y: 12, dir: 'up' },
       { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', floor: 2, x: 20, y: 5, dir: 'left' },
@@ -432,6 +439,7 @@
   function drawFloor2(ctx, state, tick) {
     const isCh2 = state.chapter === 2;
     const isCh3 = state.chapter === 3;
+    const isCh4 = state.chapter === 4;
     const isCh1 = state.chapter === 1;
 
     // 1. Floor Tiles
@@ -571,6 +579,8 @@
     } else if (isCh3) {
       pcAlert = state.ch3.interruptedByEarlyRevoke && !state.ch3.adminTransferCompleted;
       pcUnread = !state.ch3.openedChecklist || pcAlert;
+    } else if (isCh4) {
+      pcUnread = !state.ch4.openedWorkbench;
     } else {
       pcAlert = state.email.misshared && !state.email.linkRevoked;
       pcUnread = state.email.status === 'unread' || pcAlert;
@@ -631,10 +641,15 @@
     const monY = 3 * TILE - 4;
     px(ctx, monX, monY, 16, 11, '#253142');
     if (isCh3) {
-      // Lab Record Terminal showing file location/status in Ch3
+      // Lab Record Terminal showing file location/status in Ch4-display (internal 3)
       px(ctx, monX + 2, monY + 2, 12, 7, '#12314a');
       px(ctx, monX + 3, monY + 3, 9, 1, '#7dd3fc');
       px(ctx, monX + 3, monY + 6, state.ch3.rawLogLocation === 'project' ? 10 : 5, 2, state.ch3.rawLogLocation === 'project' ? '#4ade80' : '#fbbf24');
+    } else if (isCh4) {
+      // Instrument PC showing raw file archive status in Ch3-display (internal 4)
+      px(ctx, monX + 2, monY + 2, 12, 7, '#132d42');
+      px(ctx, monX + 3, monY + 3, 10, 1, '#93c5fd');
+      px(ctx, monX + 3, monY + 6, state.ch4.rawFileLocation === 'team' ? 10 : 6, 2, state.ch4.rawFileLocation === 'team' ? '#4ade80' : '#f59e0b');
     } else if (!isCh1 || state.labItems.monitor) {
       px(ctx, monX + 2, monY + 2, 12, 7, '#1e293b');
       px(ctx, monX + 6, monY + 4, 4, 3, '#64748b');
@@ -657,7 +672,15 @@
     drawDesk(ctx, 15, 11, 3, '#b8c8d4', '#7b8f9e');
     const smpX = 16 * TILE;
     const smpY = 11 * TILE;
-    if (!isCh1 || state.labItems.samples) {
+    if (isCh4) {
+      // Open Lab Record Book on the 2F Lab Record Desk!
+      px(ctx, smpX - 3, smpY + 1, 22, 11, '#fffdf5');
+      px(ctx, smpX + 7, smpY + 1, 2, 11, '#cbd5e1');
+      px(ctx, smpX - 1, smpY + 3, 7, 1, '#2f7d6d');
+      px(ctx, smpX - 1, smpY + 6, 6, 1, '#94a3b8');
+      px(ctx, smpX + 10, smpY + 3, 7, 1, state.ch4.record.correctionMode === 'tracked_append' ? '#22c55e' : '#e05252');
+      px(ctx, smpX + 10, smpY + 6, 6, 1, '#94a3b8');
+    } else if (!isCh1 || state.labItems.samples) {
       px(ctx, smpX - 2, smpY + 1, 20, 11, '#3b526b');
       px(ctx, smpX, smpY + 3, 16, 7, '#516c8a');
       px(ctx, smpX + 5, smpY + 5, 6, 2, '#93c5fd');
@@ -718,7 +741,19 @@
     return list.find((t) => t.x === tx && t.y === ty) || null;
   }
 
-  function findNearbyTarget(floor, pxTile, pyTile, dir, npcs) {
+  function getObjectLabel(obj, chapter) {
+    if (chapter === 4) {
+      if (obj.id === 'monitor') return '儀器電腦（原始量測檔）';
+      if (obj.id === 'samples') return '實驗紀錄桌（當日紀錄卡）';
+      if (obj.id === 'duty_desk') return '值班桌（模擬隔天盤點／交班）';
+      if (obj.id === 'pc') return '值班電腦（存放位置與盤點清冊）';
+    } else if (chapter === 3) {
+      if (obj.id === 'monitor') return '實驗紀錄電腦（路徑對照）';
+    }
+    return obj.label;
+  }
+
+  function findNearbyTarget(floor, pxTile, pyTile, dir, npcs, chapter) {
     const offsets = {
       up: [0, -1],
       down: [0, 1],
@@ -738,7 +773,7 @@
     }
     for (const obj of floorObjs) {
       if (obj.tiles.some((t) => t.x === fx && t.y === fy)) {
-        return { type: 'object', id: obj.id, label: obj.label, x: obj.badgeX, y: obj.badgeY };
+        return { type: 'object', id: obj.id, label: getObjectLabel(obj, chapter), x: obj.badgeX, y: obj.badgeY };
       }
     }
 
@@ -753,7 +788,7 @@
       }
       for (const obj of floorObjs) {
         if (obj.tiles.some((t) => t.x === tx && t.y === ty)) {
-          return { type: 'object', id: obj.id, label: obj.label, x: obj.badgeX, y: obj.badgeY };
+          return { type: 'object', id: obj.id, label: getObjectLabel(obj, chapter), x: obj.badgeX, y: obj.badgeY };
         }
       }
     }
