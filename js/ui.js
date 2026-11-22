@@ -250,8 +250,6 @@
   function openPauseModal(state, zoneName, callbacks) {
     activeModal = 'pause';
     $('pause-modal').classList.remove('hidden');
-    const unlocked = window.BS.State.loadUnlockedEndings();
-    const total = window.BS.State.ENDINGS_CATALOG.length;
     const chLabel =
       state.chapter === 3
         ? '第四章「阿文的最後一天」'
@@ -279,28 +277,12 @@
         }
       },
       {
-        label: `🏆 第一章結局圖鑑（${unlocked.length}/${total}）`,
-        action: () => {
-          window.BS.Audio.select();
-          closeAllModals();
-          openEndingsModal();
-        }
-      },
-      {
-        label: '🔄 重新開始本章節（保留結局紀錄）',
-        action: () => {
-          window.BS.Audio.confirm();
-          closeAllModals();
-          callbacks.onRestart();
-        }
-      },
-      {
         label: muted ? '🔇 音效：關閉（按確認開啟）' : '🔊 音效：開啟（按確認靜音）',
         action: () => {
           const nowMuted = window.BS.Audio.toggleMute();
           if (!nowMuted) window.BS.Audio.select();
           openPauseModal(state, zoneName, callbacks);
-          setPauseCursor(4);
+          setPauseCursor(2);
         }
       },
       {

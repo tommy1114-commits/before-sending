@@ -277,7 +277,7 @@ html, body {
   color: #dce9f7;
   border: 1.5px solid transparent;
   border-radius: 7px;
-  padding: 4px 8px;
+  padding: 6px 10px;
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
 }
@@ -322,26 +322,56 @@ html, body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  width: 100%;
 }
 
-.cursor-menu-item .menu-time {
-  font-family: var(--font-mono);
-  font-size: 11px;
+.cursor-menu-item .menu-title-text {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Chapter Menu Difficulty Badge & Stars */
+.cursor-menu-item .menu-difficulty {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.cursor-menu-item .diff-tag {
+  font-size: 10.5px;
   font-weight: 700;
-  color: #ffe28a;
-  background: rgba(255, 226, 138, 0.14);
-  border: 1px solid rgba(255, 226, 138, 0.4);
-  padding: 0px 6px;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 1px 5px;
   border-radius: 4px;
+  letter-spacing: 0.5px;
 }
 
-.cursor-menu-item .menu-sub {
-  font-size: 11.5px;
-  color: #b5cce3;
+.cursor-menu-item.selected .diff-tag {
+  color: #bae6fd;
+  border-color: rgba(186, 230, 253, 0.4);
+  background: rgba(186, 230, 253, 0.15);
 }
 
-.cursor-menu-item.selected .menu-sub {
-  color: #e4f2ff;
+.cursor-menu-item .diff-stars {
+  font-size: 13.5px;
+  letter-spacing: 1.5px;
+  line-height: 1;
+}
+
+.cursor-menu-item .star-on {
+  color: #facc15;
+  text-shadow: 0 0 5px rgba(250, 204, 21, 0.65);
+}
+
+.cursor-menu-item .star-off {
+  color: #475569;
+  opacity: 0.65;
 }
 
 .title-menu-footer {
@@ -1236,9 +1266,9 @@ html, body {
 
 .dpad {
   display: grid;
-  grid-template-columns: repeat(3, 36px);
-  grid-template-rows: repeat(3, 36px);
-  gap: 2px;
+  grid-template-columns: repeat(3, 40px);
+  grid-template-rows: repeat(3, 40px);
+  gap: 3px;
   flex-shrink: 0;
 }
 
@@ -1246,8 +1276,8 @@ html, body {
   background: #303d56;
   color: #edf2f7;
   border: 2px solid #56688a;
-  border-radius: 7px;
-  font-size: 14px;
+  border-radius: 8px;
+  font-size: 16px;
   cursor: pointer;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -1255,6 +1285,10 @@ html, body {
   user-select: none;
   -webkit-user-drag: none;
   touch-action: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .dpad-btn:active, .dpad-btn.pressed {
@@ -1866,23 +1900,39 @@ html, body {
   .title-menu-box {
     padding: 7px 8px 6px;
   }
-  .cursor-menu-item .menu-main {
-    font-size: 13px;
+  .cursor-menu-item {
+    padding: 6px 8px;
   }
-  .cursor-menu-item .menu-sub {
-    font-size: 10.5px;
+  .cursor-menu-item .menu-main {
+    font-size: 13.5px;
+  }
+  .cursor-menu-item .menu-difficulty {
+    gap: 4px;
+  }
+  .cursor-menu-item .diff-tag {
+    font-size: 9.5px;
+    padding: 0px 4px;
+  }
+  .cursor-menu-item .diff-stars {
+    font-size: 12px;
+    letter-spacing: 1px;
   }
   .modal-body {
     padding: 10px 11px;
     font-size: 13px;
   }
   .dpad {
-    grid-template-columns: repeat(3, 34px);
-    grid-template-rows: repeat(3, 34px);
+    grid-template-columns: repeat(3, clamp(40px, 11.5vw, 47px));
+    grid-template-rows: repeat(3, clamp(40px, 11.5vw, 47px));
+    gap: 3px;
+  }
+  .dpad-btn {
+    font-size: 18px;
+    border-radius: 9px;
   }
   .ab-btn {
-    width: 48px;
-    height: 48px;
-    font-size: 15px;
+    width: 50px;
+    height: 50px;
+    font-size: 16px;
   }
 }

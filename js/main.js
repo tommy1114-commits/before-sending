@@ -559,29 +559,15 @@
       });
     }
 
-    // Direct touch and contextmenu safety on individual buttons
+    // Prevent default click and context menu on individual direction buttons
     dpadButtons.forEach((btn) => {
-      const dir = btn.dataset.dir;
+      btn.addEventListener('click', (ev) => {
+        ev.preventDefault();
+      });
       btn.addEventListener('contextmenu', (ev) => {
         ev.preventDefault();
         return false;
       }, { capture: true, passive: false });
-
-      // Fallback for touches without PointerEvents
-      btn.addEventListener('touchstart', (ev) => {
-        ev.preventDefault();
-        activateDir(dir, btn);
-      }, { passive: false });
-
-      btn.addEventListener('touchend', (ev) => {
-        ev.preventDefault();
-        deactivateDir(dir, btn);
-      }, { passive: false });
-
-      btn.addEventListener('touchcancel', (ev) => {
-        ev.preventDefault();
-        deactivateDir(dir, btn);
-      }, { passive: false });
     });
 
     // Action button binder with pointer capture
