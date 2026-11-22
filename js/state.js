@@ -185,9 +185,10 @@
   const CH4_STORAGE_KEY = 'before_sending_ch4_endings_v1';
 
   const CH4_PATHS = {
-    instrument: 'Instrument_PC:\\Temp_Raw\\CS_20261122_S08_RAW.csv',
-    personal: '/Users/Awen/Personal_Workspace/CS_20261122_S08_RAW.csv',
-    team: '/TeamDrive/ClearSky_202611/01_RawData/CS_20261122_S08_RAW.csv'
+    optimization: '/TeamDrive/ClearSky_Project/02_ConditionOpt/',
+    patentDrafts: '/TeamDrive/ClearSky_Project/01_PatentDrafts/',
+    deviceTuning: '/TeamDrive/ClearSky_Project/03_DeviceTuning/',
+    generalLogs: '/TeamDrive/ClearSky_Project/00_GeneralLogs/'
   };
 
   function createChapter4State() {
@@ -197,39 +198,45 @@
       timeMinutes: 16 * 60 + 30, // 16:30
       introShown: false,
       ch4: {
-        openedWorkbench: false,
-        ranLookupOnce: false,
-        clues: {
-          awenInfo: false,         // From 2F 阿文: date 2026-11-22, sample S03->S08, summary, recorder 阿文
-          instrumentFile: false,   // From 2F 儀器電腦: discovered CS_20261122_S08_RAW.csv
-          qingChecklistReq: false, // From 1F 小晴: learned tomorrow's inventory starts from 清冊
-          mingTipped: false        // From 1F 阿明組長
+        stage: 'cards', // 'cards' | 'to_pc' | 'pc_draft' | 'pc_notice' | 'pc_updated' | 'verified'
+        currentCardIdx: 0, // 0, 1, 2
+        cardsCompleted: false,
+        cards: {
+          card1: {
+            title: '資料一：公開方法重現紀錄',
+            desc: '阿文照網路上的公開教學重做量測。本次沒有自家改良，也沒有需要保護的未公開結果。',
+            choice: null, // 'general' | 'protect'
+            feedback: '',
+            isCorrect: false
+          },
+          card2: {
+            title: '資料二：量測條件優化紀錄',
+            desc: '團隊自行摸索出一套調整方法，能讓量測結果更穩定。方法還沒公開，具體參數保存在受控資料夾。',
+            choice: null, // 'group' | 'details'
+            feedback: '',
+            isCorrect: false
+          },
+          card3: {
+            title: '資料三：已申請專利的量測裝置',
+            desc: '裝置的結構與原理已送件申請專利。本章開場時，申請案尚未公開。另有一份自行摸索的裝置調校紀錄，沒有納入申請。',
+            choice: null, // 'track' | 'remove'
+            feedback: '',
+            isCorrect: false
+          }
         },
-        rawFileName: 'CS_20261122_S08_RAW.csv',
-        rawFileLocation: 'instrument', // 'instrument' | 'personal' | 'team'
-        record: {
-          recordId: 'LAB-2026-1122-01',
-          date: '',
-          summary: '',
-          recorder: '',
-          rawFileLink: 'none',         // 'none' | 'instrument' | 'personal' | 'team'
-          sampleIdOriginal: 'CS-2026-S03',
-          sampleIdCurrent: 'CS-2026-S03',
-          correctionMode: 'none',      // 'none' | 'overwritten' | 'overwritten_retro' | 'tracked_append'
-          correctionReason: '',
-          correctionTime: '',
-          correctionBy: '',
-          retroNoteReason: '',
-          retroNoteTime: '',
-          retroNoteBy: ''
+        draft: {
+          optimization: true,    // 量測條件優化紀錄 (群組自研 know-how)
+          patentDevice: true,    // 量測裝置申請資料 (專利申請)
+          tuning: true,          // 量測裝置調校紀錄 (未納入申請之自研 know-how)
+          reproduce: false       // 公開方法重現紀錄 (候選項，本情境僅一般紀錄，不應列入)
         },
-        inventory: {
-          nameScope: '',     // '' | 'batch_clean' | 'batch_leaked_params'
-          dataType: '',
-          protectReason: '',
-          location: '',      // '' | 'team_folder' | 'instrument_pc'
-          owner: ''
-        }
+        draftSaved: false,
+        draftValidationMsg: '',
+        noticeShown: false,
+        updateChoice: null,      // 'only_published' | 'whole_project'
+        updateValidationMsg: '',
+        updatedSaved: false,
+        verifiedWithQing: false
       },
       handoverDone: false
     };
@@ -444,7 +451,7 @@
     }
     if (state.chapter === 4) {
       const c = state.ch4;
-      return c.openedWorkbench || c.ranLookupOnce || c.rawFileLocation !== 'instrument' || c.record.correctionMode !== 'none';
+      return c.cardsCompleted && (c.draftSaved || c.updatedSaved || c.verifiedWithQing);
     }
     const emailTouched =
       state.email.status !== 'unread' &&
@@ -468,9 +475,9 @@
   }
 
   function isCh4FullyComplete(state) {
-    if (state.chapter !== 4) return false;
-    const lookup = evaluateCh4Lookup(state);
-    return lookup.allOk && state.ch4.record.correctionMode === 'tracked_append';
+    if (state.chapter !== 4 || !state.ch4) return false;
+    const c = state.ch4;
+    return c.cardsCompleted && c.draftSaved && c.updatedSaved && c.verifiedWithQing;
   }
 
   // ===== Chapter 1 Handover Evaluation =====
@@ -962,7 +969,7 @@
     };
   }
 
-  // ===== Chapter 3 (Internal 4): Lab Record, Archive & Next-Day Qing Lookup =====
+  // ===== Chapter 3 (Internal 4): R&D Asset Checklist & Patent Disclosure Evaluation =====
   function unlockCh4Ending(id) {
     try {
       const raw = localStorage.getItem(CH4_STORAGE_KEY);
@@ -978,262 +985,79 @@
     }
   }
 
-  function getCh4MissingInventoryFields(inv) {
-    const missing = [];
-    if (!inv.nameScope) missing.push('資料名稱或範圍');
-    if (!inv.dataType) missing.push('資料類型');
-    if (!inv.protectReason) missing.push('保護原因');
-    if (!inv.location) missing.push('指定存放位置');
-    if (!inv.owner) missing.push('負責人');
-    return missing;
-  }
-
   function evaluateCh4Lookup(state) {
     const c = state.ch4;
-    const rec = c.record;
-    const inv = c.inventory;
-
-    // Step 1: Identify batch & owner from Inventory List
-    const missingInv = getCh4MissingInventoryFields(inv);
-    let step1;
-    if (missingInv.length > 0) {
-      step1 = {
-        cls: 'danger',
-        badge: '❌ 清冊未完成',
-        title: '1. 從盤點清冊確認要找哪一批資料與負責人',
-        detail: `小晴打開實驗室盤點清冊，找不到完整批次項目（尚缺：${missingInv.join('、')}），無法確認這次要盤點哪批資料及聯絡窗口。`,
-        fix: '請至 2F 值班電腦「步驟三：盤點清冊」補齊整批資料的五個必要欄位（可先下樓問 1F 小晴確認欄位重點）。'
-      };
-    } else if (inv.nameScope === 'batch_leaked_params') {
-      step1 = {
-        cls: 'warn',
-        badge: '⚠ 清冊夾帶機密參數',
-        title: '1. 從盤點清冊確認要找哪一批資料與負責人',
-        detail: '小晴找到這批資料與負責人（阿文），但發現清冊的「資料名稱」直接寫進了機密配方與製程溫度參數！清冊應只寫批次範圍，技術細節應留在受控的實驗紀錄裡。',
-        fix: '請回 2F 值班電腦「步驟三：盤點清冊」，將資料名稱改為不含機密技術細節的整批資料名稱。'
-      };
-    } else {
-      step1 = {
-        cls: 'ok',
-        badge: '✅ 找到清冊與負責人',
-        title: '1. 從盤點清冊確認要找哪一批資料與負責人',
-        detail: `小晴從清冊立刻確認要盤點「晴空計畫 2026-11 批次量測資料」，資料類型為電子實驗紀錄與原始量測檔，負責人為 ${inv.owner}，且清冊未暴露機密技術細節。`,
-        fix: ''
-      };
-    }
-
-    // Step 2: Locate Lab Record from Inventory Folder
-    const missingRecFields = [];
-    if (!rec.date) missingRecFields.push('量測日期');
-    if (!rec.summary) missingRecFields.push('實驗摘要');
-    if (!rec.recorder) missingRecFields.push('記錄人');
-
-    let step2;
-    if (inv.location !== 'team_folder') {
-      step2 = {
-        cls: 'danger',
-        badge: '❌ 清冊未指向受控資料夾',
-        title: '2. 依清冊位置找到當日實驗紀錄',
-        detail:
-          inv.location === 'instrument_pc'
-            ? '清冊的指定存放位置寫成「儀器電腦本機」，小晴在團隊共用系統裡找不到受控的實驗紀錄資料夾！'
-            : '盤點清冊尚未填入指定存放位置，小晴不知道該去哪個資料夾尋找當日實驗紀錄。',
-        fix: '請至 2F 值班電腦「步驟三：盤點清冊」，將指定存放位置設為團隊資料夾 /TeamDrive/ClearSky_202611/。'
-      };
-    } else if (missingRecFields.length > 0) {
-      step2 = {
-        cls: 'warn',
-        badge: '⚠ 紀錄欄位不完整',
-        title: '2. 依清冊位置找到當日實驗紀錄',
-        detail: `小晴在 /TeamDrive/ClearSky_202611/ 找到實驗紀錄卡（${rec.recordId}），但缺少「${missingRecFields.join('、')}」，無法確認實驗當日完整資訊與記錄人！`,
-        fix: '請到 2F 實驗區找阿文確認當日資訊，再回 2F 實驗紀錄桌或值班電腦「步驟一」帶入缺漏欄位。'
-      };
-    } else {
-      step2 = {
-        cls: 'ok',
-        badge: '✅ 找到完整當日紀錄',
-        title: '2. 依清冊位置找到當日實驗紀錄',
-        detail: `小晴依清冊路徑順利找到 ${rec.recordId}，清楚確認日期（${rec.date}）、記錄人（${rec.recorder}）與實驗摘要（${rec.summary}）。`,
-        fix: ''
-      };
-    }
-
-    // Step 3: Open Raw Measurement File via Record Link
-    let step3;
-    if (c.rawFileLocation === 'instrument') {
-      step3 = {
-        cls: 'danger',
-        badge: '❌ 原始檔仍留在儀器電腦',
-        title: `3. 從實驗紀錄開啟原始量測檔（${c.rawFileName}）`,
-        detail: `原始量測檔仍留在儀器本機（${CH4_PATHS.instrument}），未歸檔至團隊指定資料夾！小晴無法從團隊系統開啟，且儀器暫存區隨時有遭覆蓋或刪除的風險。`,
-        fix: '請至 2F 儀器電腦或值班電腦「步驟二：原始檔歸檔」將檔案移至團隊指定資料夾，再回「步驟一」更新紀錄卡連結！'
-      };
-    } else if (c.rawFileLocation === 'personal') {
-      step3 = {
-        cls: 'danger',
-        badge: '❌ 檔案放在個人工作區',
-        title: `3. 從實驗紀錄開啟原始量測檔（${c.rawFileName}）`,
-        detail: `原始量測檔被放在阿文個人工作區（${CH4_PATHS.personal}），小晴點開顯示權限不足、無法盤點！`,
-        fix: '請至 2F 值班電腦「步驟二」將原始檔改存至團隊指定資料夾，並回「步驟一」更新紀錄卡連結。'
-      };
-    } else if (rec.rawFileLink !== 'team') {
-      const linkDesc =
-        rec.rawFileLink === 'instrument'
-          ? '仍指向儀器電腦本機'
-          : rec.rawFileLink === 'personal'
-          ? '仍指向阿文個人工作區'
-          : '尚未填入連結';
-      step3 = {
-        cls: 'warn',
-        badge: '⚠ 連結未同步更新',
-        title: `3. 從實驗紀錄開啟原始量測檔（${c.rawFileName}）`,
-        detail: `找到紀錄，但原始檔連結${linkDesc}！雖然檔案其實已經移到團隊指定資料夾（${CH4_PATHS.team}），但小晴直接點紀錄卡裡的連結仍打不開！`,
-        fix: '請回 2F 實驗紀錄桌或值班電腦「步驟一：實驗紀錄卡」，把原始檔連結更新為團隊指定資料夾路徑！'
-      };
-    } else {
-      step3 = {
-        cls: 'ok',
-        badge: '✅ 順利開啟原始檔（原樣保留）',
-        title: `3. 從實驗紀錄開啟原始量測檔（${c.rawFileName}）`,
-        detail: `小晴直接點選紀錄卡中的連結，成功開啟團隊指定資料夾中的 ${c.rawFileName}，且確認原始量測檔維持唯讀原樣、未遭修改。`,
-        fix: ''
-      };
-    }
-
-    // Step 4: Verify Sample ID Correction Traceability (S03 -> S08)
-    let step4;
-    if (rec.correctionMode === 'none') {
-      step4 = {
-        cls: 'danger',
-        badge: '❌ 樣品編號仍與原始檔不符',
-        title: '4. 確認寫錯的樣品編號（S03 → S08）更正歷程',
-        detail: `紀錄卡上的樣品編號仍是寫錯的 ${rec.sampleIdOriginal}，與原始量測檔名（S08）對不上，小晴無法確認這筆紀錄對應哪顆樣品！`,
-        fix: '請向 2F 實驗區阿文確認正確樣品編號（CS-2026-S08），再回紀錄卡選擇「新增一筆更正紀錄」（保留原值）。'
-      };
-    } else if (rec.correctionMode === 'overwritten') {
-      step4 = {
-        cls: 'danger',
-        badge: '⚠ 覆寫無痕・脈絡無法確認',
-        title: '4. 確認寫錯的樣品編號（S03 → S08）更正歷程',
-        detail: '找到檔案，但無法確認樣品編號為何變更！因先前選擇直接覆寫舊內容，系統查無原本填寫的編號、更正時間、更正人與更正原因，若日後發生爭議將難以佐證紀錄完整性。',
-        fix: '請回 2F 實驗紀錄桌或值班電腦「步驟一」，補上「事後補記更正來源與原因」（系統會如實標註為事後補記）。'
-      };
-    } else if (rec.correctionMode === 'overwritten_retro') {
-      step4 = {
-        cls: 'warn',
-        badge: '🟡 事後補記（非系統原生歷程）',
-        title: '4. 確認寫錯的樣品編號（S03 → S08）更正歷程',
-        detail: `小晴查到一筆「事後補記」說明（原編號 CS-2026-S03 → 新編號 CS-2026-S08｜原因：${rec.retroNoteReason}｜補記人：${rec.retroNoteBy}｜時間：${rec.retroNoteTime}）。雖能補足背景脈絡，但系統明確標記為「事後補記」，不等同於系統原本保留的更正歷程！`,
-        fix: '已補記完成可交班；下次修改實驗紀錄時，務必從一開始就「新增更正筆錄」而非直接覆寫原值！（可重玩本章體驗系統原生留痕路線）'
-      };
-    } else {
-      step4 = {
-        cls: 'ok',
-        badge: '✅ 系統原生保留完整更正歷程',
-        title: '4. 確認寫錯的樣品編號（S03 → S08）更正歷程',
-        detail: `系統完整保留原紀錄（${rec.sampleIdOriginal}）與新增更正紀錄（更正為 ${rec.sampleIdCurrent}｜原因：${rec.correctionReason}｜時間：${rec.correctionTime}｜更正人：${rec.correctionBy}），小晴一眼就能追溯更正脈絡！`,
-        fix: ''
-      };
-    }
-
-    const steps = [step1, step2, step3, step4];
-    const dangerCount = steps.filter((s) => s.cls === 'danger').length;
-    const warnCount = steps.filter((s) => s.cls === 'warn').length;
-    const allOk = dangerCount === 0 && warnCount === 0;
-
-    return { steps, dangerCount, warnCount, allOk };
+    return {
+      allOk: c.updatedSaved,
+      dangerCount: c.updatedSaved ? 0 : 1,
+      warnCount: 0,
+      steps: [
+        {
+          cls: c.cardsCompleted ? 'ok' : 'warn',
+          badge: c.cardsCompleted ? '✅ 資料精準辨識' : '⬜ 尚未辨識資料卡',
+          title: '1. 資料卡分類與群組管理',
+          detail: '成功分辨公開教學重現（一般紀錄）、自研 know-how（條件優化）與專利申請資料。'
+        },
+        {
+          cls: c.draftSaved ? 'ok' : 'warn',
+          badge: c.draftSaved ? '✅ 清單五欄位齊備' : '⬜ 清單未儲存',
+          title: '2. 研發成果清單五欄位',
+          detail: '包含資料名稱或範圍、資料類型、保護原因、存放位置、負責人，技術細節留在受控資料夾。'
+        },
+        {
+          cls: c.updatedSaved ? 'ok' : 'warn',
+          badge: c.updatedSaved ? '✅ 專利公開精確更新' : '⬜ 尚未更新公開狀態',
+          title: '3. 專利申請案公開動態更新',
+          detail: '更新量測裝置申請資料為已公開，並保留未納入申請之調校紀錄與自研優化紀錄的受控保護。'
+        }
+      ]
+    };
   }
 
   function evaluateChapter4Handover(state) {
     const c = state.ch4;
-    const rec = c.record;
-    const lookup = evaluateCh4Lookup(state);
-
-    let endingId = 'ch4_native_perfect';
-    let hasRisk = false;
-    let isRetroOnly = false;
-    let banner = {
-      icon: '🏅',
-      title: '完整歸檔與原生留痕典範',
-      desc: '清冊、當日紀錄、團隊指定資料夾原始檔與系統原生更正歷程全數到位，隔天小晴一步到位找齊並確認脈絡！'
-    };
-
-    if (lookup.dangerCount > 0 || (lookup.warnCount > 0 && !(lookup.warnCount === 1 && rec.correctionMode === 'overwritten_retro' && lookup.steps[0].cls === 'ok' && lookup.steps[1].cls === 'ok' && lookup.steps[2].cls === 'ok'))) {
-      endingId = 'ch4_incomplete';
-      hasRisk = true;
-      banner = {
-        icon: '⚠️',
-        title: '隔天盤點尚有斷點待補強',
-        desc: '小晴在隔天模擬盤點時仍有找不到的檔案、斷裂的連結或無法追溯的更正。交班紀錄已列出具體缺口與補救方向！'
-      };
-    } else if (rec.correctionMode === 'overwritten_retro') {
-      endingId = 'ch4_retro_note';
-      isRetroOnly = true;
-      banner = {
-        icon: '📝',
-        title: '覆寫後事後補記完成盤點',
-        desc: '檔案、清冊與連結皆正確歸位，並於覆寫後補上了事後更正說明；系統亦如實區分其為「事後補記」而非原生歷程。'
-      };
-    }
-
+    const isPerfect = c.cardsCompleted && c.draftSaved && c.updatedSaved && c.verifiedWithQing;
+    const endingId = isPerfect ? 'ch4_perfect_list' : 'ch4_incomplete_list';
     unlockCh4Ending(endingId);
 
-    // Section 1: 盤點找到的資料與存放位置
-    const foundOk = lookup.steps[0].cls === 'ok' && lookup.steps[1].cls === 'ok' && lookup.steps[2].cls === 'ok';
-    const dataBadge = foundOk
-      ? { text: '清冊→紀錄→原始檔全數串通', cls: 'ok' }
-      : { text: '查找仍有缺口', cls: lookup.steps[0].cls === 'danger' || lookup.steps[2].cls === 'danger' ? 'danger' : 'warn' };
-    const dataDetail =
-      `盤點清冊：${lookup.steps[0].badge}｜當日紀錄（${rec.recordId}）：${lookup.steps[1].badge}｜原始檔（${c.rawFileName}）：目前存放於「${
-        c.rawFileLocation === 'team' ? '團隊指定資料夾' : c.rawFileLocation === 'personal' ? '阿文個人工作區' : '儀器電腦本機'
-      }」，紀錄卡連結指向「${
-        rec.rawFileLink === 'team' ? '團隊指定資料夾' : rec.rawFileLink === 'instrument' ? '儀器電腦本機' : rec.rawFileLink === 'personal' ? '個人工作區' : '未填寫'
-      }」（原始量測檔維持原樣未更動）。`;
-    const dataReminder =
-      '「原始檔移到團隊指定資料夾後，務必同步更新實驗紀錄中的連結；盤點清冊則以整批資料為單位，不寫入機密技術細節。」';
+    const banner = isPerfect
+      ? {
+          icon: '🏅',
+          title: '研發成果清單盤點典範',
+          desc: '精準分辨自研 know-how 與專利資料，落實清單五欄位，並在專利公開時及時精確更新！'
+        }
+      : {
+          icon: '⚠️',
+          title: '研發成果清單尚有待補強項目',
+          desc: '清單草稿尚未完整更新或尚未向小晴確認盤點。交班紀錄已列出補強方向！'
+        };
 
-    // Section 2: 可追溯的更正歷程（嚴格區分原生歷程 vs 事後補記）
-    let corrBadge = { text: '系統原生留痕', cls: 'ok' };
-    let corrDetail = '';
-    if (rec.correctionMode === 'tracked_append') {
-      corrDetail = `【系統原本保留的歷程】原紀錄樣品編號 ${rec.sampleIdOriginal} 完整留存，並於 ${rec.correctionTime} 由 ${rec.correctionBy} 新增更正筆錄改為 ${rec.sampleIdCurrent}（原因：${rec.correctionReason}）。隔天盤點可直接驗證更正前後脈絡。`;
-    } else if (rec.correctionMode === 'overwritten_retro') {
-      corrBadge = { text: '事後補記（非原生歷程）', cls: 'warn' };
-      corrDetail = `【事後補記，非系統原生保留歷程】先前曾直接覆寫原值，後續由 ${rec.retroNoteBy} 於 ${rec.retroNoteTime} 補記原編號 ${rec.sampleIdOriginal} → ${rec.sampleIdCurrent} 及原因（${rec.retroNoteReason}）。系統已如實區分補記與原生歷程。`;
-    } else if (rec.correctionMode === 'overwritten') {
-      corrBadge = { text: '直接覆寫・無更正歷程', cls: 'danger' };
-      corrDetail = '樣品編號雖已改為 CS-2026-S08，但因採直接覆寫且未補記來源與原因，小晴隔天無法確認為何變更、由誰更正。';
-    } else {
-      corrBadge = { text: '尚未更正錯誤編號', cls: 'danger' };
-      corrDetail = '實驗紀錄卡仍保留寫錯的 CS-2026-S03，與原始檔名 S08 不符。';
-    }
-    const corrReminder =
-      '「更正實驗紀錄時應保留原內容並記錄更正人、時間與原因；避免無痕覆寫，才能維持紀錄的完整性與可追溯性。」';
+    // Section 1: 資料辨識與群組整理
+    const cardBadge = c.cardsCompleted ? { text: '精準分類', cls: 'ok' } : { text: '尚未完成辨識', cls: 'warn' };
+    const cardDetail = '成功分辨公開教學重現（留作一般紀錄）、自研 know-how（量測條件優化與調校紀錄）與專利申請資料；以群組建立清單，機密參數與檔案明細留在受控資料夾。';
+    const cardReminder = '「清單是管理與查找目錄，讓同事知道去哪裡找、找誰問；機密技術細節應留在受控位置。」';
 
-    // Section 3: 未完成項目與後續建議
-    const unfinished = lookup.steps.filter((s) => s.cls !== 'ok').map((s) => `【${s.badge}】${s.detail}${s.fix ? ' 建議：' + s.fix : ''}`);
-    const followBadge = unfinished.length === 0
-      ? { text: '無未完成項目', cls: 'ok' }
-      : isRetroOnly
-      ? { text: '已完成（附留痕提醒）', cls: 'warn' }
-      : { text: `尚有 ${unfinished.length} 項待補強`, cls: 'danger' };
-    const followItems =
-      unfinished.length > 0
-        ? unfinished
-        : ['明日小晴盤點所需的清冊、當日實驗紀錄、團隊資料夾原始檔與更正歷程均已完整就緒！'];
-    const followReminder =
-      '「今天把當日紀錄、原始檔歸檔與盤點清冊一次做到位，明天接手同事就找得到、看得懂、接得上。」';
+    // Section 2: 清單五欄位落實
+    const fieldBadge = c.draftSaved ? { text: '五欄位齊備', cls: 'ok' } : { text: '清單未完整儲存', cls: 'warn' };
+    const fieldDetail = '每筆資料皆清楚載明五項必要欄位：資料名稱或範圍、資料類型、保護原因、存放位置、負責人，資訊完整明確。';
+    const fieldReminder = '「落實五個必要欄位，接手同事才能在無口頭交接下順暢盤點。」';
+
+    // Section 3: 動態更新與公開界線
+    const updateBadge = c.updatedSaved ? { text: '精確更新留痕', cls: 'ok' } : { text: '公開狀態未更新', cls: 'warn' };
+    const updateDetail = c.updatedSaved
+      ? '專利公開時，精準更新申請資料原有項目（不建重複紀錄），並清楚保留未納入申請之調校紀錄與自研優化紀錄的未公開保護狀態。'
+      : '專利申請公開時，應核對公開文件範圍，僅更新涵蓋部分，其餘未公開 know-how 應繼續受控保護。';
+    const updateReminder = '「申請案公開時，應核對實際公開範圍，僅更新涵蓋部分，未公開的 know-how 仍應繼續受控保護。」';
 
     return {
       chapter: 4,
-      complete: !hasRisk,
-      hasRisk,
-      isRetroOnly,
+      complete: isPerfect,
+      hasRisk: !isPerfect,
       banner,
       sections: {
-        data: { badge: dataBadge, detail: dataDetail, reminder: dataReminder },
-        correction: { badge: corrBadge, detail: corrDetail, reminder: corrReminder },
-        followup: { badge: followBadge, items: followItems, reminder: followReminder }
+        data: { badge: cardBadge, detail: cardDetail, reminder: cardReminder },
+        correction: { badge: fieldBadge, detail: fieldDetail, reminder: fieldReminder },
+        followup: { badge: updateBadge, items: [updateDetail], reminder: updateReminder }
       }
     };
   }

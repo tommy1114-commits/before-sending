@@ -46,11 +46,20 @@
   }
 
   function resetPlayer(floor, spawnX, spawnY, dir) {
+    let sx = spawnX;
+    let sy = spawnY;
+    if (sx < 1 || sx >= window.BS.Map.COLS - 1 || sy < 2 || sy >= window.BS.Map.ROWS - 1 || window.BS.Map.isSolid(floor, sx, sy, null)) {
+      if (floor === 1) {
+        sx = 7; sy = 12;
+      } else {
+        sx = 5; sy = 10;
+      }
+    }
     player.floor = floor;
-    player.x = spawnX;
-    player.y = spawnY;
-    player.px = spawnX * TILE;
-    player.py = spawnY * TILE;
+    player.x = sx;
+    player.y = sy;
+    player.px = sx * TILE;
+    player.py = sy * TILE;
     player.dir = dir || 'up';
     player.moving = false;
     player.moveProgress = 0;
@@ -107,7 +116,7 @@
       currentChapter === 3
         ? 'Ch4 阿文的最後一天'
         : currentChapter === 4
-        ? 'Ch3 今天的紀錄，明天找得到'
+        ? 'Ch3 這批資料要列入清單嗎？'
         : currentChapter === 2
         ? 'Ch2 投稿前一晚'
         : 'Ch1 寄出之前';
@@ -142,6 +151,24 @@
             ? '🚨 回 2F 電腦聯絡主辦方！'
             : '🚨 找 2F 阿明組長回報！'
           : '🚨 下樓找 1F 阿明組長補救移交！';
+    } else if (currentChapter === 4 && state.ch4) {
+      const c = state.ch4;
+      statusPill.classList.remove('hidden');
+      if (!c.cardsCompleted) {
+        statusPill.textContent = '目標：在 1F 實驗區找同事阿文辨識三組資料卡';
+      } else if (player.floor === 1) {
+        statusPill.textContent = '▲ 請走樓梯上 2F 辦公區，到值班電腦確認清單';
+      } else if (!c.updatedSaved) {
+        statusPill.textContent = '目標：在 2F 辦公區值班電腦確認與更新研發成果清單';
+      } else if (!c.verifiedWithQing) {
+        statusPill.textContent = '目標：在 2F 辦公區找小晴核對清單';
+      } else {
+        statusPill.textContent = '✨ 任務完成！向小晴或回值班桌完成交班';
+        if (!handoverToastShown) {
+          handoverToastShown = true;
+          window.BS.UI.showToast('🎉 研發成果清單已核對完成！向小晴或回值班桌完成交班。', false, 5200);
+        }
+      }
     } else if (readyToastNow) {
       statusPill.classList.remove('hidden');
       statusPill.textContent = '✨ 任務完成！回 2F 值班桌交班';
@@ -166,10 +193,12 @@
     state.started = true;
     npcs = window.BS.Map.createNPCsForChapter(currentChapter);
 
-    if (currentChapter === 2 || currentChapter === 3 || currentChapter === 4) {
-      resetPlayer(2, 7, 5, 'right');
+    if (currentChapter === 4) {
+      resetPlayer(1, 9, 7, 'up');
+    } else if (currentChapter === 2 || currentChapter === 3) {
+      resetPlayer(2, 3, 10, 'up');
     } else {
-      resetPlayer(2, 5, 5, 'up');
+      resetPlayer(2, 5, 10, 'up');
     }
 
     refreshHUD();
@@ -559,8 +588,20 @@
       });
     }
 
-    // Prevent default click and context menu on individual direction buttons
+    // Bind individual direction buttons for discrete taps as well as drag gestures
     dpadButtons.forEach((btn) => {
+      btn.addEventListener('pointerdown', (ev) => {
+        const dir = btn.dataset.dir;
+        activateDir(dir, btn);
+      });
+      btn.addEventListener('pointerup', (ev) => {
+        const dir = btn.dataset.dir;
+        deactivateDir(dir, btn);
+      });
+      btn.addEventListener('pointercancel', (ev) => {
+        const dir = btn.dataset.dir;
+        deactivateDir(dir, btn);
+      });
       btn.addEventListener('click', (ev) => {
         ev.preventDefault();
       });
@@ -782,9 +823,24 @@
     }
 
     nearbyTarget = window.BS.Map.findNearbyTarget(player.floor, player.x, player.y, player.dir, npcs, currentChapter);
-    $('nearby-hint').textContent = nearbyTarget
-      ? `按 A / 空白鍵互動：${nearbyTarget.label}`
-      : '走近物件或同事查看提示 · START 選單 · SELECT 筆記';
+    if (nearbyTarget) {
+      $('nearby-hint').textContent = `按 A / 空白鍵互動：${nearbyTarget.label}`;
+    } else if (currentChapter === 4 && state && state.ch4) {
+      const c = state.ch4;
+      if (!c.cardsCompleted) {
+        $('nearby-hint').textContent = '目前在 1F 實驗區 · 請走向右側同事阿文辨識三組資料卡';
+      } else if (player.floor === 1) {
+        $('nearby-hint').textContent = '目前在 1F 實驗區 · ▲ 請往左走樓梯上 2F 辦公區';
+      } else if (!c.updatedSaved) {
+        $('nearby-hint').textContent = '目前在 2F 辦公區 · 請至左上方值班電腦確認清單';
+      } else if (!c.verifiedWithQing) {
+        $('nearby-hint').textContent = '目前在 2F 辦公區 · 請找小晴核對清單';
+      } else {
+        $('nearby-hint').textContent = '目前在 2F 辦公區 · 請向小晴或到值班桌完成交班';
+      }
+    } else {
+      $('nearby-hint').textContent = '走近物件或同事查看提示 · START 選單 · SELECT 筆記';
+    }
   }
 
   // ===== Render Loop =====
@@ -849,31 +905,31 @@
 
       if (player.floor === 2) {
         if (state.email.misshared && !state.email.linkRevoked) {
-          drawQuestBubble(3, 2.5, '!', '#ef4444', '#ffffff');
+          drawQuestBubble(3, 8.5, '!', '#ef4444', '#ffffff');
         } else if (state.email.misshared && state.email.linkRevoked && !state.email.reportedToLead) {
-          drawQuestBubble(8, 11.6, '!', '#ef4444', '#ffffff');
+          drawQuestBubble(8, 16.5, '!', '#ef4444', '#ffffff');
         } else if (emailPending) {
-          drawQuestBubble(3, 2.5, '!', '#f59e0b', '#1e293b');
+          drawQuestBubble(3, 8.5, '!', '#f59e0b', '#1e293b');
         }
         if (vNpc && vNpc.floor === 2 && state.visitor.status === 'in_lab') {
           drawQuestBubble(vNpc.x, vNpc.y - 0.3, '!', '#38bdf8', '#0f172a');
         }
         if (visitorWaiting1F) {
-          drawQuestBubble(3, 7.1, '▼', '#38bdf8', '#0f172a');
+          drawQuestBubble(2.5, 2.5, '▼', '#38bdf8', '#0f172a');
         }
         if (handoverReady) {
-          drawQuestBubble(7, 2.5, '✓', '#22c55e', '#ffffff');
+          drawQuestBubble(3, 11.5, '✓', '#22c55e', '#ffffff');
         }
       } else {
         if (visitorWaiting1F) {
           drawQuestBubble(vNpc.x, vNpc.y - 0.3, '!', '#38bdf8', '#0f172a');
         }
         if (emailUrgent) {
-          drawQuestBubble(3, 7.1, '▲', '#ef4444', '#ffffff');
+          drawQuestBubble(2.5, 2.5, '▲', '#ef4444', '#ffffff');
         } else if (handoverReady) {
-          drawQuestBubble(3, 7.1, '▲', '#22c55e', '#ffffff');
+          drawQuestBubble(2.5, 2.5, '▲', '#22c55e', '#ffffff');
         } else if (emailPending || state.visitor.status === 'in_lab') {
-          drawQuestBubble(3, 7.1, '▲', '#f59e0b', '#1e293b');
+          drawQuestBubble(2.5, 2.5, '▲', '#f59e0b', '#1e293b');
         }
       }
     } else if (currentChapter === 2) {
@@ -881,17 +937,17 @@
       const handoverReady = window.BS.State.canHandover(state) && !state.handoverDone;
       if (player.floor === 2) {
         if (c.misuploaded && !c.contactedOrganizer) {
-          drawQuestBubble(3, 2.5, '!', '#ef4444', '#ffffff');
+          drawQuestBubble(3, 8.5, '!', '#ef4444', '#ffffff');
         } else if (!c.openedPoster || (c.outcome === 'in_progress' && c.lastApprovedVersionId)) {
-          drawQuestBubble(3, 2.5, '!', '#f59e0b', '#1e293b');
+          drawQuestBubble(3, 8.5, '!', '#f59e0b', '#1e293b');
         }
 
         if (c.misuploaded && !c.reportedToLead) {
-          drawQuestBubble(8, 11.6, '!', '#ef4444', '#ffffff');
+          drawQuestBubble(8, 16.5, '!', '#ef4444', '#ffffff');
         } else if (c.pendingReviewVersionId) {
-          drawQuestBubble(8, 11.6, '!', '#22c55e', '#ffffff');
+          drawQuestBubble(8, 16.5, '!', '#22c55e', '#ffffff');
         } else if (!c.clues.mingExplainedRules && c.outcome === 'in_progress') {
-          drawQuestBubble(8, 11.6, '?', '#38bdf8', '#0f172a');
+          drawQuestBubble(8, 16.5, '?', '#38bdf8', '#0f172a');
         }
 
         if (!c.clues.wenExplainedFig2 && c.outcome === 'in_progress') {
@@ -899,50 +955,42 @@
           if (wen && wen.floor === 2) drawQuestBubble(wen.x, wen.y - 0.3, '?', '#38bdf8', '#0f172a');
         }
         if (handoverReady) {
-          drawQuestBubble(7, 2.5, '✓', '#22c55e', '#ffffff');
+          drawQuestBubble(3, 11.5, '✓', '#22c55e', '#ffffff');
         }
       } else {
-        drawQuestBubble(3, 7.1, '▲', c.misuploaded ? '#ef4444' : '#f59e0b', c.misuploaded ? '#ffffff' : '#1e293b');
+        drawQuestBubble(2.5, 2.5, '▲', c.misuploaded ? '#ef4444' : '#f59e0b', c.misuploaded ? '#ffffff' : '#1e293b');
       }
-    } else if (currentChapter === 4) {
-      // Chapter 3 (Internal 4): 今天的紀錄，明天找得到 cross-floor quest markers
+    } else if (currentChapter === 4 && state.ch4) {
+      // Chapter 3: 這批資料要列入清單嗎？
       const c = state.ch4;
-      const lookup = window.BS.State.evaluateCh4Lookup(state);
-      const allDone = lookup.allOk && !state.handoverDone;
-      const needInv = lookup.steps[0].cls !== 'ok';
-      const needRec = lookup.steps[1].cls !== 'ok' || lookup.steps[3].cls !== 'ok' || (c.rawFileLocation === 'team' && c.record.rawFileLink !== 'team');
-      const needRaw = c.rawFileLocation !== 'team';
+      const allDone = c.verifiedWithQing && !state.handoverDone;
 
-      if (player.floor === 2) {
-        if (needInv) {
-          drawQuestBubble(3, 2.5, '!', '#f59e0b', '#1e293b');
-        }
-        const wen = npcs.find((n) => n.id === 'npc_colleague');
-        if (wen && wen.floor === 2 && !c.clues.awenInfo) {
-          drawQuestBubble(wen.x, wen.y - 0.3, '!', '#38bdf8', '#0f172a');
-        }
-        if (!c.clues.instrumentFile || needRaw) {
-          drawQuestBubble(19, 2.5, '!', '#f59e0b', '#1e293b');
-        }
-        if (needRec) {
-          drawQuestBubble(16, 10.6, '!', c.rawFileLocation === 'team' && c.record.rawFileLink !== 'team' ? '#ef4444' : '#38bdf8', '#ffffff');
-        }
-        if (!c.clues.qingChecklistReq) {
-          drawQuestBubble(3, 7.1, '▼', '#38bdf8', '#0f172a');
-        }
-        if (allDone) {
-          drawQuestBubble(7, 2.5, '✓', '#22c55e', '#ffffff');
+      if (player.floor === 1) {
+        if (!c.cardsCompleted) {
+          const wen = npcs.find((n) => n.id === 'npc_colleague');
+          if (wen && wen.floor === 1) {
+            drawQuestBubble(wen.x, wen.y - 0.3, '!', '#38bdf8', '#0f172a');
+          }
+        } else {
+          // Cards completed on 1F, guide upstairs to 2F
+          drawQuestBubble(2.5, 2.5, '▲', '#22c55e', '#ffffff');
         }
       } else {
-        const qing = npcs.find((n) => n.id === 'npc_qing');
-        if (qing && qing.floor === 1 && (!c.clues.qingChecklistReq || allDone)) {
-          drawQuestBubble(qing.x, qing.y - 0.3, allDone ? '✓' : '!', allDone ? '#22c55e' : '#38bdf8', allDone ? '#ffffff' : '#0f172a');
+        // Floor 2: office
+        if (!c.updatedSaved) {
+          drawQuestBubble(3, 8.5, '!', '#f59e0b', '#1e293b');
+        } else if (!c.verifiedWithQing) {
+          const qing = npcs.find((n) => n.id === 'npc_qing');
+          if (qing && qing.floor === 2) {
+            drawQuestBubble(qing.x, qing.y - 0.3, '!', '#38bdf8', '#0f172a');
+          }
+        } else if (allDone) {
+          const qing = npcs.find((n) => n.id === 'npc_qing');
+          if (qing && qing.floor === 2) {
+            drawQuestBubble(qing.x, qing.y - 0.3, '✓', '#22c55e', '#ffffff');
+          }
+          drawQuestBubble(3, 11.5, '✓', '#22c55e', '#ffffff');
         }
-        const lead = npcs.find((n) => n.id === 'npc_lead');
-        if (lead && lead.floor === 1 && !allDone) {
-          drawQuestBubble(lead.x, lead.y - 0.3, '?', '#f59e0b', '#1e293b');
-        }
-        drawQuestBubble(3, 7.1, '▲', allDone ? '#22c55e' : '#f59e0b', allDone ? '#ffffff' : '#1e293b');
       }
     } else {
       // Chapter 4 (Internal 3) cross-floor quest markers!
@@ -963,7 +1011,7 @@
 
       if (player.floor === 2) {
         if (!c.openedChecklist || (!c.qingHasProjectAccess && c.rawLogLocation === 'project') || (c.clues.mingConfirmedScope && (!c.awenPaperGrant || c.awenOrigAccess !== 'revoked'))) {
-          drawQuestBubble(3, 2.5, '!', '#f59e0b', '#1e293b');
+          drawQuestBubble(3, 8.5, '!', '#f59e0b', '#1e293b');
         }
         const wen = npcs.find((n) => n.id === 'npc_colleague');
         if (wen && wen.floor === 2 && ((c.rawLogLocation !== 'project' && c.awenOrigAccess !== 'revoked') || !c.ndaRemindedToAwen)) {
@@ -980,10 +1028,10 @@
           );
         }
         if (need1F) {
-          drawQuestBubble(3, 7.1, '▼', c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project' ? '#ef4444' : '#38bdf8', '#ffffff');
+          drawQuestBubble(2.5, 2.5, '▼', c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project' ? '#ef4444' : '#38bdf8', '#ffffff');
         }
         if (allDone) {
-          drawQuestBubble(7, 2.5, '✓', '#22c55e', '#ffffff');
+          drawQuestBubble(3, 11.5, '✓', '#22c55e', '#ffffff');
         }
       } else {
         // On 1F in Ch3
@@ -992,10 +1040,10 @@
           drawQuestBubble(lead.x, lead.y - 0.3, '!', c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project' ? '#ef4444' : '#f59e0b', '#ffffff');
         }
         if (!c.badgeReturned) {
-          drawQuestBubble(6.5, 10.3, '!', '#38bdf8', '#0f172a');
+          drawQuestBubble(7, 9.5, '!', '#38bdf8', '#0f172a');
         }
         if (need2F) {
-          drawQuestBubble(3, 7.1, '▲', allDone ? '#22c55e' : '#f59e0b', allDone ? '#ffffff' : '#1e293b');
+          drawQuestBubble(2.5, 2.5, '▲', allDone ? '#22c55e' : '#f59e0b', allDone ? '#ffffff' : '#1e293b');
         }
       }
     }

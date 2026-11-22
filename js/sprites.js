@@ -259,13 +259,17 @@
     [216, 108, 0], [254, 98, 1], [290, 110, 0], [168, 124, 1], [202, 128, 0]
   ];
 
-  // Animated 384x256 GBA Pixel-Art Title Backdrop inspired by RCCI science illustration
+  // Animated GBA Pixel-Art Title Backdrop inspired by RCCI science illustration
   function drawTitleBackdrop(canvas, tick) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     const w = canvas.width;
     const h = canvas.height;
+    ctx.save();
+    if (w !== 384 || h !== 256) {
+      ctx.scale(w / 384, h / 256);
+    }
 
     // 1. Deep Cosmic Night Sky
     const skyGrad = ctx.createLinearGradient(0, 0, 0, 175);
@@ -466,6 +470,7 @@
     px(ctx, rx + 5, ry + 2, 12, 11, '#f3caa6');
     px(ctx, rx + 4, ry, 14, 6, '#1e2536');
     px(ctx, rx + 12, ry + 4, 6, 7, '#1e2536');
+    ctx.restore();
   }
 
   initSprites();

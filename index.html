@@ -14,7 +14,7 @@
     <!-- Main GBA Viewport Stage -->
     <main class="stage-wrap">
       <div class="screen-bezel">
-        <canvas id="game-canvas" width="384" height="256" aria-label="遊戲畫面"></canvas>
+        <canvas id="game-canvas" width="256" height="320" aria-label="遊戲畫面"></canvas>
 
         <!-- Minimal In-Game Micro HUD (hidden on title screen) -->
         <div class="micro-hud hidden" id="micro-hud" aria-label="遊戲狀態">
@@ -31,7 +31,7 @@
 
         <!-- GBA Animated Title Screen Overlay -->
         <section class="overlay-screen title-overlay" id="title-screen" role="dialog" aria-modal="true" aria-labelledby="title-heading">
-          <canvas id="title-bg-canvas" width="384" height="256" aria-hidden="true"></canvas>
+          <canvas id="title-bg-canvas" width="256" height="320" aria-hidden="true"></canvas>
           <div class="title-content">
             <div class="title-header-block">
               <div class="title-kicker">中研院 RCCI 實驗室 · 營業秘密情境 RPG</div>
@@ -63,7 +63,7 @@
                   <span class="menu-cursor">▶</span>
                   <span class="menu-body">
                     <span class="menu-main">
-                      <span class="menu-title-text">第三章　今天的紀錄，明天找得到</span>
+                      <span class="menu-title-text">第三章　這批資料要列入清單嗎？</span>
                       <span class="menu-difficulty" title="難度：2顆星"><span class="diff-tag">難度</span><span class="diff-stars"><span class="star-on">★★</span><span class="star-off">☆☆</span></span></span>
                     </span>
                   </span>
@@ -86,7 +86,7 @@
 
         <!-- Stage Clear Celebration Screen -->
         <section class="modal-overlay clear-overlay hidden" id="clear-screen" role="dialog" aria-modal="true" aria-labelledby="clear-headline">
-          <canvas id="clear-fx-canvas" width="384" height="256" aria-hidden="true"></canvas>
+          <canvas id="clear-fx-canvas" width="256" height="320" aria-hidden="true"></canvas>
           <div class="clear-card" id="clear-card"></div>
         </section>
 
@@ -139,23 +139,23 @@
           </div>
         </section>
 
-        <!-- Chapter 3 (Internal 4): Lab Record, Raw File Archive & Inventory Workbench -->
+        <!-- Chapter 3 (Internal 4): R&D Asset Checklist & Patent Disclosure Workbench -->
         <section class="modal-overlay hidden" id="record-modal" role="dialog" aria-modal="true" aria-labelledby="record-title">
           <div class="modal-window poster-window">
             <div class="modal-header">
-              <span id="record-title">🧪 實驗紀錄整理、原始檔歸檔與盤點清冊</span>
-              <button class="modal-close" id="btn-record-close" type="button" aria-label="關閉整理系統">✕</button>
+              <span id="record-title">📋 2F 值班電腦 — 研發成果清單管理系統</span>
+              <button class="modal-close" id="btn-record-close" type="button" aria-label="關閉清單系統">✕</button>
             </div>
             <div class="modal-body" id="record-body"></div>
           </div>
         </section>
 
-        <!-- Chapter 3 (Internal 4): Next-Day Qing Lookup Simulation Modal -->
+        <!-- Chapter 3 (Internal 4): Data Cards Identification Modal -->
         <section class="modal-overlay hidden" id="lookup-modal" role="dialog" aria-modal="true" aria-labelledby="lookup-title">
           <div class="modal-window poster-window">
             <div class="modal-header">
-              <span id="lookup-title">🔍 模擬隔天盤點 — 小晴查找視角</span>
-              <button class="modal-close" id="btn-lookup-close" type="button" aria-label="關閉盤點模擬">✕</button>
+              <span id="lookup-title">🗂️ 1F 實驗區 — 和阿文一起辨識三組資料卡</span>
+              <button class="modal-close" id="btn-lookup-close" type="button" aria-label="關閉資料卡">✕</button>
             </div>
             <div class="modal-body" id="lookup-body"></div>
           </div>
@@ -220,6 +220,7 @@
 
     <!-- Authentic GBA Handheld Controls Deck -->
     <footer class="controls-bar gba-deck" aria-label="GBA 控制器">
+      <div class="nearby-strip" id="nearby-hint">↑↓ 選擇章節，按 A 或 Enter 開始</div>
       <div class="gba-controls-row">
         <!-- Left D-Pad -->
         <div class="dpad" role="group" aria-label="方向鍵">
@@ -230,9 +231,8 @@
           <button class="dpad-btn down" data-dir="down" type="button" aria-label="下">▼</button>
         </div>
 
-        <!-- Center GBA SELECT & START Pill Buttons + Prompt -->
+        <!-- Center GBA SELECT & START Pill Buttons -->
         <div class="gba-center-col">
-          <div class="nearby-strip" id="nearby-hint">↑↓ 選擇章節，按 A 或 Enter 開始</div>
           <div class="gba-mid-btns">
             <div class="gba-pill-wrap">
               <button class="gba-pill-btn" id="btn-select-gba" type="button" aria-label="SELECT 筆記"></button>
@@ -258,6 +258,15 @@
         </div>
       </div>
     </footer>
+  </div>
+
+  <!-- Mobile Landscape Lock Overlay -->
+  <div class="landscape-lock-overlay" id="landscape-lock-overlay" aria-hidden="true">
+    <div class="landscape-lock-content">
+      <div class="landscape-lock-icon">📱 ↺</div>
+      <div class="landscape-lock-text">請將手機轉回直向繼續遊玩</div>
+      <div class="landscape-lock-sub">本遊戲專為直向畫面設計，以獲得最佳視野與操作體驗</div>
+    </div>
   </div>
 
   <script defer src="js/audio.js?v=3.2"></script>

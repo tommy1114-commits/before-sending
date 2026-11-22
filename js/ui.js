@@ -359,15 +359,18 @@
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    const cw = canvas.width;
+    const ch = canvas.height;
+
     clearFxParticles.forEach((p, idx) => {
       p.x += p.vx + Math.sin(tick * 0.05 + idx) * 0.25;
       p.y += p.vy;
-      if (p.y > 260) {
+      if (p.y > ch + 4) {
         p.y = -6;
-        p.x = Math.random() * 384;
+        p.x = Math.random() * cw;
       }
-      if (p.x < -6) p.x = 388;
-      if (p.x > 390) p.x = -4;
+      if (p.x < -6) p.x = cw + 4;
+      if (p.x > cw + 6) p.x = -4;
       ctx.fillStyle = p.color;
       ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
     });
@@ -393,7 +396,7 @@
     let headline = isCh3
       ? '恭喜完成第四章「阿文的最後一天」！'
       : isCh4
-      ? '恭喜完成第三章「今天的紀錄，明天找得到」！'
+      ? '恭喜完成第三章「這批資料要列入清單嗎？」！'
       : isCh2
       ? '恭喜完成第二章「投稿前一晚」！'
       : '恭喜完成第一章「寄出之前」！';
@@ -1905,725 +1908,439 @@
     render();
   }
 
-  // ===== Chapter 3 (Internal 4): Lab Record, Raw File Archive & Inventory Workbench =====
-  function openRecordModal(state, initialTab, callbacks) {
-    activeModal = 'record';
-    $('record-modal').classList.remove('hidden');
-    state.ch4.openedWorkbench = true;
-    let activeTab = initialTab || 'record'; // 'record' | 'file' | 'inventory'
-    let inlineMsg = '';
+  // ===== Chapter 3 (Internal 4): Data Cards Identification Modal (1F with Awen) =====
+  function openDataCardsModal(state, callbacks) {
+    activeModal = 'lookup';
+    $('lookup-modal').classList.remove('hidden');
+    const c = state.ch4;
+    const body = $('lookup-body');
+    const titleEl = $('lookup-title');
+    if (titleEl) titleEl.textContent = '🗂️ 1F 實驗區 — 和阿文一起辨識三組資料卡';
 
-    const PATHS = window.BS.State.CH4_PATHS;
+    let idx = c.currentCardIdx || 0;
+    if (idx < 0) idx = 0;
+    if (idx > 2) idx = 2;
 
-    function getLinkLabel(linkKey) {
-      if (linkKey === 'team') return PATHS.team;
-      if (linkKey === 'personal') return PATHS.personal;
-      if (linkKey === 'instrument') return PATHS.instrument;
-      return '（尚未填寫連結）';
-    }
+    const cardsData = [
+      {
+        key: 'card1',
+        title: '資料一：公開方法重現紀錄',
+        badge: '卡片 1 / 3',
+        desc: '阿文照網路上的公開教學重做量測。本次沒有自家改良，也沒有需要保護的未公開結果。',
+        optA: { label: '📄 留作一般實驗紀錄。', correct: true },
+        optB: { label: '🔒 因為在實驗室做過，就列入需保護的清單。', correct: false },
+        correctMsg: '這次只是重現公開教學，可以保留一般實驗紀錄。下次如果做出自家改良或取得值得保護的未公開結果，就要另外判斷。',
+        wrongMsg: '這批紀錄只是照著公開教學重現，既無自家專屬改良也無未公開技術成果，無須列入需保護的研發成果清單，留作一般實驗紀錄即可。請重新選擇！'
+      },
+      {
+        key: 'card2',
+        title: '資料二：量測條件優化紀錄',
+        badge: '卡片 2 / 3',
+        desc: '團隊自行摸索出一套調整方法，能讓量測結果更穩定。方法還沒公開，具體參數保存在受控資料夾。',
+        optA: { label: '📑 以「量測條件優化紀錄」為一個資料群組登記。', correct: true },
+        optB: { label: '📝 把每個檔案和實際調整參數都抄進清單。', correct: false },
+        correctMsg: '用資料群組記下範圍、位置和負責人，讓同事找得到。調整參數留在受控資料夾。',
+        wrongMsg: '清單是索引與管理目錄，用來告訴同仁去哪裡找與由誰負責；機密調整參數與實驗檔案細節應留在受控資料夾，不應全部抄進清單。請重新選擇！'
+      },
+      {
+        key: 'card3',
+        title: '資料三：已申請專利的量測裝置',
+        badge: '卡片 3 / 3',
+        desc: '裝置的結構與原理已送件申請專利。本章開場時，申請案尚未公開。另有一份自行摸索的裝置調校紀錄，沒有納入申請。',
+        optA: { label: '📋 先記下申請狀態，確認哪些內容涵蓋在申請中，哪些仍要另外管理。', correct: true },
+        optB: { label: '🗑️ 既然已經申請，就把整批裝置資料從需保護的清單移除。', correct: false },
+        correctMsg: '已申請與已公開是不同狀態。即使日後申請案公開，也要看公開文件涵蓋哪些內容。',
+        wrongMsg: '專利已送件申請在尚未公開前依然具有保密必要；即使日後公開，也只有公開文件涵蓋的範圍變成公開資訊，未納入申請的調校紀錄仍需繼續保護！不可直接將整批資料移除。請重新選擇！'
+      }
+    ];
 
-    function render() {
-      const c = state.ch4;
-      const rec = c.record;
-      const inv = c.inventory;
-      const body = $('record-body');
-      const titleEl = $('record-title');
-      if (titleEl) {
-        titleEl.textContent =
-          activeTab === 'record'
-            ? '🧪 步驟一：當日實驗紀錄卡與更正歷程'
-            : activeTab === 'file'
-            ? '📂 步驟二：原始量測檔指定存放位置'
-            : '📋 步驟三：整批資料盤點清冊';
+    function renderCard() {
+      const cur = cardsData[idx];
+      const cardState = c.cards[cur.key];
+      c.currentCardIdx = idx;
+
+      let feedbackHtml = '';
+      if (cardState.feedback) {
+        const isOk = cardState.isCorrect;
+        feedbackHtml = `
+          <div class="${isOk ? 'inline-ok-box' : 'inline-warning-box'}" style="margin:10px 0; font-size:12.5px; line-height:1.5;">
+            <strong>${isOk ? '✅ 回饋：' : '⚠ 回饋：'}</strong>${cardState.feedback}
+          </div>
+        `;
       }
 
-      const rawLocLabel =
-        c.rawFileLocation === 'team'
-          ? '團隊指定資料夾'
-          : c.rawFileLocation === 'personal'
-          ? '阿文個人工作區'
-          : '儀器電腦本機';
-
-      let tabHtml = '';
-
-      if (activeTab === 'record') {
-        const hasAwen = c.clues.awenInfo;
-        const hasInst = c.clues.instrumentFile || c.rawFileLocation !== 'instrument';
-        const linkMismatch = c.rawFileLocation === 'team' && rec.rawFileLink !== 'team';
-        const missingQuickFill = (!rec.date || !rec.summary || !rec.recorder);
-
-        // Before vs After Correction Pane
-        let afterPaneHtml = '';
-        let afterPaneCls = '';
-        if (rec.correctionMode === 'none') {
-          afterPaneCls = 'lost-danger';
-          afterPaneHtml = `
-            <div style="font-weight:800; color:#9e1f1f; margin-bottom:4px;">❌ 尚未更正</div>
-            <div>目前編號：<code>${rec.sampleIdCurrent}</code></div>
-            <div style="font-size:11.5px; color:#7f1d1d; margin-top:4px;">與儀器原始檔 <code>CS_20261122_S08_RAW.csv</code> 的樣品編號不符！</div>
-          `;
-        } else if (rec.correctionMode === 'overwritten') {
-          afterPaneCls = 'lost-danger';
-          afterPaneHtml = `
-            <div style="font-weight:800; color:#9e1f1f; margin-bottom:4px;">⚠ 直接覆寫（舊紀錄已消失）</div>
-            <div>目前編號：<code>${rec.sampleIdCurrent}</code></div>
-            <div style="font-size:11.5px; color:#7f1d1d; margin-top:4px;">系統查無原值（S03）、更正原因、時間與更正人！隔天小晴將無法確認為何變更。</div>
-          `;
-        } else if (rec.correctionMode === 'overwritten_retro') {
-          afterPaneCls = 'retro-warn';
-          afterPaneHtml = `
-            <div style="font-weight:800; color:#9a5b13; margin-bottom:4px;">🟡 事後補記（非系統原本保留的歷程）</div>
-            <div>目前編號：<code>${rec.sampleIdCurrent}</code></div>
-            <div style="font-size:11.5px; color:#6b440f; margin-top:4px;">
-              <strong>【事後補記】</strong>原筆誤編號：<code>${rec.sampleIdOriginal}</code> → <code>${rec.sampleIdCurrent}</code><br>
-              原因：${rec.retroNoteReason}<br>
-              補記人：${rec.retroNoteBy} ｜ 時間：${rec.retroNoteTime}<br>
-              <em>※ 系統已明確區分此為「事後補記」，不等同系統原生留痕。</em>
+      let advanceBtnHtml = '';
+      if (cardState.isCorrect) {
+        if (idx < 2) {
+          advanceBtnHtml = `
+            <div style="margin-top:10px;">
+              <button class="pixel-btn primary" id="btn-card-next" type="button" style="width:100%; font-weight:700;">下一張資料卡（${idx + 2}/3） ▶</button>
             </div>
           `;
         } else {
-          afterPaneCls = 'native-ok';
-          afterPaneHtml = `
-            <div style="font-weight:800; color:#1b6e44; margin-bottom:4px;">✅ 系統原本保留的更正歷程</div>
-            <div>原紀錄保留：<span class="strike-old">${rec.sampleIdOriginal}</span> → 新增更正：<code>${rec.sampleIdCurrent}</code></div>
-            <div style="font-size:11.5px; color:#1c5136; margin-top:4px;">
-              原因：${rec.correctionReason}<br>
-              更正人：${rec.correctionBy} ｜ 時間：${rec.correctionTime}
+          advanceBtnHtml = `
+            <div style="margin-top:10px;">
+              <button class="pixel-btn primary" id="btn-card-finish" type="button" style="width:100%; font-weight:700;">✅ 三組資料辨識完成，上 2F 辦公區值班電腦 ▶</button>
             </div>
           `;
         }
-
-        let corrActionsHtml = '';
-        if (rec.correctionMode === 'none') {
-          corrActionsHtml = `
-            <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
-              <button class="pixel-btn primary" id="btn-ch4-corr-append" type="button" style="font-weight:700;">✅ 新增一筆更正紀錄（保留原值 S03，更正為 S08 並記錄留痕）【推薦標準做法】</button>
-              <button class="pixel-btn danger" id="btn-ch4-corr-overwrite" type="button">⚠ 直接覆寫舊內容（把 S03 直接改寫為 S08，不保留原內容）</button>
-            </div>
-          `;
-        } else if (rec.correctionMode === 'overwritten') {
-          corrActionsHtml = `
-            <div class="inline-warning-box" style="margin-top:8px;">
-              ⚠ 你已直接覆寫舊內容，系統原生歷程已無法復原。你可先去「模擬隔天盤點」看看小晴會遇到什麼問題，或點下方補上「事後補記」說明來源與原因：
-            </div>
-            <div style="margin-top:6px;">
-              <button class="pixel-btn warn" id="btn-ch4-corr-retro" type="button">📝 補上「事後補記」（補充原編號 S03、更正來源與原因）</button>
-            </div>
-          `;
-        } else if (rec.correctionMode === 'overwritten_retro') {
-          corrActionsHtml = `
-            <div class="inline-warning-box" style="margin-top:8px;">
-              🟡 已加上「事後補記」以說明更正來源與原因（系統會如實標示為事後補記，區別於系統原生保留的歷程）。
-            </div>
-          `;
-        } else {
-          corrActionsHtml = `
-            <div class="inline-ok-box" style="margin-top:8px;">
-              ✅ 已透過系統原生更正機制保留原內容與新內容，可完整追溯更正人、時間與原因！
-            </div>
-          `;
-        }
-
-        tabHtml = `
-          ${inlineMsg ? `<div class="inline-ok-box">${inlineMsg}</div>` : ''}
-          ${
-            linkMismatch
-              ? `<div class="inline-warning-box">⚠ <strong>偵測到路徑不同步：</strong>原始量測檔已移至「團隊指定資料夾」，但下方紀錄卡的「原始檔連結」尚未更新！若不更新，明天小晴點連結會找不到檔案。</div>`
-              : ''
-          }
-          <div class="pc-card" style="margin-bottom:10px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
-              <h3 style="margin:0;">📄 當日實驗紀錄卡（編號：${rec.recordId}）</h3>
-              ${
-                missingQuickFill
-                  ? '<button class="pixel-btn primary" id="btn-ch4-fill-all" type="button" style="padding:4px 10px; font-size:12px;">⚡ 一鍵帶入阿文確認的欄位</button>'
-                  : ''
-              }
-            </div>
-            <div style="font-size:12px; color:#526179; margin-bottom:8px;">
-              ※ 提示：點選已取得的線索即可帶入欄位。原始量測檔（<code>${c.rawFileName}</code>）全程維持唯讀原樣，不得改寫原始檔。
-            </div>
-
-            <div class="rec-field-row">
-              <div class="rec-field-label">量測日期</div>
-              <div class="rec-field-val">${rec.date ? `<strong>${rec.date}</strong>` : '<span style="color:#9a5b13;">（尚未填寫）</span>'}</div>
-              <div>
-                ${
-                  rec.date
-                    ? '<span class="status-badge ok">已填入</span>'
-                    : hasAwen
-                    ? '<button class="pixel-btn" id="btn-ch4-fill-date" type="button" style="padding:4px 8px; font-size:12px;">帶入：2026-11-22</button>'
-                    : '<span style="font-size:11.5px; color:#7c879c;">問 2F 阿文</span>'
-                }
-              </div>
-            </div>
-
-            <div class="rec-field-row">
-              <div class="rec-field-label">實驗摘要</div>
-              <div class="rec-field-val">${rec.summary ? rec.summary : '<span style="color:#9a5b13;">（尚未填寫）</span>'}</div>
-              <div>
-                ${
-                  rec.summary
-                    ? '<span class="status-badge ok">已填入</span>'
-                    : hasAwen
-                    ? '<button class="pixel-btn" id="btn-ch4-fill-summary" type="button" style="padding:4px 8px; font-size:12px;">帶入摘要</button>'
-                    : '<span style="font-size:11.5px; color:#7c879c;">問 2F 阿文</span>'
-                }
-              </div>
-            </div>
-
-            <div class="rec-field-row">
-              <div class="rec-field-label">記錄人</div>
-              <div class="rec-field-val">${rec.recorder ? `<strong>${rec.recorder}</strong>` : '<span style="color:#9a5b13;">（尚未填寫）</span>'}</div>
-              <div>
-                ${
-                  rec.recorder
-                    ? '<span class="status-badge ok">已填入</span>'
-                    : hasAwen
-                    ? '<button class="pixel-btn" id="btn-ch4-fill-recorder" type="button" style="padding:4px 8px; font-size:12px;">帶入：阿文</button>'
-                    : '<span style="font-size:11.5px; color:#7c879c;">問 2F 阿文</span>'
-                }
-              </div>
-            </div>
-
-            <div class="rec-field-row" style="flex-direction:column; align-items:stretch;">
-              <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
-                <div>
-                  <span class="rec-field-label" style="display:inline; margin-right:8px;">原始檔連結</span>
-                  <code style="font-size:11.5px;">${getLinkLabel(rec.rawFileLink)}</code>
-                </div>
-                <span class="status-badge ${rec.rawFileLink === 'team' && c.rawFileLocation === 'team' ? 'ok' : linkMismatch ? 'warn' : 'danger'}">
-                  ${rec.rawFileLink === 'team' && c.rawFileLocation === 'team' ? '已同步團隊資料夾' : linkMismatch ? '未同步新位置' : '尚待更新'}
-                </span>
-              </div>
-              <div style="font-size:11.5px; color:#526179;">
-                目前原始檔實際存放位置：<strong>${rawLocLabel}</strong>
-              </div>
-              ${
-                hasInst
-                  ? `<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
-                      <button class="pixel-btn ${rec.rawFileLink === 'instrument' ? 'warn' : ''}" id="btn-ch4-link-inst" type="button" style="padding:4px 8px; font-size:11.5px;">指向儀器電腦本機</button>
-                      <button class="pixel-btn ${rec.rawFileLink === 'personal' ? 'warn' : ''}" id="btn-ch4-link-pers" type="button" style="padding:4px 8px; font-size:11.5px;">指向個人工作區</button>
-                      <button class="pixel-btn ${rec.rawFileLink === 'team' ? 'primary' : ''}" id="btn-ch4-link-team" type="button" style="padding:4px 8px; font-size:11.5px;">✅ 更新連結至團隊指定資料夾</button>
-                    </div>`
-                  : '<div style="font-size:11.5px; color:#9a5b13;">🔒 請先到 2F 實驗區「儀器電腦」找到原始量測檔（CS_20261122_S08_RAW.csv）。</div>'
-              }
-            </div>
-          </div>
-
-          <div class="pc-card">
-            <h3>✏️ 樣品編號更正對照（比較「直接覆寫」與「新增更正紀錄」）</h3>
-            <div class="corr-compare-box">
-              <div class="corr-pane">
-                <div style="font-weight:800; color:#334155; margin-bottom:4px;">📄 更正前原紀錄</div>
-                <div>樣品編號：<code>${rec.sampleIdOriginal}</code></div>
-                <div style="font-size:11.5px; color:#64748b; margin-top:4px;">原始量測檔（唯讀原樣）：<code>${c.rawFileName}</code></div>
-              </div>
-              <div class="corr-pane ${afterPaneCls}">
-                ${afterPaneHtml}
-              </div>
-            </div>
-            ${corrActionsHtml}
-          </div>
-        `;
-      } else if (activeTab === 'file') {
-        const hasInst = c.clues.instrumentFile || c.rawFileLocation !== 'instrument';
-        tabHtml = `
-          ${inlineMsg ? `<div class="inline-ok-box">${inlineMsg}</div>` : ''}
-          <div class="pc-card">
-            <h3>📂 原始量測檔存放位置管理（模擬檔案系統）</h3>
-            <p style="margin:0 0 8px; font-size:12.5px; color:#4b576d;">
-              檔名：<code>${c.rawFileName}</code>（唯讀原樣保留，不改寫內容）<br>
-              目前實際存放位置：<strong>${rawLocLabel}</strong>（<code>${PATHS[c.rawFileLocation]}</code>）
-            </p>
-            ${
-              !hasInst
-                ? `<div class="inline-warning-box">🔒 尚未確認儀器上的原始量測檔！請先前往 <strong>2F 實驗區「儀器電腦」</strong>找到 <code>${c.rawFileName}</code>，再回來安排歸檔位置。</div>`
-                : `
-                  <div class="access-card-list">
-                    <div class="access-card ${c.rawFileLocation === 'instrument' ? 'danger' : ''}">
-                      <div class="access-card-top">
-                        <strong>1. 留在儀器電腦本機</strong>
-                        <span class="status-badge ${c.rawFileLocation === 'instrument' ? 'danger' : 'warn'}">${c.rawFileLocation === 'instrument' ? '目前位置' : '不建議'}</span>
-                      </div>
-                      <div style="font-size:12px; color:#475569; margin-bottom:6px;">
-                        路徑：<code>${PATHS.instrument}</code><br>
-                        其他同事無法從團隊系統直接開啟，且儀器暫存區容易被覆蓋或清理。
-                      </div>
-                      <button class="pixel-btn ${c.rawFileLocation === 'instrument' ? 'danger' : ''}" id="btn-ch4-loc-inst" type="button" ${c.rawFileLocation === 'instrument' ? 'disabled' : ''}>留在儀器本機</button>
-                    </div>
-
-                    <div class="access-card ${c.rawFileLocation === 'personal' ? 'danger' : ''}">
-                      <div class="access-card-top">
-                        <strong>2. 移到阿文個人工作區</strong>
-                        <span class="status-badge ${c.rawFileLocation === 'personal' ? 'danger' : 'warn'}">${c.rawFileLocation === 'personal' ? '目前位置' : '他人無權限'}</span>
-                      </div>
-                      <div style="font-size:12px; color:#475569; margin-bottom:6px;">
-                        路徑：<code>${PATHS.personal}</code><br>
-                        僅阿文帳號有權存取，明天小晴盤點時會因權限不足無法開啟。
-                      </div>
-                      <button class="pixel-btn ${c.rawFileLocation === 'personal' ? 'warn' : ''}" id="btn-ch4-loc-pers" type="button" ${c.rawFileLocation === 'personal' ? 'disabled' : ''}>放到個人工作區</button>
-                    </div>
-
-                    <div class="access-card ${c.rawFileLocation === 'team' ? 'ok' : ''}">
-                      <div class="access-card-top">
-                        <strong>3. 歸檔至團隊指定資料夾（受控共用空間）</strong>
-                        <span class="status-badge ${c.rawFileLocation === 'team' ? 'ok' : 'warn'}">${c.rawFileLocation === 'team' ? '✅ 已歸檔至此' : '建議位置'}</span>
-                      </div>
-                      <div style="font-size:12px; color:#475569; margin-bottom:6px;">
-                        路徑：<code>${PATHS.team}</code><br>
-                        符合專案權限控管且具固定歸檔結構，接手同事明天即可依清冊與連結找到檔案。
-                      </div>
-                      <button class="pixel-btn primary" id="btn-ch4-loc-team" type="button" ${c.rawFileLocation === 'team' ? 'disabled' : ''}>${c.rawFileLocation === 'team' ? '✅ 已存放在團隊指定資料夾' : '📁 歸檔至團隊指定資料夾'}</button>
-                    </div>
-                  </div>
-                  ${
-                    c.rawFileLocation === 'team' && rec.rawFileLink !== 'team'
-                      ? `<div class="inline-warning-box" style="margin-top:10px;">
-                          ⚠ 檔案已歸檔到團隊指定資料夾，但<strong>「步驟一：實驗紀錄卡」中的原始檔連結不會自動更新</strong>！<br>
-                          <button class="pixel-btn primary" id="btn-ch4-jump-rec" type="button" style="margin-top:6px; padding:4px 10px; font-size:12px;">← 立刻回步驟一更新原始檔連結</button>
-                        </div>`
-                      : ''
-                  }
-                `
-            }
-          </div>
-        `;
-      } else {
-        // Tab 3: Batch Inventory Entry (5 fields)
-        const nameText =
-          inv.nameScope === 'batch_clean'
-            ? '晴空計畫 2026-11 批次量測資料（實驗紀錄與原始檔）'
-            : inv.nameScope === 'batch_leaked_params'
-            ? '晴空計畫薄膜配方 TiN-450°C-120s 退火條件與 S08 量測數據'
-            : '（尚未選擇）';
-        const locText =
-          inv.location === 'team_folder'
-            ? '/TeamDrive/ClearSky_202611/（受控團隊專案資料夾）'
-            : inv.location === 'instrument_pc'
-            ? 'Instrument_PC:\\Temp_Raw\\（儀器電腦本機）'
-            : '（尚未選擇）';
-
-        tabHtml = `
-          ${inlineMsg ? `<div class="inline-ok-box">${inlineMsg}</div>` : ''}
-          ${
-            inv.nameScope === 'batch_leaked_params'
-              ? '<div class="inline-warning-box">⚠ <strong>注意：</strong>盤點清冊是管理目錄，不應把機密配方與製程溫度參數直接寫進清冊名稱！技術細節應留在受控的實驗紀錄裡。</div>'
-              : ''
-          }
-          <div class="pc-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-              <h3 style="margin:0;">📋 更新「本次量測資料」盤點清冊（整批資料一筆項目）</h3>
-              <button class="pixel-btn primary" id="btn-inv-fill-all" type="button" style="padding:4px 10px; font-size:12px; font-weight:700;">⚡ 一鍵套用標準盤點清冊</button>
-            </div>
-            <p style="margin:0 0 8px; font-size:12.5px; color:#4b576d;">
-              清冊用來幫助主管與接手同事快速找到這批資料與負責人，<strong>以整批資料為單位</strong>，不寫入機密技術細節。
-              ${!c.clues.qingChecklistReq ? '（小提示：也可以下樓問 <strong>1F 大廳的小晴</strong>，聽聽她明天盤點會先看哪幾個欄位！）' : '（✅ 已向 1F 小晴確認明日盤點重點）'}
-            </p>
-
-            <div class="rec-field-row" style="flex-direction:column; align-items:stretch;">
-              <div><span class="rec-field-label" style="display:inline; margin-right:8px;">1. 資料名稱或範圍</span><strong>${nameText}</strong></div>
-              <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button class="pixel-btn ${inv.nameScope === 'batch_clean' ? 'primary' : ''}" id="btn-inv-name-clean" type="button" style="padding:4px 8px; font-size:12px;">✅ 晴空計畫 2026-11 批次量測資料（不含機密參數）</button>
-                <button class="pixel-btn ${inv.nameScope === 'batch_leaked_params' ? 'danger' : ''}" id="btn-inv-name-leak" type="button" style="padding:4px 8px; font-size:12px;">⚠ 寫入薄膜配方 TiN-450°C-120s 退火參數與 S08 數據</button>
-              </div>
-            </div>
-
-            <div class="rec-field-row">
-              <div class="rec-field-label">2. 資料類型</div>
-              <div class="rec-field-val">${inv.dataType || '<span style="color:#9a5b13;">（尚未選擇）</span>'}</div>
-              <div>
-                <button class="pixel-btn ${inv.dataType ? 'primary' : ''}" id="btn-inv-type" type="button" style="padding:4px 8px; font-size:12px;">${inv.dataType ? '✅ 已填入' : '填入：電子實驗紀錄＋原始量測檔'}</button>
-              </div>
-            </div>
-
-            <div class="rec-field-row">
-              <div class="rec-field-label">3. 保護原因</div>
-              <div class="rec-field-val">${inv.protectReason || '<span style="color:#9a5b13;">（尚未選擇）</span>'}</div>
-              <div>
-                <button class="pixel-btn ${inv.protectReason ? 'primary' : ''}" id="btn-inv-reason" type="button" style="padding:4px 8px; font-size:12px;">${inv.protectReason ? '✅ 已填入' : '填入：未公開量測成果／專利評估'}</button>
-              </div>
-            </div>
-
-            <div class="rec-field-row" style="flex-direction:column; align-items:stretch;">
-              <div><span class="rec-field-label" style="display:inline; margin-right:8px;">4. 指定存放位置</span><code>${locText}</code></div>
-              <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                <button class="pixel-btn ${inv.location === 'team_folder' ? 'primary' : ''}" id="btn-inv-loc-team" type="button" style="padding:4px 8px; font-size:12px;">✅ 團隊指定資料夾 /TeamDrive/ClearSky_202611/</button>
-                <button class="pixel-btn ${inv.location === 'instrument_pc' ? 'warn' : ''}" id="btn-inv-loc-inst" type="button" style="padding:4px 8px; font-size:12px;">⚠ 儀器電腦本機暫存區</button>
-              </div>
-            </div>
-
-            <div class="rec-field-row">
-              <div class="rec-field-label">5. 負責人</div>
-              <div class="rec-field-val">${inv.owner || '<span style="color:#9a5b13;">（尚未選擇）</span>'}</div>
-              <div>
-                <button class="pixel-btn ${inv.owner ? 'primary' : ''}" id="btn-inv-owner" type="button" style="padding:4px 8px; font-size:12px;">${inv.owner ? '✅ 已填入' : '填入：阿文（量測負責人）'}</button>
-              </div>
-            </div>
-          </div>
-        `;
       }
 
       body.innerHTML = `
-        <div class="poster-tabs">
-          <button class="poster-tab-btn ${activeTab === 'record' ? 'active' : ''}" id="tab-ch4-record" type="button">📝 步驟一：實驗紀錄卡</button>
-          <button class="poster-tab-btn ${activeTab === 'file' ? 'active' : ''}" id="tab-ch4-file" type="button">📂 步驟二：原始檔位置</button>
-          <button class="poster-tab-btn ${activeTab === 'inventory' ? 'active' : ''}" id="tab-ch4-inv" type="button">📋 步驟三：盤點清冊</button>
-        </div>
-        ${tabHtml}
-        <div class="pc-actions" style="justify-content:space-between; margin-top:12px;">
-          <button class="pixel-btn warn" id="btn-ch4-open-lookup" type="button">🔍 模擬隔天盤點（切換小晴查找視角）</button>
-          <button class="pixel-btn" id="btn-ch4-close-wb" type="button">關閉工作台</button>
+        <div class="pc-card" style="margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <h3 style="margin:0;">🗂️ ${cur.title}</h3>
+            <span class="status-badge ${cardState.isCorrect ? 'ok' : 'warn'}">${cur.badge}</span>
+          </div>
+          <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:10px; font-size:13px; color:#1e293b; line-height:1.6; margin-bottom:10px;">
+            <strong>【資料內容】</strong><br>${cur.desc}
+          </div>
+          <div style="font-size:12px; color:#64748b; margin-bottom:8px;">
+            ※ 思考重點：同一研究計畫下，公開資訊、未公開 know-how 與專利申請資料界線不同，依實際內容與範圍判斷。
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <button class="pixel-btn ${cardState.choice === 'optA' ? (cur.optA.correct ? 'primary' : 'danger') : ''}" id="btn-card-opt-a" type="button" style="text-align:left; padding:8px 10px; font-size:12.5px;">
+              ${cur.optA.label}
+            </button>
+            <button class="pixel-btn ${cardState.choice === 'optB' ? (cur.optB.correct ? 'primary' : 'danger') : ''}" id="btn-card-opt-b" type="button" style="text-align:left; padding:8px 10px; font-size:12.5px;">
+              ${cur.optB.label}
+            </button>
+          </div>
+
+          ${feedbackHtml}
+          ${advanceBtnHtml}
         </div>
       `;
 
-      $('tab-ch4-record').onclick = () => {
-        activeTab = 'record';
-        inlineMsg = '';
-        window.BS.Audio.select();
-        render();
-      };
-      $('tab-ch4-file').onclick = () => {
-        activeTab = 'file';
-        inlineMsg = '';
-        window.BS.Audio.select();
-        render();
-      };
-      $('tab-ch4-inv').onclick = () => {
-        activeTab = 'inventory';
-        inlineMsg = '';
-        window.BS.Audio.select();
-        render();
-      };
-      $('btn-ch4-open-lookup').onclick = () => {
-        window.BS.Audio.confirm();
-        closeAllModals();
-        if (callbacks.onOpenLookup) callbacks.onOpenLookup();
-      };
-      $('btn-ch4-close-wb').onclick = () => {
-        window.BS.Audio.cancel();
-        closeAllModals();
-        if (callbacks.onUpdate) callbacks.onUpdate();
-      };
-
-      // Tab 1 bindings
-      if (activeTab === 'record') {
-        if ($('btn-ch4-fill-all')) {
-          $('btn-ch4-fill-all').onclick = () => {
-            rec.date = '2026-11-22';
-            rec.summary = '晴空計畫薄膜樣品 S08 室溫阻抗與穩定度基準量測';
-            rec.recorder = '阿文';
-            inlineMsg = '✅ 已帶入阿文確認的量測日期、實驗摘要與記錄人！';
-            window.BS.Audio.success();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        if ($('btn-ch4-fill-date')) {
-          $('btn-ch4-fill-date').onclick = () => {
-            rec.date = '2026-11-22';
-            inlineMsg = '✅ 已帶入量測日期：2026-11-22';
-            window.BS.Audio.confirm();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        if ($('btn-ch4-fill-summary')) {
-          $('btn-ch4-fill-summary').onclick = () => {
-            rec.summary = '晴空計畫薄膜樣品 S08 室溫阻抗與穩定度基準量測';
-            inlineMsg = '✅ 已帶入實驗摘要。';
-            window.BS.Audio.confirm();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        if ($('btn-ch4-fill-recorder')) {
-          $('btn-ch4-fill-recorder').onclick = () => {
-            rec.recorder = '阿文';
-            inlineMsg = '✅ 已帶入記錄人：阿文';
-            window.BS.Audio.confirm();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        if ($('btn-ch4-link-inst')) {
-          $('btn-ch4-link-inst').onclick = () => {
-            rec.rawFileLink = 'instrument';
-            inlineMsg = '已將紀錄卡原始檔連結指向儀器電腦本機。';
-            window.BS.Audio.select();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        if ($('btn-ch4-link-pers')) {
-          $('btn-ch4-link-pers').onclick = () => {
-            rec.rawFileLink = 'personal';
-            inlineMsg = '已將紀錄卡原始檔連結指向阿文個人工作區。';
-            window.BS.Audio.select();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        if ($('btn-ch4-link-team')) {
-          $('btn-ch4-link-team').onclick = () => {
-            rec.rawFileLink = 'team';
-            inlineMsg =
-              c.rawFileLocation === 'team'
-                ? '✅ 已將原始檔連結同步更新為團隊指定資料夾！'
-                : '已將連結設為團隊指定資料夾（提醒：請確認「步驟二」也已把檔案實際移過去！）。';
-            window.BS.Audio.success();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        if ($('btn-ch4-corr-append')) {
-          $('btn-ch4-corr-append').onclick = () => {
-            rec.correctionMode = 'tracked_append';
-            rec.sampleIdCurrent = 'CS-2026-S08';
-            rec.correctionReason = '核對儀器原始檔名與樣品盤標籤，確認筆誤 S03 應為 S08';
-            rec.correctionTime = window.BS.State.formatClock(state.timeMinutes);
-            rec.correctionBy = '小安（與阿文確認）';
-            inlineMsg = '✅ 已新增系統原生更正紀錄！原編號 CS-2026-S03 完整保留，並記錄原因、時間與更正人。';
-            window.BS.Audio.success();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        if ($('btn-ch4-corr-overwrite')) {
-          $('btn-ch4-corr-overwrite').onclick = () => {
-            rec.correctionMode = 'overwritten';
-            rec.sampleIdCurrent = 'CS-2026-S08';
-            inlineMsg = '';
-            window.BS.Audio.alert();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        if ($('btn-ch4-corr-retro')) {
-          $('btn-ch4-corr-retro').onclick = () => {
-            rec.correctionMode = 'overwritten_retro';
-            rec.retroNoteReason = '核對儀器原始檔名確認原筆誤 CS-2026-S03 應為 CS-2026-S08（先前已直接覆寫，於此補記來源與原因）';
-            rec.retroNoteTime = window.BS.State.formatClock(state.timeMinutes);
-            rec.retroNoteBy = '小安（事後補記）';
-            inlineMsg = '📝 已完成「事後補記」！系統將如實區分此為事後補記，而非系統原本保留的歷程。';
-            window.BS.Audio.confirm();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-      }
-
-      // Tab 2 bindings
-      if (activeTab === 'file') {
-        if ($('btn-ch4-loc-inst')) {
-          $('btn-ch4-loc-inst').onclick = () => {
-            c.rawFileLocation = 'instrument';
-            inlineMsg = '原始檔目前設定保留於儀器電腦本機。';
-            window.BS.Audio.select();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        if ($('btn-ch4-loc-pers')) {
-          $('btn-ch4-loc-pers').onclick = () => {
-            c.rawFileLocation = 'personal';
-            inlineMsg = '原始檔已移至阿文個人工作區（提醒：小晴可能無法存取個人工作區）。';
-            window.BS.Audio.alert();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        if ($('btn-ch4-loc-team')) {
-          $('btn-ch4-loc-team').onclick = () => {
-            c.rawFileLocation = 'team';
-            rec.rawFileLink = 'team'; // Auto-sync link with record card!
-            inlineMsg = '✅ 已將原始檔原樣歸檔至團隊指定資料夾，且實驗紀錄卡連結已自動同步更新！';
-            window.BS.Audio.success();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        if ($('btn-ch4-jump-rec')) {
-          $('btn-ch4-jump-rec').onclick = () => {
-            activeTab = 'record';
-            inlineMsg = '';
-            window.BS.Audio.select();
-            render();
-          };
-        }
-      }
-
-      // Tab 3 bindings
-      if (activeTab === 'inventory') {
-        if ($('btn-inv-fill-all')) {
-          $('btn-inv-fill-all').onclick = () => {
-            inv.nameScope = 'batch_clean';
-            inv.dataType = '電子實驗紀錄＋儀器原始量測檔（CSV）';
-            inv.protectReason = '未公開量測成果／專利評估';
-            inv.location = 'team_folder';
-            inv.owner = '阿文';
-            inlineMsg = '✅ 已一鍵套用標準盤點清冊五欄位（以整批資料命名，未寫入機密技術細節）！';
-            window.BS.Audio.success();
-            if (callbacks.onUpdate) callbacks.onUpdate();
-            render();
-          };
-        }
-        $('btn-inv-name-clean').onclick = () => {
-          inv.nameScope = 'batch_clean';
-          inlineMsg = '✅ 已選用整批資料名稱（未暴露機密技術細節）。';
+      function handlePick(pickKey, optObj) {
+        cardState.choice = pickKey;
+        if (optObj.correct) {
+          cardState.isCorrect = true;
+          cardState.feedback = cur.correctMsg;
           window.BS.Audio.success();
-          if (callbacks.onUpdate) callbacks.onUpdate();
-          render();
-        };
-        $('btn-inv-name-leak').onclick = () => {
-          inv.nameScope = 'batch_leaked_params';
-          inlineMsg = '';
+        } else {
+          cardState.isCorrect = false;
+          cardState.feedback = cur.wrongMsg;
           window.BS.Audio.alert();
-          if (callbacks.onUpdate) callbacks.onUpdate();
-          render();
-        };
-        $('btn-inv-type').onclick = () => {
-          inv.dataType = '電子實驗紀錄＋儀器原始量測檔（CSV）';
-          inlineMsg = '✅ 已填入資料類型。';
-          window.BS.Audio.confirm();
-          if (callbacks.onUpdate) callbacks.onUpdate();
-          render();
-        };
-        $('btn-inv-reason').onclick = () => {
-          inv.protectReason = '未公開研究量測成果，涉及後續論文發表與專利評估';
-          inlineMsg = '✅ 已填入保護原因。';
-          window.BS.Audio.confirm();
-          if (callbacks.onUpdate) callbacks.onUpdate();
-          render();
-        };
-        $('btn-inv-loc-team').onclick = () => {
-          inv.location = 'team_folder';
-          inlineMsg = '✅ 已指定存放位置為團隊受控資料夾。';
-          window.BS.Audio.success();
-          if (callbacks.onUpdate) callbacks.onUpdate();
-          render();
-        };
-        $('btn-inv-loc-inst').onclick = () => {
-          inv.location = 'instrument_pc';
-          inlineMsg = '⚠ 已填寫儀器電腦本機（明天小晴從團隊共用系統可能找不到）。';
-          window.BS.Audio.alert();
-          if (callbacks.onUpdate) callbacks.onUpdate();
-          render();
-        };
-        $('btn-inv-owner').onclick = () => {
-          inv.owner = '阿文（晴空計畫量測負責人）';
-          inlineMsg = '✅ 已填入負責人：阿文。';
-          window.BS.Audio.confirm();
-          if (callbacks.onUpdate) callbacks.onUpdate();
-          render();
+        }
+        renderCard();
+      }
+
+      $('btn-card-opt-a').onclick = () => handlePick('optA', cur.optA);
+      $('btn-card-opt-b').onclick = () => handlePick('optB', cur.optB);
+
+      if ($('btn-card-next')) {
+        $('btn-card-next').onclick = () => {
+          window.BS.Audio.select();
+          idx++;
+          renderCard();
         };
       }
+
+      if ($('btn-card-finish')) {
+        $('btn-card-finish').onclick = () => {
+          c.cardsCompleted = true;
+          c.stage = 'to_pc';
+          window.BS.Audio.confirm();
+          closeAllModals();
+          if (callbacks && callbacks.onComplete) {
+            callbacks.onComplete();
+          }
+        };
+      }
+    }
+
+    renderCard();
+  }
+
+  // ===== Chapter 3 (Internal 4): R&D Asset Checklist Workbench (2F PC) =====
+  function openChecklistModal(state, callbacks) {
+    activeModal = 'record';
+    $('record-modal').classList.remove('hidden');
+    const c = state.ch4;
+    const body = $('record-body');
+    const titleEl = $('record-title');
+    if (titleEl) titleEl.textContent = '📋 2F 值班電腦 — 研發成果清單管理系統';
+
+    function render() {
+      // Stage 1: Review Draft Checklist (before draft saved)
+      if (!c.draftSaved) {
+        let valBox = '';
+        if (c.draftValidationMsg) {
+          valBox = `
+            <div class="inline-warning-box" style="margin-bottom:10px; font-size:12.5px;">
+              ${c.draftValidationMsg}
+            </div>
+          `;
+        }
+
+        body.innerHTML = `
+          <div class="pc-card" style="margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+              <h3 style="margin:0;">📋 研究計畫：晴空計畫（ClearSky Project）研發成果清單草稿</h3>
+              <span class="status-badge warn">待確認納入範圍</span>
+            </div>
+            <p style="font-size:12px; color:#475569; margin:6px 0 0; line-height:1.5;">
+              清單是管理與查找目錄，<strong>按研究計畫或資料群組整理</strong>，每筆記錄五項必要欄位（資料名稱或範圍、資料類型、保護原因、存放位置、負責人）。檔案明細與機密技術細節留在受控資料夾。
+            </p>
+          </div>
+
+          ${valBox}
+
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <!-- Group Item 1: 量測條件優化紀錄 -->
+            <div class="lookup-step-card ${c.draft.optimization ? 'ok' : ''}">
+              <div class="access-card-top">
+                <strong>1. 晴空計畫｜量測條件優化紀錄</strong>
+                <button class="pixel-btn ${c.draft.optimization ? 'primary' : ''}" id="btn-toggle-opt" type="button" style="padding:3px 8px; font-size:11.5px;">
+                  ${c.draft.optimization ? '✓ 納入清單' : '未納入'}
+                </button>
+              </div>
+              <div class="rec-field-row"><span class="rec-field-label">資料名稱或範圍</span><span class="rec-field-val">晴空計畫｜量測條件優化紀錄</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">資料類型</span><span class="rec-field-val">自研 know-how</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">保護原因</span><span class="rec-field-val">自研方法尚未公開（讓量測更穩定之參數）</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">存放位置</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/02_ConditionOpt/</code></span></div>
+              <div class="rec-field-row"><span class="rec-field-label">負責人</span><span class="rec-field-val">阿文</span></div>
+            </div>
+
+            <!-- Group Item 2: 量測裝置申請資料 -->
+            <div class="lookup-step-card ${c.draft.patentDevice ? 'ok' : ''}">
+              <div class="access-card-top">
+                <strong>2. 晴空計畫｜量測裝置申請資料</strong>
+                <button class="pixel-btn ${c.draft.patentDevice ? 'primary' : ''}" id="btn-toggle-patent" type="button" style="padding:3px 8px; font-size:11.5px;">
+                  ${c.draft.patentDevice ? '✓ 納入清單' : '未納入'}
+                </button>
+              </div>
+              <div class="rec-field-row"><span class="rec-field-label">資料名稱或範圍</span><span class="rec-field-val">晴空計畫｜量測裝置申請資料</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">資料類型</span><span class="rec-field-val">專利申請相關資料</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">保護原因</span><span class="rec-field-val">本情境的申請內容尚未公開（已送件，尚未公開）</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">存放位置</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/01_PatentDrafts/</code></span></div>
+              <div class="rec-field-row"><span class="rec-field-label">負責人</span><span class="rec-field-val">阿文（專案窗口）</span></div>
+              <div style="font-size:11.5px; color:#2563eb; margin-top:4px;">📌 狀態標記：已送件申請專利，專利案號 TW115-XXXXX（尚未公開）</div>
+            </div>
+
+            <!-- Group Item 3: 量測裝置調校紀錄 -->
+            <div class="lookup-step-card ${c.draft.tuning ? 'ok' : ''}">
+              <div class="access-card-top">
+                <strong>3. 晴空計畫｜量測裝置調校紀錄</strong>
+                <button class="pixel-btn ${c.draft.tuning ? 'primary' : ''}" id="btn-toggle-tuning" type="button" style="padding:3px 8px; font-size:11.5px;">
+                  ${c.draft.tuning ? '✓ 納入清單' : '未納入'}
+                </button>
+              </div>
+              <div class="rec-field-row"><span class="rec-field-label">資料名稱或範圍</span><span class="rec-field-val">晴空計畫｜量測裝置調校紀錄</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">資料類型</span><span class="rec-field-val">自研 know-how</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">保護原因</span><span class="rec-field-val">調校方法尚未公開，且未納入該專利申請</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">存放位置</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/03_DeviceTuning/</code></span></div>
+              <div class="rec-field-row"><span class="rec-field-label">負責人</span><span class="rec-field-val">阿文</span></div>
+              <div style="font-size:11.5px; color:#6b7280; margin-top:4px;">📌 備註：未納入專利申請範圍，獨立作為自研 know-how 管理</div>
+            </div>
+
+            <!-- Candidate Item 4: 公開方法重現紀錄 -->
+            <div class="lookup-step-card ${c.draft.reproduce ? 'warn' : ''}">
+              <div class="access-card-top">
+                <strong>4. 晴空計畫｜公開方法重現紀錄（候選項）</strong>
+                <button class="pixel-btn ${c.draft.reproduce ? 'danger' : ''}" id="btn-toggle-reproduce" type="button" style="padding:3px 8px; font-size:11.5px;">
+                  ${c.draft.reproduce ? '已納入（點擊取消）' : '不納入（留作一般紀錄）'}
+                </button>
+              </div>
+              <div class="rec-field-row"><span class="rec-field-label">資料名稱或範圍</span><span class="rec-field-val">晴空計畫｜公開方法重現紀錄</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">資料類型</span><span class="rec-field-val">一般實驗操作紀錄</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">保護原因</span><span class="rec-field-val">僅重現公開教學，無自家改良與未公開結果</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">存放位置</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/00_GeneralLogs/</code></span></div>
+              <div class="rec-field-row"><span class="rec-field-label">負責人</span><span class="rec-field-val">阿文</span></div>
+              <div style="font-size:11.5px; color:#9a3412; margin-top:4px;">
+                ${c.draft.reproduce ? '⚠ 提示：此項僅為重現公開教學，留作一般實驗紀錄即可，不應列入受控清單。' : '💡 狀態：不列入受控研發成果清單，保留作一般實驗紀錄。'}
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <button class="pixel-btn primary" id="btn-save-draft" type="button" style="width:100%; font-weight:700; padding:8px 0;">
+              💾 儲存並確認研發成果清單草稿
+            </button>
+          </div>
+        `;
+
+        $('btn-toggle-opt').onclick = () => { c.draft.optimization = !c.draft.optimization; render(); };
+        $('btn-toggle-patent').onclick = () => { c.draft.patentDevice = !c.draft.patentDevice; render(); };
+        $('btn-toggle-tuning').onclick = () => { c.draft.tuning = !c.draft.tuning; render(); };
+        $('btn-toggle-reproduce').onclick = () => { c.draft.reproduce = !c.draft.reproduce; render(); };
+
+        $('btn-save-draft').onclick = () => {
+          if (c.draft.reproduce) {
+            c.draftValidationMsg = '草稿多列了「公開方法重現紀錄」！本情境僅為重現公開教學且無自家改良，留作一般實驗紀錄即可，無須列入保護清單。請取消納入後重存。';
+            window.BS.Audio.alert();
+            render();
+            return;
+          }
+          if (!c.draft.optimization || !c.draft.patentDevice || !c.draft.tuning) {
+            c.draftValidationMsg = '草稿缺少了必要的自研成果或專利申請資料！自研 know-how 與未公開申請資料皆需列入清單，讓同事找得到、找誰問。請勾選納入後儲存。';
+            window.BS.Audio.alert();
+            render();
+            return;
+          }
+
+          c.draftSaved = true;
+          c.draftValidationMsg = '';
+          window.BS.Audio.success();
+          render();
+        };
+        return;
+      }
+
+      // Stage 2: Notice received & update checklist
+      if (c.draftSaved && !c.updatedSaved) {
+        let updateMsgHtml = '';
+        if (c.updateValidationMsg) {
+          updateMsgHtml = `
+            <div class="inline-warning-box" style="margin-bottom:10px; font-size:12.5px;">
+              ${c.updateValidationMsg}
+            </div>
+          `;
+        }
+
+        let updatedPreviewHtml = '';
+        if (c.updateChoice === 'only_published') {
+          updatedPreviewHtml = `
+            <div class="inline-ok-box" style="margin:10px 0;">
+              <strong>🔍 更新前後對照預覽：</strong>
+              <div style="margin-top:6px; font-size:12px; line-height:1.6;">
+                <strong>【量測裝置申請資料】（同一筆項目更新，不重複建立）：</strong><br>
+                • 更新前：保護原因「申請內容尚未公開」｜狀態「已送件，尚未公開」<br>
+                • 更新後：保護原因改為「已公開專利文件所載內容已公開；申請文件留存備查」｜狀態標示為「✅ 已公開（僅限裝置結構與原理，公開日：今日 2026-11-22）」<br><br>
+                <strong>【量測裝置調校紀錄】：</strong><br>
+                • 狀態：🔒 未納入申請，維持「未公開 know-how」受控管理，原保護原因與存放位置繼續有效！<br><br>
+                <strong>【量測條件優化紀錄】：</strong><br>
+                • 狀態：🔒 自研 know-how，繼續按原範圍受控管理。
+              </div>
+            </div>
+            <button class="pixel-btn primary" id="btn-save-update" type="button" style="width:100%; font-weight:700; padding:8px 0; margin-top:6px;">
+              💾 儲存更新後的研發成果清單
+            </button>
+          `;
+        }
+
+        body.innerHTML = `
+          <div class="inline-ok-box" style="background:#eefaf4; border-color:#369364; font-size:13px; line-height:1.6; margin-bottom:10px;">
+            <strong>📢 阿明組長即時系統通知（16:45）：</strong><br>
+            「量測裝置的申請案今天公開了。公開文件有裝置的結構與原理，沒有我們內部的調校紀錄。請更新清單。」
+          </div>
+
+          <div class="pc-card" style="margin-bottom:8px;">
+            <h3 style="margin:0 0 6px;">🔄 專利申請案公開 — 研發成果清單動態更新</h3>
+            <p style="font-size:12px; color:#475569; margin:0 0 8px;">
+              當資料狀態改變時，應更新原有項目，確認實際公開的內容與仍需保護的資料。依據阿明組長的公開通知，請選擇正確的更新方式：
+            </p>
+
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <button class="pixel-btn ${c.updateChoice === 'only_published' ? 'primary' : ''}" id="btn-upd-only-pub" type="button" style="text-align:left; padding:8px 10px; font-size:12.5px;">
+                ✅ <strong>只更新已公開的項目</strong><br>
+                <small style="color:#15803d;">更新「量測裝置申請資料」為已公開，保留未納入申請的「調校紀錄」與「優化紀錄」為未公開保護。</small>
+              </button>
+              <button class="pixel-btn ${c.updateChoice === 'whole_project' ? 'danger' : ''}" id="btn-upd-whole-proj" type="button" style="text-align:left; padding:8px 10px; font-size:12.5px;">
+                ⚠ <strong>將整個計畫標為已公開</strong><br>
+                <small style="color:#b91c1c;">將晴空計畫所有量測資料全部標記為已公開。</small>
+              </button>
+            </div>
+          </div>
+
+          ${updateMsgHtml}
+          ${updatedPreviewHtml}
+        `;
+
+        $('btn-upd-whole-proj').onclick = () => {
+          c.updateChoice = 'whole_project';
+          c.updateValidationMsg = '注意：公開文件僅包含量測裝置的結構與原理，內部的調校紀錄並未納入專利申請，仍屬未公開 know-how，條件優化紀錄也未公開！不可將整個計畫標為已公開。請重新選擇！';
+          window.BS.Audio.alert();
+          render();
+        };
+
+        $('btn-upd-only-pub').onclick = () => {
+          c.updateChoice = 'only_published';
+          c.updateValidationMsg = '';
+          window.BS.Audio.select();
+          render();
+        };
+
+        if ($('btn-save-update')) {
+          $('btn-save-update').onclick = () => {
+            c.updatedSaved = true;
+            c.stage = 'pc_updated';
+            window.BS.Audio.confirm();
+            window.BS.UI.showToast('✅ 清單更新儲存完成！請找 2F 辦公區的盤點同事小晴核對。', false, 4800);
+            closeAllModals();
+            if (callbacks && callbacks.onUpdate) callbacks.onUpdate();
+          };
+        }
+        return;
+      }
+
+      // Stage 3: Saved & Updated List View
+      body.innerHTML = `
+        <div class="inline-ok-box" style="margin-bottom:10px;">
+          ✅ <strong>晴空計畫研發成果清單（最新版本 — 已儲存）</strong><br>
+          已完成專利公開狀態更新，同一筆記錄完整留痕，無重複登記。
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div class="lookup-step-card ok">
+            <div class="access-card-top">
+              <strong>1. 晴空計畫｜量測裝置申請資料</strong>
+              <span class="status-badge ok">✅ 已公開（裝置結構原理）</span>
+            </div>
+            <div class="rec-field-row"><span class="rec-field-label">資料名稱或範圍</span><span class="rec-field-val">晴空計畫｜量測裝置申請資料</span></div>
+            <div class="rec-field-row"><span class="rec-field-label">資料類型</span><span class="rec-field-val">專利申請相關資料</span></div>
+            <div class="rec-field-row"><span class="rec-field-label">保護原因</span><span class="rec-field-val">已公開專利文件所載內容已公開；申請文件留存備查</span></div>
+            <div class="rec-field-row"><span class="rec-field-label">存放位置</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/01_PatentDrafts/</code></span></div>
+            <div class="rec-field-row"><span class="rec-field-label">負責人</span><span class="rec-field-val">阿文（專案窗口）</span></div>
+            <div style="font-size:11.5px; color:#15803d; margin-top:4px;">更新日期：今日（2026-11-22）｜範圍：僅限裝置結構與原理</div>
+          </div>
+
+          <div class="lookup-step-card ok">
+            <div class="access-card-top">
+              <strong>2. 晴空計畫｜量測裝置調校紀錄</strong>
+              <span class="status-badge ok">🔒 未公開自研 know-how</span>
+            </div>
+            <div class="rec-field-row"><span class="rec-field-label">資料名稱或範圍</span><span class="rec-field-val">晴空計畫｜量測裝置調校紀錄</span></div>
+            <div class="rec-field-row"><span class="rec-field-label">資料類型</span><span class="rec-field-val">自研 know-how</span></div>
+            <div class="rec-field-row"><span class="rec-field-label">保護原因</span><span class="rec-field-val">調校方法尚未公開，且未納入該專利申請</span></div>
+            <div class="rec-field-row"><span class="rec-field-label">存放位置</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/03_DeviceTuning/</code></span></div>
+            <div class="rec-field-row"><span class="rec-field-label">負責人</span><span class="rec-field-val">阿文</span></div>
+            <div style="font-size:11.5px; color:#2563eb; margin-top:4px;">狀態：未納入申請，繼續按原範圍受控保護</div>
+          </div>
+
+          <div class="lookup-step-card ok">
+            <div class="access-card-top">
+              <strong>3. 晴空計畫｜量測條件優化紀錄</strong>
+              <span class="status-badge ok">🔒 未公開自研 know-how</span>
+            </div>
+            <div class="rec-field-row"><span class="rec-field-label">資料名稱或範圍</span><span class="rec-field-val">晴空計畫｜量測條件優化紀錄</span></div>
+            <div class="rec-field-row"><span class="rec-field-label">資料類型</span><span class="rec-field-val">自研 know-how</span></div>
+            <div class="rec-field-row"><span class="rec-field-label">保護原因</span><span class="rec-field-val">自研方法尚未公開（量測穩定度提升參數）</span></div>
+            <div class="rec-field-row"><span class="rec-field-label">存放位置</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/02_ConditionOpt/</code></span></div>
+            <div class="rec-field-row"><span class="rec-field-label">負責人</span><span class="rec-field-val">阿文</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <button class="pixel-btn primary" id="btn-close-checklist" type="button" style="width:100%; font-weight:700; padding:8px 0;">
+            關閉視窗，找 2F 辦公區小晴核對清單 ▶
+          </button>
+        </div>
+      `;
+
+      $('btn-close-checklist').onclick = () => {
+        window.BS.Audio.select();
+        closeAllModals();
+      };
     }
 
     render();
   }
 
-  // ===== Chapter 3 (Internal 4): Next-Day Qing Lookup Simulation Modal =====
-  function openLookupModal(state, callbacks) {
-    activeModal = 'lookup';
-    $('lookup-modal').classList.remove('hidden');
-    state.ch4.ranLookupOnce = true;
-
-    const lookup = window.BS.State.evaluateCh4Lookup(state);
-    const body = $('lookup-body');
-
-    let summaryBanner = '';
-    if (lookup.allOk) {
-      summaryBanner = `
-        <div class="inline-ok-box">
-          <strong>✅ 隔天 09:30 小晴盤點結果：四個步驟全數順暢通過！</strong><br>
-          小晴從盤點清冊一路找到實驗紀錄、原始量測檔，也清楚驗證了樣品編號的系統原生更正歷程！
-        </div>
-      `;
-    } else if (lookup.dangerCount === 0 && state.ch4.record.correctionMode === 'overwritten_retro' && lookup.warnCount === 1) {
-      summaryBanner = `
-        <div class="inline-warning-box">
-          <strong>🟡 隔天 09:30 小晴盤點結果：檔案與清冊皆已找到，但更正紀錄為「事後補記」</strong><br>
-          清冊、紀錄與原始檔均正常開啟；樣品編號變更已透過事後補記說明脈絡（系統如實區分其非原生留痕）。
-        </div>
-      `;
-    } else {
-      summaryBanner = `
-        <div class="inline-warning-box" style="background:#fff1f0; border-color:#d95d4c; color:#8a1c1c;">
-          <strong>⚠ 隔天 09:30 小晴盤點遇到斷點！（異常 ${lookup.dangerCount} 項｜提醒 ${lookup.warnCount} 項）</strong><br>
-          你可以先「返回樓層修正」補齊缺口再來重測，或以目前結果直接完成本章交班查看檢討。
-        </div>
-      `;
-    }
-
-    body.innerHTML = `
-      <div style="font-size:12.5px; color:#475569; margin-bottom:8px;">
-        <strong>模擬情境：</strong>隔天早上 09:30，同事<strong>小晴</strong>在沒有你口頭解說的情況下，只靠你昨天整理好的盤點清冊與系統紀錄逐項盤點這批資料：
-      </div>
-      ${summaryBanner}
-      <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
-        ${lookup.steps
-          .map(
-            (st) => `
-          <div class="lookup-step-card ${st.cls}">
-            <div class="access-card-top">
-              <strong>${st.title}</strong>
-              <span class="status-badge ${st.cls}">${st.badge}</span>
-            </div>
-            <div style="font-size:12.5px; color:#2b3648;">${st.detail}</div>
-            ${st.fix ? `<div class="lookup-fix-tip">🔧 修正方向：${st.fix}</div>` : ''}
-          </div>
-        `
-          )
-          .join('')}
-      </div>
-      <div class="pc-actions" style="justify-content:space-between; margin-top:12px; gap:8px; flex-wrap:wrap;">
-        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-          <button class="pixel-btn" id="btn-lookup-fix" type="button">🔧 返回工作台修正</button>
-          ${!lookup.allOk ? '<button class="pixel-btn primary" id="btn-lookup-autofix" type="button" style="font-weight:700;">✨ 一鍵自動校正全部合規</button>' : ''}
-        </div>
-        <button class="pixel-btn ${lookup.allOk ? 'primary' : 'warn'}" id="btn-lookup-handover" type="button">✍ 以目前結果完成本章交班</button>
-      </div>
-    `;
-
-    if ($('btn-lookup-autofix')) {
-      $('btn-lookup-autofix').onclick = () => {
-        const c = state.ch4;
-        const rec = c.record;
-        const inv = c.inventory;
-        c.rawFileLocation = 'team';
-        c.clues.awenInfo = true;
-        c.clues.instrumentFile = true;
-        rec.rawFileLink = 'team';
-        rec.date = '2026-11-22';
-        rec.summary = '晴空計畫薄膜樣品 S08 室溫阻抗與穩定度基準量測';
-        rec.recorder = '阿文';
-        rec.correctionMode = 'tracked_append';
-        rec.sampleIdCurrent = 'CS-2026-S08';
-        rec.correctionReason = '核對儀器原始檔名與樣品盤標籤，確認筆誤 S03 應為 S08';
-        rec.correctionTime = window.BS.State.formatClock(state.timeMinutes);
-        rec.correctionBy = '小安（與阿文確認）';
-        inv.nameScope = 'batch_clean';
-        inv.dataType = '電子實驗紀錄＋儀器原始量測檔（CSV）';
-        inv.protectReason = '未公開量測成果／專利評估';
-        inv.location = 'team_folder';
-        inv.owner = '阿文';
-        window.BS.Audio.success();
-        openLookupModal(state, callbacks);
-      };
-    }
-
-    $('btn-lookup-fix').onclick = () => {
-      window.BS.Audio.select();
-      closeAllModals();
-      if (callbacks.onFix) callbacks.onFix();
-    };
-    $('btn-lookup-handover').onclick = () => {
-      window.BS.Audio.confirm();
-      closeAllModals();
-      if (callbacks.onHandover) callbacks.onHandover();
-    };
-  }
+  const openRecordModal = openChecklistModal;
+  const openLookupModal = openDataCardsModal;
 
   // ===== Field Notes / Clues Modal =====
   function openCluesModal(state) {
@@ -2632,31 +2349,24 @@
 
     if (state.chapter === 4) {
       const c = state.ch4;
-      const lookup = window.BS.State.evaluateCh4Lookup(state);
-      $('clues-title').textContent = '📋 第三章筆記 — 今天的紀錄，明天找得到（SELECT）';
+      $('clues-title').textContent = '📋 第三章筆記 — 這批資料要列入清單嗎？（SELECT）';
       $('clues-body').innerHTML = `
         <div class="section-card">
-          <h3>🏢 雙樓層資料整理路線圖</h3>
+          <h3>🏢 兩層樓動線與任務指引</h3>
           <ul style="margin:6px 0 0; padding-left:18px;">
-            <li><strong>2F 實驗區</strong>：阿文（確認日期、樣品編號 S03→S08、摘要與記錄人）、儀器電腦（找到原始量測檔 <code>${c.rawFileName}</code>）、實驗紀錄桌（開啟當日紀錄卡與更正比較）。</li>
-            <li><strong>2F 辦公區</strong>：值班電腦（整理原始檔存放位置與整批資料盤點清冊）、值班桌（模擬隔天盤點與完成交班）。</li>
-            <li><strong>1F 大門大廳</strong>：小晴（確認明天盤點從清冊怎麼查，亦可直接預覽隔天查找）、阿明組長（卡住時的欄位／歸檔／更正提示）、1F 大門櫃台（清冊填寫範例卡）。</li>
+            <li><strong>1F 實驗區</strong>：找同事阿文辨識三組資料卡（公開方法重現、量測條件優化、已申請專利之裝置）。</li>
+            <li><strong>2F 辦公區</strong>：到值班電腦確認研發成果清單（五欄位落實與群組管理），收到阿明組長專利公開通知後及時更新清單。</li>
+            <li><strong>2F 辦公區</strong>：找小晴核對清單並完成第三章交班。</li>
           </ul>
         </div>
 
         <div class="section-card">
-          <h3>🔍 調查線索與整理進度</h3>
+          <h3>🔍 目前進度狀態</h3>
           <ul style="margin:6px 0 0; padding-left:18px;">
-            <li>${c.clues.awenInfo ? '✅' : '⬜'} <strong>2F 阿文資訊</strong>：${c.clues.awenInfo ? '已取得日期（2026-11-22）、S03→S08 更正原因、摘要與記錄人。' : '尚未找 2F 實驗區阿文確認當日欄位。'}</li>
-            <li>${c.clues.instrumentFile ? '✅' : '⬜'} <strong>2F 儀器電腦原始檔</strong>：${c.clues.instrumentFile ? `已找到 <code>${c.rawFileName}</code>（目前存放於：${c.rawFileLocation === 'team' ? '團隊指定資料夾' : c.rawFileLocation === 'personal' ? '個人工作區' : '儀器本機'}）。` : '尚未調查 2F 實驗區儀器電腦。'}</li>
-            <li>${c.clues.qingChecklistReq ? '✅' : '⬜'} <strong>1F 小晴盤點需求</strong>：${c.clues.qingChecklistReq ? '已確認明天小晴會從盤點清冊開始找資料、紀錄與更正脈絡。' : '可下樓找 1F 大廳小晴了解盤點查找順序。'}</li>
-          </ul>
-        </div>
-
-        <div class="section-card">
-          <h3>🧪 模擬隔天查找即時狀態</h3>
-          <ul style="margin:6px 0 0; padding-left:18px;">
-            ${lookup.steps.map((st) => `<li><strong>${st.badge}</strong> — ${st.title}</li>`).join('')}
+            <li>${c.cardsCompleted ? '✅' : '⬜'} <strong>1F 資料卡辨識</strong>：${c.cardsCompleted ? '三組資料卡已辨識完成！' : '尚未找 1F 實驗區阿文辨識三組資料卡。'}</li>
+            <li>${c.draftSaved ? '✅' : '⬜'} <strong>2F 清單草稿儲存</strong>：${c.draftSaved ? '已在值班電腦確認五欄位清單草稿。' : '尚未在 2F 值班電腦儲存清單草稿。'}</li>
+            <li>${c.updatedSaved ? '✅' : '⬜'} <strong>2F 專利公開更新</strong>：${c.updatedSaved ? '已精準更新量測裝置公開狀態，並保留未公開 know-how。' : '尚未更新專利公開狀態。'}</li>
+            <li>${c.verifiedWithQing ? '✅' : '⬜'} <strong>2F 小晴核對</strong>：${c.verifiedWithQing ? '已與小晴核對完成，可隨時交班！' : '尚未找 2F 辦公區小晴核對清單。'}</li>
           </ul>
         </div>
       `;
@@ -3250,6 +2960,8 @@
     openPosterModal,
     openOffboardModal,
     openRecordModal,
+    openDataCardsModal,
+    openChecklistModal,
     openLookupModal,
     openCameraModal,
     openCluesModal,

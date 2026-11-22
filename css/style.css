@@ -138,15 +138,15 @@ html, body {
 
 .screen-bezel {
   position: relative;
-  width: 100%;
+  width: auto;
   height: 100%;
-  max-width: 960px;
+  max-width: 100%;
   max-height: 640px;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 256 / 320;
   background: #0a1420;
-  border: 4px solid var(--bezel-border);
-  border-radius: 14px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), inset 0 0 0 3px #18202e;
+  border: 3px solid var(--bezel-border);
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), inset 0 0 0 2px #18202e;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -156,8 +156,8 @@ html, body {
 #game-canvas {
   max-width: 100%;
   max-height: 100%;
-  aspect-ratio: 3 / 2;
-  width: auto;
+  aspect-ratio: 256 / 320;
+  width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
@@ -1149,14 +1149,19 @@ html, body {
 /* ===== Authentic GBA Handheld Control Deck ===== */
 .controls-bar.gba-deck {
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
   background: linear-gradient(180deg, #212a3b 0%, #151b26 100%);
   border: 2px solid var(--bezel-border);
   border-radius: 14px;
-  padding: 8px 16px;
+  padding: 6px 14px 8px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .gba-controls-row {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1853,37 +1858,70 @@ html, body {
 
 @media (max-width: 720px) {
   .app-shell {
-    padding: 4px 6px;
-    gap: 5px;
+    padding: 3px 5px;
+    gap: 4px;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+  .stage-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .screen-bezel {
+    border-width: 2px;
+    border-radius: 8px;
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
   }
   .controls-bar.gba-deck {
-    padding: 6px 8px;
+    flex-shrink: 0;
+    padding: 3px 6px 5px;
+    gap: 3px;
+    background: rgba(15, 23, 36, 0.95);
   }
   .gba-controls-row {
-    gap: 6px;
+    gap: 4px;
   }
   .desktop-key-hint,
   .micro-pill.hint {
     display: none;
   }
+  .gba-center-col {
+    gap: 4px;
+    padding-top: 1px;
+  }
   .nearby-strip {
-    font-size: 11px;
-    padding: 2px 8px;
+    font-size: 10.5px;
+    padding: 2px 10px;
+    max-width: 96%;
+    margin-bottom: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
   }
   .gba-mid-btns {
     gap: 12px;
   }
   .gba-pill-btn {
-    width: 40px;
-    height: 14px;
+    width: 42px;
+    height: 15px;
   }
   .gba-pill-label small {
     display: none;
   }
   .dialogue-box {
-    left: 6px;
-    right: 6px;
-    bottom: 6px;
+    left: 4px;
+    right: 4px;
+    bottom: 4px;
     padding: 8px 10px;
   }
   .dialogue-portrait-wrap {
@@ -1895,23 +1933,23 @@ html, body {
     height: 36px;
   }
   .title-content {
-    padding: 8px 10px;
+    padding: 8px 8px;
   }
   .title-menu-box {
-    padding: 7px 8px 6px;
+    padding: 6px 7px 5px;
   }
   .cursor-menu-item {
     padding: 6px 8px;
   }
   .cursor-menu-item .menu-main {
-    font-size: 13.5px;
+    font-size: 13px;
   }
   .cursor-menu-item .menu-difficulty {
     gap: 4px;
   }
   .cursor-menu-item .diff-tag {
-    font-size: 9.5px;
-    padding: 0px 4px;
+    font-size: 9px;
+    padding: 0px 3px;
   }
   .cursor-menu-item .diff-stars {
     font-size: 12px;
@@ -1920,19 +1958,65 @@ html, body {
   .modal-body {
     padding: 10px 11px;
     font-size: 13px;
+    overscroll-behavior: contain;
   }
   .dpad {
-    grid-template-columns: repeat(3, clamp(40px, 11.5vw, 47px));
-    grid-template-rows: repeat(3, clamp(40px, 11.5vw, 47px));
+    grid-template-columns: repeat(3, clamp(42px, 12.5vw, 52px));
+    grid-template-rows: repeat(3, clamp(42px, 12.5vw, 52px));
     gap: 3px;
   }
   .dpad-btn {
-    font-size: 18px;
+    font-size: 20px;
     border-radius: 9px;
   }
   .ab-btn {
-    width: 50px;
-    height: 50px;
-    font-size: 16px;
+    width: 54px;
+    height: 54px;
+    font-size: 17px;
   }
+}
+
+/* Landscape lock overlay for phones */
+.landscape-lock-overlay {
+  display: none;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .landscape-lock-overlay {
+    display: flex !important;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: #09121d;
+    color: #edf2f7;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+  .landscape-lock-icon {
+    font-size: 44px;
+    margin-bottom: 12px;
+    animation: rotatePhone 2.2s infinite ease-in-out;
+  }
+  .landscape-lock-text {
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #6ee7b7;
+    margin-bottom: 8px;
+  }
+  .landscape-lock-sub {
+    font-size: 13px;
+    color: #94a3b8;
+    max-width: 320px;
+    line-height: 1.5;
+  }
+}
+
+@keyframes rotatePhone {
+  0%, 15% { transform: rotate(0deg); }
+  45%, 70% { transform: rotate(-90deg); }
+  100% { transform: rotate(0deg); }
 }
