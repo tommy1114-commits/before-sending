@@ -7,20 +7,29 @@
   let currentChapter = 1;
   let state = window.BS.State.createStateForChapter(1);
   let npcs = window.BS.Map.createNPCsForChapter(1);
+  let handoverToastShown = false;
 
   const player = {
-    x: 3,
-    y: 9,
-    px: 3 * TILE,
-    py: 9 * TILE,
+    floor: 2,
+    x: 5,
+    y: 5,
+    px: 5 * TILE,
+    py: 5 * TILE,
     dir: 'up',
     moving: false,
-    fromX: 3,
-    fromY: 9,
-    toX: 3,
-    toY: 9,
+    fromX: 5,
+    fromY: 5,
+    toX: 5,
+    toY: 5,
     moveProgress: 0,
     walkToggle: 0
+  };
+
+  const fade = {
+    active: false,
+    alpha: 0,
+    phase: 'in',
+    pending: null
   };
 
   const heldDirs = [];
@@ -32,7 +41,12 @@
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
 
-  function resetPlayer(spawnX, spawnY, dir) {
+  function isTitleVisible() {
+    return !$('title-screen').classList.contains('hidden');
+  }
+
+  function resetPlayer(floor, spawnX, spawnY, dir) {
+    player.floor = floor;
     player.x = spawnX;
     player.y = spawnY;
     player.px = spawnX * TILE;
@@ -43,10 +57,23 @@
     heldDirs.length = 0;
   }
 
-  function moveNpcTo(npcId, tx, ty, dir) {
+  function transitionToFloor(targetFloor, spawnX, spawnY, spawnDir, onDone) {
+    if (fade.active) return;
+    const goingUp = targetFloor > player.floor;
+    window.BS.Audio.stairs(goingUp);
+    heldDirs.length = 0;
+    player.moving = false;
+    fade.active = true;
+    fade.alpha = 0;
+    fade.phase = 'out';
+    fade.pending = { floor: targetFloor, x: spawnX, y: spawnY, dir: spawnDir || 'down', onDone: onDone || null };
+  }
+
+  function moveNpcTo(npcId, floor, tx, ty, dir) {
     const npc = npcs.find((n) => n.id === npcId);
     if (!npc) return;
-    if (player.x === tx && player.y === ty) {
+    npc.floor = floor;
+    if (player.floor === floor && player.x === tx && player.y === ty) {
       npc.x = tx + 1;
       npc.y = ty;
     } else {
@@ -57,110 +84,80 @@
   }
 
   function advanceTime(mins) {
-    const maxTime = currentChapter === 2 ? 18 * 60 + 55 : 16 * 60 + 5;
+    const maxTime = currentChapter === 3 ? 17 * 60 + 55 : currentChapter === 2 ? 18 * 60 + 55 : 16 * 60 + 5;
     state.timeMinutes = Math.min(maxTime, state.timeMinutes + mins);
   }
 
   function refreshHUD() {
-    $('hud-chapter-badge').textContent = currentChapter === 2 ? 'Ch2 投稿前一晚' : 'Ch1 寄出之前';
-    $('hud-clock').textContent = `🕒 ${window.BS.State.formatClock(state.timeMinutes)}`;
-    $('hud-zone').textContent = window.BS.Map.getZoneName(player.x, player.y);
+    const microHud = $('micro-hud');
+    if (isTitleVisible()) {
+      microHud.classList.add('hidden');
+      return;
+    }
+    microHud.classList.remove('hidden');
 
-    const pill1 = $('pill-task1');
-    const pill2 = $('pill-task2');
-    pill1.className = 'task-pill';
-    pill2.className = 'task-pill';
+    $('micro-chapter').textContent =
+      currentChapter === 3
+        ? 'Ch3 阿文的最後一天'
+        : currentChapter === 2
+        ? 'Ch2 投稿前一晚'
+        : 'Ch1 寄出之前';
+    $('micro-clock').textContent = `🕒 ${window.BS.State.formatClock(state.timeMinutes)}`;
+    $('micro-zone').textContent = window.BS.Map.getZoneName(player.floor, player.x, player.y);
 
-    if (currentChapter === 2) {
-      const c = state.ch2;
-      const wv = window.BS.State.getWorkingVersion(state);
+    const statusPill = $('micro-status');
+    statusPill.className = 'micro-pill task hidden';
 
-      if (c.pendingReviewVersionId) {
-        pill1.classList.add('warn');
-        pill1.textContent = '🎨 海報：待阿明組長確認';
-      } else if (wv.status === 'approved') {
-        pill1.classList.add('done');
-        pill1.textContent = `🎨 海報：${wv.id} 已核准`;
-      } else if (wv.status === 'needs_reapproval') {
-        pill1.classList.add('warn');
-        pill1.textContent = `🎨 海報：${wv.id} 待重新確認`;
-      } else if (c.openedPoster) {
-        pill1.textContent = `🎨 海報：檢視中 (${wv.id})`;
-      } else {
-        pill1.textContent = '🎨 海報：看電腦草稿';
-      }
+    const urgentAlert =
+      (currentChapter === 1 && state.email.misshared && (!state.email.linkRevoked || !state.email.reportedToLead)) ||
+      (currentChapter === 2 && state.ch2.misuploaded && (!state.ch2.contactedOrganizer || !state.ch2.reportedToLead)) ||
+      (currentChapter === 3 && state.ch3.interruptedByEarlyRevoke && state.ch3.rawLogLocation !== 'project');
 
-      if (c.outcome === 'submitted_approved') {
-        pill2.classList.add('done');
-        pill2.textContent = '📤 投稿：核准版已提交';
-      } else if (c.outcome === 'deferred') {
-        pill2.classList.add('warn');
-        pill2.textContent = '📤 投稿：已暫緩（可交班）';
-      } else if (c.outcome === 'misuploaded') {
-        if (c.contactedOrganizer && c.reportedToLead) {
-          pill2.classList.add('warn');
-          pill2.textContent = '📤 投稿：已撤換請求（待確認）';
-        } else {
-          pill2.classList.add('alert');
-          pill2.textContent = !c.contactedOrganizer ? '🚨 誤傳：請回電腦聯絡主辦方' : '🚨 誤傳：請找阿明組長回報';
-        }
-      } else {
-        pill2.textContent = '📤 投稿：待決定';
-      }
-    } else {
-      // Chapter 1 pills
-      if (state.email.misshared && (!state.email.linkRevoked || !state.email.reportedToLead)) {
-        pill1.classList.add('alert');
-        pill1.textContent = !state.email.linkRevoked ? '🚨 誤分享：請立即停權' : '🚨 誤分享：請找阿明組長通報';
-      } else if (state.email.status === 'sent_safe') {
-        pill1.classList.add('done');
-        pill1.textContent = '✉ 來信：已安全寄出';
-      } else if (state.email.status === 'misshared_remediated') {
-        pill1.classList.add('warn');
-        pill1.textContent = '✉ 來信：已停權並通報';
-      } else if (state.email.status === 'sent_unverified') {
-        pill1.classList.add('warn');
-        pill1.textContent = '✉ 來信：已寄出(未核NDA)';
-      } else if (state.email.status === 'holding') {
-        pill1.classList.add('warn');
-        pill1.textContent = '✉ 來信：已回覆確認中';
-      } else {
-        pill1.textContent = '✉ 來信：待處理';
-      }
+    const readyToastNow =
+      currentChapter === 3
+        ? window.BS.State.isCh3FullyComplete(state) && !state.handoverDone
+        : window.BS.State.canHandover(state) && !state.handoverDone;
 
-      if (state.visitor.status === 'done_entrance' || state.visitor.status === 'done_lab_clean') {
-        pill2.classList.add('done');
-        pill2.textContent = '📷 訪客：安全完成';
-      } else if (state.visitor.status === 'done_lab_leaked') {
-        pill2.classList.add('alert');
-        pill2.textContent = '📷 訪客：敏感資訊入鏡';
-      } else if (state.visitor.status === 'in_lab') {
-        pill2.classList.add('warn');
-        pill2.textContent = '📷 訪客：實驗區等候中';
-      } else {
-        pill2.textContent = '📷 訪客：入口等候';
+    if (urgentAlert) {
+      statusPill.classList.remove('hidden');
+      statusPill.classList.add('alert');
+      statusPill.textContent =
+        currentChapter === 1
+          ? !state.email.linkRevoked
+            ? '🚨 回 2F 電腦停權！'
+            : '🚨 找 2F 阿明組長通報！'
+          : currentChapter === 2
+          ? !state.ch2.contactedOrganizer
+            ? '🚨 回 2F 電腦聯絡主辦方！'
+            : '🚨 找 2F 阿明組長回報！'
+          : '🚨 下樓找 1F 阿明組長補救移交！';
+    } else if (readyToastNow) {
+      statusPill.classList.remove('hidden');
+      statusPill.textContent = '✨ 任務完成！回 2F 值班桌交班';
+      if (!handoverToastShown) {
+        handoverToastShown = true;
+        window.BS.UI.showToast('🎉 任務已處理完成！請回到 2F 辦公區值班桌（綠勾 ✓）完成交班與通關！', false, 5200);
       }
     }
-
-    const unlocked = window.BS.State.loadUnlockedEndings();
-    const total = window.BS.State.ENDINGS_CATALOG.length;
-    $('title-ending-count').textContent = `${unlocked.length}/${total}`;
   }
 
   function startChapter(chapter) {
-    currentChapter = chapter === 2 ? 2 : 1;
+    currentChapter = chapter === 3 ? 3 : chapter === 2 ? 2 : 1;
+    handoverToastShown = false;
     window.BS.UI.closeAllModals();
     window.BS.UI.closeDialogue();
     $('title-screen').classList.add('hidden');
+    fade.active = false;
+    fade.alpha = 0;
 
     state = window.BS.State.createStateForChapter(currentChapter);
     state.started = true;
     npcs = window.BS.Map.createNPCsForChapter(currentChapter);
 
-    if (currentChapter === 2) {
-      resetPlayer(7, 6, 'right'); // Facing 阿文 at office doorway (9,6) for opening scene
+    if (currentChapter === 2 || currentChapter === 3) {
+      resetPlayer(2, 7, 5, 'right');
     } else {
-      resetPlayer(3, 9, 'up'); // Standing by Duty Desk in Office
+      resetPlayer(2, 5, 5, 'up');
     }
 
     refreshHUD();
@@ -175,19 +172,101 @@
     window.BS.UI.closeAllModals();
     window.BS.UI.closeDialogue();
     heldDirs.length = 0;
+    fade.active = false;
+    fade.alpha = 0;
     state.started = false;
     $('title-screen').classList.remove('hidden');
+    window.BS.UI.setTitleCursor(currentChapter - 1);
     refreshHUD();
+  }
+
+  function togglePauseMenu() {
+    if (fade.active) return;
+    const modal = window.BS.UI.getActiveModal();
+
+    // On Title Screen, pressing START confirms the selected menu item (classic GBA!)
+    if (isTitleVisible()) {
+      if (modal) {
+        window.BS.Audio.cancel();
+        window.BS.UI.closeAllModals();
+      } else {
+        window.BS.UI.confirmTitleCursor();
+      }
+      return;
+    }
+
+    if (modal === 'pause') {
+      window.BS.Audio.cancel();
+      window.BS.UI.closeAllModals();
+      return;
+    }
+
+    if (modal === 'clear' || modal === 'handover') {
+      return;
+    }
+
+    if (modal) {
+      window.BS.Audio.cancel();
+      window.BS.UI.closeAllModals();
+      return;
+    }
+
+    if (window.BS.UI.isOverlayOpen()) return; // don't interrupt active dialogue
+
+    heldDirs.length = 0;
+    window.BS.Audio.select();
+    const zoneName = window.BS.Map.getZoneName(player.floor, player.x, player.y);
+    window.BS.UI.openPauseModal(state, zoneName, {
+      onRestart: () => restartChapter(),
+      onReturnMenu: () => returnToMenu()
+    });
+  }
+
+  function toggleSelectNotes() {
+    if (fade.active) return;
+    const modal = window.BS.UI.getActiveModal();
+
+    if (isTitleVisible()) {
+      if (modal === 'endings') {
+        window.BS.Audio.cancel();
+        window.BS.UI.closeAllModals();
+      } else if (!modal) {
+        window.BS.UI.moveTitleCursor(1);
+      }
+      return;
+    }
+
+    if (modal === 'clues') {
+      window.BS.Audio.cancel();
+      window.BS.UI.closeAllModals();
+      return;
+    }
+
+    if (modal === 'pause') {
+      window.BS.Audio.select();
+      window.BS.UI.closeAllModals();
+      window.BS.UI.openCluesModal(state);
+      return;
+    }
+
+    if (window.BS.UI.isOverlayOpen()) return;
+
+    heldDirs.length = 0;
+    window.BS.Audio.select();
+    window.BS.UI.openCluesModal(state);
   }
 
   story = window.BS.Story.createStoryController({
     getState: () => state,
     getNPCs: () => npcs,
+    getFloor: () => player.floor,
     advanceTime,
     refreshHUD,
+    startChapter,
     restartChapter,
     returnToMenu,
-    moveNpcTo
+    moveNpcTo,
+    transitionToFloor
   });
 
   // ===== Input Handling =====
@@ -210,14 +289,25 @@
     return null;
   }
 
-  function triggerInteract() {
+  function triggerA() {
+    if (fade.active) return;
+    const modal = window.BS.UI.getActiveModal();
+
+    if (isTitleVisible() && !modal) {
+      window.BS.UI.confirmTitleCursor();
+      return;
+    }
+    if (modal === 'pause') {
+      window.BS.UI.confirmPauseCursor();
+      return;
+    }
     if (window.BS.UI.isOverlayOpen()) {
       window.BS.UI.advanceDialogue();
       return;
     }
     if (nearbyTarget) {
       if (nearbyTarget.type === 'npc') {
-        const npc = npcs.find((n) => n.id === nearbyTarget.id);
+        const npc = npcs.find((n) => n.id === nearbyTarget.id && n.floor === player.floor);
         if (npc) {
           const dx = player.x - npc.x;
           const dy = player.y - npc.y;
@@ -234,13 +324,74 @@
     }
   }
 
+  function triggerB() {
+    if (fade.active) return;
+    const modal = window.BS.UI.getActiveModal();
+    if (modal === 'handover') {
+      $('btn-handover-close').click();
+      return;
+    }
+    if (modal && modal !== 'clear') {
+      window.BS.Audio.cancel();
+      window.BS.UI.closeAllModals();
+    }
+  }
+
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      const m = window.BS.UI.getActiveModal();
-      if (m && m !== 'handover') {
-        window.BS.Audio.cancel();
-        window.BS.UI.closeAllModals();
+    if (fade.active) return;
+
+    // GBA START (Esc / P)
+    if (e.key === 'Escape' || e.key === 'p' || e.key === 'P') {
+      e.preventDefault();
+      togglePauseMenu();
+      return;
+    }
+
+    // GBA SELECT (Tab)
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      toggleSelectNotes();
+      return;
+    }
+
+    const modal = window.BS.UI.getActiveModal();
+
+    // Title Screen Cursor Navigation
+    if (isTitleVisible() && !modal) {
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
         e.preventDefault();
+        window.BS.UI.moveTitleCursor(-1);
+        return;
+      }
+      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        window.BS.UI.moveTitleCursor(1);
+        return;
+      }
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        window.BS.UI.confirmTitleCursor();
+        return;
+      }
+      return;
+    }
+
+    // Pause Menu Cursor Navigation
+    if (modal === 'pause') {
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+        e.preventDefault();
+        window.BS.UI.movePauseCursor(-1);
+        return;
+      }
+      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        window.BS.UI.movePauseCursor(1);
+        return;
+      }
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        window.BS.UI.confirmPauseCursor();
+        return;
       }
       return;
     }
@@ -261,7 +412,7 @@
 
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
-      triggerInteract();
+      triggerA();
     }
   });
 
@@ -274,29 +425,23 @@
     heldDirs.length = 0;
   });
 
-  function setupTouchControls() {
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || window.innerWidth <= 760;
-    const padEl = $('touch-gamepad');
-    const toggleBtn = $('btn-pad-toggle');
-
-    function setPadVisible(vis) {
-      padEl.classList.toggle('hidden', !vis);
-      toggleBtn.classList.toggle('active', vis);
-    }
-
-    setPadVisible(isTouch);
-
-    toggleBtn.addEventListener('click', () => {
-      const nowVisible = padEl.classList.contains('hidden');
-      setPadVisible(nowVisible);
-      window.BS.Audio.select();
-    });
-
+  function setupGBAControls() {
     document.querySelectorAll('.dpad-btn').forEach((btn) => {
       const dir = btn.dataset.dir;
       const start = (ev) => {
         ev.preventDefault();
         btn.classList.add('pressed');
+        const modal = window.BS.UI.getActiveModal();
+        if (isTitleVisible() && !modal) {
+          if (dir === 'up') window.BS.UI.moveTitleCursor(-1);
+          if (dir === 'down') window.BS.UI.moveTitleCursor(1);
+          return;
+        }
+        if (modal === 'pause') {
+          if (dir === 'up') window.BS.UI.movePauseCursor(-1);
+          if (dir === 'down') window.BS.UI.movePauseCursor(1);
+          return;
+        }
         if (window.BS.UI.isOverlayOpen()) {
           if (dir === 'up') window.BS.UI.handleDialogueKey('ArrowUp');
           if (dir === 'down') window.BS.UI.handleDialogueKey('ArrowDown');
@@ -317,24 +462,34 @@
 
     $('touch-a').addEventListener('pointerdown', (ev) => {
       ev.preventDefault();
-      triggerInteract();
+      triggerA();
     });
 
     $('touch-b').addEventListener('pointerdown', (ev) => {
       ev.preventDefault();
-      const m = window.BS.UI.getActiveModal();
-      if (m && m !== 'handover') {
-        window.BS.Audio.cancel();
-        window.BS.UI.closeAllModals();
-      } else if (!window.BS.UI.isOverlayOpen()) {
-        window.BS.Audio.select();
-        window.BS.UI.openCluesModal(state);
-      }
+      triggerB();
+    });
+
+    $('btn-start-gba').addEventListener('click', () => {
+      togglePauseMenu();
+    });
+
+    $('btn-select-gba').addEventListener('click', () => {
+      toggleSelectNotes();
     });
   }
 
   function setupButtons() {
     window.BS.UI.bindStaticHandlers();
+
+    // Title Cursor Menu hover + click
+    document.querySelectorAll('#title-menu-list .cursor-menu-item').forEach((btn) => {
+      const idx = Number(btn.dataset.idx);
+      btn.addEventListener('mouseenter', () => {
+        window.BS.UI.setTitleCursor(idx);
+        window.BS.Audio.select();
+      });
+    });
 
     $('btn-start-ch1').addEventListener('click', () => {
       window.BS.Audio.confirm();
@@ -346,51 +501,14 @@
       startChapter(2);
     });
 
-    $('btn-title-endings').addEventListener('click', () => {
-      window.BS.Audio.select();
-      window.BS.UI.openEndingsModal();
-    });
-
-    $('btn-clues').addEventListener('click', () => {
-      if (!$('title-screen').classList.contains('hidden')) return;
-      window.BS.Audio.select();
-      if (window.BS.UI.getActiveModal() === 'clues') {
-        window.BS.UI.closeAllModals();
-      } else if (!window.BS.UI.isOverlayOpen()) {
-        window.BS.UI.openCluesModal(state);
-      }
-    });
-
-    $('btn-endings').addEventListener('click', () => {
-      window.BS.Audio.select();
-      if (window.BS.UI.getActiveModal() === 'endings') {
-        window.BS.UI.closeAllModals();
-      } else if (window.BS.UI.getActiveModal() !== 'handover') {
-        window.BS.UI.closeAllModals();
-        window.BS.UI.openEndingsModal();
-      }
-    });
-
-    $('btn-restart').addEventListener('click', () => {
-      if (!$('title-screen').classList.contains('hidden')) return;
+    $('btn-start-ch3').addEventListener('click', () => {
       window.BS.Audio.confirm();
-      restartChapter();
-    });
-
-    $('btn-menu').addEventListener('click', () => {
-      window.BS.Audio.cancel();
-      returnToMenu();
-    });
-
-    $('btn-sound').addEventListener('click', () => {
-      const muted = window.BS.Audio.toggleMute();
-      $('btn-sound').textContent = muted ? '🔇' : '🔊';
-      if (!muted) window.BS.Audio.select();
+      startChapter(3);
     });
 
     canvas.addEventListener('click', () => {
       if (!window.BS.UI.isOverlayOpen() && nearbyTarget) {
-        triggerInteract();
+        triggerA();
       }
     });
   }
@@ -398,10 +516,41 @@
   // ===== Update Loop =====
   const MOVE_SPEED = 0.135;
 
+  function updateFade() {
+    if (!fade.active) return;
+    if (fade.phase === 'out') {
+      fade.alpha += 0.14;
+      if (fade.alpha >= 1) {
+        fade.alpha = 1;
+        const p = fade.pending;
+        if (p) {
+          resetPlayer(p.floor, p.x, p.y, p.dir);
+          refreshHUD();
+        }
+        fade.phase = 'in';
+      }
+    } else {
+      fade.alpha -= 0.14;
+      if (fade.alpha <= 0) {
+        fade.alpha = 0;
+        fade.active = false;
+        const cb = fade.pending && fade.pending.onDone;
+        fade.pending = null;
+        if (cb) cb();
+      }
+    }
+  }
+
   function update() {
     tick++;
+    updateFade();
 
-    if (!window.BS.UI.isOverlayOpen()) {
+    if (isTitleVisible()) {
+      $('nearby-hint').textContent = '↑↓ 移動游標選擇章節 · 按 A / START / Enter 進入';
+      return;
+    }
+
+    if (!fade.active && !window.BS.UI.isOverlayOpen()) {
       if (player.moving) {
         player.moveProgress += MOVE_SPEED;
         if (player.moveProgress >= 1) {
@@ -411,7 +560,13 @@
           player.py = player.y * TILE;
           player.moving = false;
           player.moveProgress = 0;
-          $('hud-zone').textContent = window.BS.Map.getZoneName(player.x, player.y);
+          $('micro-zone').textContent = window.BS.Map.getZoneName(player.floor, player.x, player.y);
+
+          const trig = window.BS.Map.getFloorTrigger(player.floor, player.x, player.y);
+          if (trig) {
+            transitionToFloor(trig.toFloor, trig.spawnX, trig.spawnY, trig.spawnDir);
+            return;
+          }
         } else {
           player.px = (player.fromX + (player.toX - player.fromX) * player.moveProgress) * TILE;
           player.py = (player.fromY + (player.toY - player.fromY) * player.moveProgress) * TILE;
@@ -424,7 +579,7 @@
         const delta = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[dir];
         const nx = player.x + delta[0];
         const ny = player.y + delta[1];
-        if (!window.BS.Map.isSolid(nx, ny, npcs)) {
+        if (!window.BS.Map.isSolid(player.floor, nx, ny, npcs)) {
           player.fromX = player.x;
           player.fromY = player.y;
           player.toX = nx;
@@ -437,10 +592,10 @@
       }
     }
 
-    nearbyTarget = window.BS.Map.findNearbyTarget(player.x, player.y, player.dir, npcs);
+    nearbyTarget = window.BS.Map.findNearbyTarget(player.floor, player.x, player.y, player.dir, npcs);
     $('nearby-hint').textContent = nearbyTarget
-      ? `按空白鍵 / A 互動：${nearbyTarget.label}`
-      : '走近物件或同事查看提示';
+      ? `按 A / 空白鍵互動：${nearbyTarget.label}`
+      : '走近物件或同事查看提示 · START 選單 · SELECT 筆記';
   }
 
   // ===== Render Loop =====
@@ -463,12 +618,20 @@
   }
 
   function render() {
+    if (isTitleVisible()) {
+      window.BS.Sprites.drawTitleBackdrop($('title-bg-canvas'), tick);
+      return;
+    }
+
+    if (window.BS.UI.getActiveModal() === 'clear') {
+      window.BS.UI.renderClearFx(tick);
+    }
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    window.BS.Map.drawMap(ctx, state, player.floor, tick);
 
-    window.BS.Map.drawMap(ctx, state, tick);
-
-    // Depth-sorted characters
-    const drawables = npcs.map((n) => ({
+    const floorNpcs = npcs.filter((n) => n.floor === player.floor);
+    const drawables = floorNpcs.map((n) => ({
       sortY: n.y * TILE,
       draw: () => {
         const sp = window.BS.Sprites.getChar(n.sprite, n.dir, 0);
@@ -488,50 +651,127 @@
     drawables.sort((a, b) => a.sortY - b.sortY);
     drawables.forEach((d) => d.draw());
 
-    // Chapter-specific quest markers
     if (currentChapter === 1) {
-      if (state.email.misshared && !state.email.linkRevoked) {
-        drawQuestBubble(3, 2.5, '!', '#ef4444', '#ffffff');
-      } else if (state.email.misshared && state.email.linkRevoked && !state.email.reportedToLead) {
-        drawQuestBubble(7, 3.6, '!', '#ef4444', '#ffffff');
-      } else if (state.email.status === 'unread' || state.email.status === 'read' || state.email.status === 'holding') {
-        drawQuestBubble(3, 2.5, '!', '#f59e0b', '#1e293b');
-      }
+      const vNpc = npcs.find((n) => n.id === 'npc_visitor');
+      const emailUrgent = state.email.misshared && (!state.email.linkRevoked || !state.email.reportedToLead);
+      const emailPending = state.email.status === 'unread' || state.email.status === 'read' || state.email.status === 'holding';
+      const visitorWaiting1F = vNpc && vNpc.floor === 1 && state.visitor.status === 'waiting';
+      const handoverReady = window.BS.State.canHandover(state) && !state.handoverDone;
 
-      if (state.visitor.status === 'waiting' || state.visitor.status === 'in_lab') {
-        const vNpc = npcs.find((n) => n.id === 'npc_visitor');
-        if (vNpc) {
+      if (player.floor === 2) {
+        if (state.email.misshared && !state.email.linkRevoked) {
+          drawQuestBubble(3, 2.5, '!', '#ef4444', '#ffffff');
+        } else if (state.email.misshared && state.email.linkRevoked && !state.email.reportedToLead) {
+          drawQuestBubble(8, 11.6, '!', '#ef4444', '#ffffff');
+        } else if (emailPending) {
+          drawQuestBubble(3, 2.5, '!', '#f59e0b', '#1e293b');
+        }
+        if (vNpc && vNpc.floor === 2 && state.visitor.status === 'in_lab') {
           drawQuestBubble(vNpc.x, vNpc.y - 0.3, '!', '#38bdf8', '#0f172a');
         }
+        if (visitorWaiting1F) {
+          drawQuestBubble(3, 7.1, '▼', '#38bdf8', '#0f172a');
+        }
+        if (handoverReady) {
+          drawQuestBubble(7, 2.5, '✓', '#22c55e', '#ffffff');
+        }
+      } else {
+        if (visitorWaiting1F) {
+          drawQuestBubble(vNpc.x, vNpc.y - 0.3, '!', '#38bdf8', '#0f172a');
+        }
+        if (emailUrgent) {
+          drawQuestBubble(3, 7.1, '▲', '#ef4444', '#ffffff');
+        } else if (handoverReady) {
+          drawQuestBubble(3, 7.1, '▲', '#22c55e', '#ffffff');
+        } else if (emailPending || state.visitor.status === 'in_lab') {
+          drawQuestBubble(3, 7.1, '▲', '#f59e0b', '#1e293b');
+        }
+      }
+    } else if (currentChapter === 2) {
+      const c = state.ch2;
+      const handoverReady = window.BS.State.canHandover(state) && !state.handoverDone;
+      if (player.floor === 2) {
+        if (c.misuploaded && !c.contactedOrganizer) {
+          drawQuestBubble(3, 2.5, '!', '#ef4444', '#ffffff');
+        } else if (!c.openedPoster || (c.outcome === 'in_progress' && c.lastApprovedVersionId)) {
+          drawQuestBubble(3, 2.5, '!', '#f59e0b', '#1e293b');
+        }
+
+        if (c.misuploaded && !c.reportedToLead) {
+          drawQuestBubble(8, 11.6, '!', '#ef4444', '#ffffff');
+        } else if (c.pendingReviewVersionId) {
+          drawQuestBubble(8, 11.6, '!', '#22c55e', '#ffffff');
+        } else if (!c.clues.mingExplainedRules && c.outcome === 'in_progress') {
+          drawQuestBubble(8, 11.6, '?', '#38bdf8', '#0f172a');
+        }
+
+        if (!c.clues.wenExplainedFig2 && c.outcome === 'in_progress') {
+          const wen = npcs.find((n) => n.id === 'npc_colleague');
+          if (wen && wen.floor === 2) drawQuestBubble(wen.x, wen.y - 0.3, '?', '#38bdf8', '#0f172a');
+        }
+        if (handoverReady) {
+          drawQuestBubble(7, 2.5, '✓', '#22c55e', '#ffffff');
+        }
+      } else {
+        drawQuestBubble(3, 7.1, '▲', c.misuploaded ? '#ef4444' : '#f59e0b', c.misuploaded ? '#ffffff' : '#1e293b');
       }
     } else {
-      const c = state.ch2;
-      if (c.misuploaded && !c.contactedOrganizer) {
-        drawQuestBubble(3, 2.5, '!', '#ef4444', '#ffffff');
-      } else if (!c.openedPoster || (c.outcome === 'in_progress' && c.lastApprovedVersionId)) {
-        drawQuestBubble(3, 2.5, '!', '#f59e0b', '#1e293b');
-      }
+      // Chapter 3 cross-floor quest markers!
+      const c = state.ch3;
+      const allDone = window.BS.State.isCh3FullyComplete(state) && !state.handoverDone;
+      const need1F =
+        !c.clues.mingConfirmedScope ||
+        !c.badgeReturned ||
+        (c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project');
+      const need2F =
+        !c.openedChecklist ||
+        c.rawLogLocation !== 'project' ||
+        !c.qingConfirmedOpen ||
+        c.awenOrigAccess !== 'revoked' ||
+        !c.awenPaperGrant ||
+        !c.ndaRemindedToAwen ||
+        allDone;
 
-      if (c.misuploaded && !c.reportedToLead) {
-        drawQuestBubble(7, 3.6, '!', '#ef4444', '#ffffff');
-      } else if (c.pendingReviewVersionId) {
-        drawQuestBubble(7, 3.6, '!', '#22c55e', '#ffffff');
-      } else if (!c.clues.mingExplainedRules && c.outcome === 'in_progress') {
-        drawQuestBubble(7, 3.6, '?', '#38bdf8', '#0f172a');
-      }
-
-      if (!c.clues.wenExplainedFig2 && c.outcome === 'in_progress') {
+      if (player.floor === 2) {
+        if (!c.openedChecklist || (!c.qingHasProjectAccess && c.rawLogLocation === 'project') || (c.clues.mingConfirmedScope && (!c.awenPaperGrant || c.awenOrigAccess !== 'revoked'))) {
+          drawQuestBubble(3, 2.5, '!', '#f59e0b', '#1e293b');
+        }
         const wen = npcs.find((n) => n.id === 'npc_colleague');
-        if (wen) drawQuestBubble(wen.x, wen.y - 0.3, '?', '#38bdf8', '#0f172a');
+        if (wen && wen.floor === 2 && ((c.rawLogLocation !== 'project' && c.awenOrigAccess !== 'revoked') || !c.ndaRemindedToAwen)) {
+          drawQuestBubble(wen.x, wen.y - 0.3, '!', '#38bdf8', '#0f172a');
+        }
+        const qing = npcs.find((n) => n.id === 'npc_qing');
+        if (qing && qing.floor === 2 && !c.qingConfirmedOpen) {
+          drawQuestBubble(
+            qing.x,
+            qing.y - 0.3,
+            c.rawLogLocation === 'project' && c.qingHasProjectAccess ? '!' : '?',
+            c.rawLogLocation === 'project' && c.qingHasProjectAccess ? '#22c55e' : '#38bdf8',
+            c.rawLogLocation === 'project' && c.qingHasProjectAccess ? '#ffffff' : '#0f172a'
+          );
+        }
+        if (need1F) {
+          drawQuestBubble(3, 7.1, '▼', c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project' ? '#ef4444' : '#38bdf8', '#ffffff');
+        }
+        if (allDone) {
+          drawQuestBubble(7, 2.5, '✓', '#22c55e', '#ffffff');
+        }
+      } else {
+        // On 1F in Ch3
+        const lead = npcs.find((n) => n.id === 'npc_lead');
+        if (lead && lead.floor === 1 && (!c.clues.mingConfirmedScope || (c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project'))) {
+          drawQuestBubble(lead.x, lead.y - 0.3, '!', c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project' ? '#ef4444' : '#f59e0b', '#ffffff');
+        }
+        if (!c.badgeReturned) {
+          drawQuestBubble(6.5, 10.3, '!', '#38bdf8', '#0f172a');
+        }
+        if (need2F) {
+          drawQuestBubble(3, 7.1, '▲', allDone ? '#22c55e' : '#f59e0b', allDone ? '#ffffff' : '#1e293b');
+        }
       }
     }
 
-    if (window.BS.State.canHandover(state) && !state.handoverDone) {
-      drawQuestBubble(3, 7.5, '✓', '#22c55e', '#ffffff');
-    }
-
-    // Floating interaction tooltip
-    if (nearbyTarget && !window.BS.UI.isOverlayOpen()) {
+    if (nearbyTarget && !fade.active && !window.BS.UI.isOverlayOpen()) {
       const label = nearbyTarget.label;
       ctx.font = 'bold 8px sans-serif';
       const tw = ctx.measureText(label).width;
@@ -551,6 +791,11 @@
       ctx.fillStyle = '#ffffff';
       ctx.fillText(label, bx + 6, by + 9.5);
     }
+
+    if (fade.active || fade.alpha > 0) {
+      ctx.fillStyle = `rgba(15, 21, 32, ${Math.min(1, Math.max(0, fade.alpha))})`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
   }
 
   function loop() {
@@ -559,19 +804,22 @@
     requestAnimationFrame(loop);
   }
 
-  // Expose lightweight helper for debugging/verification without polluting global scope
   window.BS.App = {
     getState: () => state,
     getNPCs: () => npcs,
     getPlayer: () => player,
+    isTransitioning: () => fade.active,
     startChapter,
     restartChapter,
     returnToMenu,
-    triggerInteract
+    togglePauseMenu,
+    toggleSelectNotes,
+    transitionToFloor,
+    triggerA
   };
 
   setupButtons();
-  setupTouchControls();
+  setupGBAControls();
   refreshHUD();
   requestAnimationFrame(loop);
 })();

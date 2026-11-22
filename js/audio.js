@@ -73,6 +73,10 @@
       playTone(1100, 0.025, 'square', 0.05, 0);
       playTone(220, 0.06, 'sawtooth', 0.04, 0.03);
     },
+    stairs(goingUp = true) {
+      const notes = goingUp ? [330, 392, 494] : [494, 392, 330];
+      notes.forEach((n, i) => playTone(n, 0.06, 'triangle', 0.045, i * 0.06));
+    },
     fanfare() {
       const notes = [523.25, 659.25, 783.99, 1046.5];
       notes.forEach((n, i) => playTone(n, i === 3 ? 0.28 : 0.1, 'square', 0.05, i * 0.1));

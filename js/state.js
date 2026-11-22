@@ -138,8 +138,54 @@
     };
   }
 
+  const CH3_STORAGE_KEY = 'before_sending_ch3_endings_v1';
+
+  function createChapter3State() {
+    return {
+      chapter: 3,
+      started: false,
+      timeMinutes: 17 * 60, // 17:00
+      introShown: false,
+      ch3: {
+        openedChecklist: false,
+        clues: {
+          talkedToWen: false,          // 阿文 pointed out raw log in personal workspace
+          talkedToQing: false,         // 小晴 explained she needs CS_2026_RawLog_Full.csv
+          mingConfirmedScope: false,   // 阿明組長 confirmed 2 charts + 論文修訂 + 離開後 30 天 + 保密約定提醒
+          inspectedLabTerminal: false  // Inspected 2F 實驗紀錄電腦
+        },
+        rawLogName: 'CS_2026_RawLog_Full.csv',
+        rawLogOrigPath: '/Users/Awen/Personal_Workspace/CS_2026_RawLog_Full.csv',
+        rawLogTargetPath: '/Projects/ClearSky/01_RawData/CS_2026_RawLog_Full.csv',
+        rawLogLocation: 'personal',    // 'personal' | 'project'
+        transferredBy: null,           // 'awen' | 'admin'
+        interruptedByEarlyRevoke: false,
+        adminTransferCompleted: false,
+
+        qingHasProjectAccess: false,
+        qingConfirmedOpen: false,
+
+        awenOrigAccess: 'active',      // 'active' | 'kept_explicit' | 'revoked'
+        everKeptExplicit: false,
+        awenPaperGrant: false,
+        awenPaperDuration: '離開後 30 天',
+        awenPaperPurpose: '後續論文修訂（僅限會議用兩張圖：圖A、圖B）',
+
+        awenGaveBadge: false,
+        badgeReturned: false,
+        ndaRemindedToAwen: false,
+
+        checkedAwenView: false,
+        checkedQingView: false
+      },
+      handoverDone: false
+    };
+  }
+
   function createStateForChapter(chapter) {
-    return chapter === 2 ? createChapter2State() : createChapter1State();
+    if (chapter === 2) return createChapter2State();
+    if (chapter === 3) return createChapter3State();
+    return createChapter1State();
   }
 
   function createInitialState() {
@@ -332,6 +378,16 @@
     if (state.chapter === 2) {
       return state.ch2.outcome !== 'in_progress';
     }
+    if (state.chapter === 3) {
+      const c = state.ch3;
+      return (
+        c.openedChecklist ||
+        c.awenOrigAccess !== 'active' ||
+        c.rawLogLocation === 'project' ||
+        c.badgeReturned ||
+        c.ndaRemindedToAwen
+      );
+    }
     const emailTouched =
       state.email.status !== 'unread' &&
       state.email.status !== 'read' &&
@@ -339,10 +395,27 @@
     return emailTouched && isVisitorResolved(state);
   }
 
+  function isCh3FullyComplete(state) {
+    if (state.chapter !== 3) return false;
+    const c = state.ch3;
+    return (
+      c.rawLogLocation === 'project' &&
+      c.qingHasProjectAccess &&
+      c.qingConfirmedOpen &&
+      c.awenOrigAccess === 'revoked' &&
+      c.awenPaperGrant &&
+      c.badgeReturned &&
+      c.ndaRemindedToAwen
+    );
+  }
+
   // ===== Chapter 1 Handover Evaluation =====
   function evaluateHandover(state) {
     if (state.chapter === 2) {
       return evaluateChapter2Handover(state);
+    }
+    if (state.chapter === 3) {
+      return evaluateChapter3Handover(state);
     }
 
     const e = state.email;
@@ -576,6 +649,252 @@
     };
   }
 
+  // ===== Chapter 3 Helpers & Handover Evaluation =====
+  function unlockCh3Ending(id) {
+    try {
+      const raw = localStorage.getItem(CH3_STORAGE_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      const list = Array.isArray(arr) ? arr : [];
+      if (!list.includes(id)) {
+        list.push(id);
+        localStorage.setItem(CH3_STORAGE_KEY, JSON.stringify(list));
+      }
+      return list;
+    } catch {
+      return [id];
+    }
+  }
+
+  function getCh3AccessPreview(state, role) {
+    const c = state.ch3;
+    const origOpen = c.awenOrigAccess !== 'revoked';
+
+    if (role === 'awen') {
+      return [
+        {
+          title: `1. 原始量測紀錄（${c.rawLogName}）`,
+          canOpen: origOpen,
+          cls: origOpen ? 'warn' : 'ok',
+          badge: origOpen ? '⚠ 可開啟（原權限未關閉）' : '🔒 無法開啟（原權限已終止）',
+          detail: origOpen
+            ? '阿文仍可透過尚未終止的原專案／個人工作區權限開啟完整原始量測紀錄。'
+            : '原專案與個人工作區權限已終止，阿文已無法存取原始量測紀錄。'
+        },
+        {
+          title: '2. 後續論文需要的兩張會議用圖（ClearSky_會議用摘要圖_v2）',
+          canOpen: c.awenPaperGrant || origOpen,
+          cls: c.awenPaperGrant && !origOpen ? 'ok' : origOpen ? 'warn' : 'warn',
+          badge:
+            c.awenPaperGrant && !origOpen
+              ? `✅ 可唯讀檢視（限期：${c.awenPaperDuration}）`
+              : c.awenPaperGrant && origOpen
+              ? '⚠ 可存取（已設限期，但原專案權限仍未終止）'
+              : origOpen
+              ? '⚠ 可存取（透過過廣的原專案權限）'
+              : '🔒 無法開啟（尚未設定兩張圖的限期授權）',
+          detail: c.awenPaperGrant
+            ? `已依阿明組長核定範圍設定獨立限期授權：僅含圖A、圖B，限論文修訂使用，${c.awenPaperDuration}自動到期。`
+            : origOpen
+            ? '目前是透過整個原專案資料夾權限開啟，而非限縮於這兩張圖的獨立授權。'
+            : '尚未為阿文開通論文修訂所需的兩張核准圖限期授權。'
+        },
+        {
+          title: '3. 與後續論文無關的其他專案資料（製程筆記、其他實驗資料夾）',
+          canOpen: origOpen,
+          cls: origOpen ? 'danger' : 'ok',
+          badge: origOpen ? '🚨 仍可存取！（授權過廣風險）' : '✅ 無法存取（已妥善隔離）',
+          detail: origOpen
+            ? '警告：因保留阿文原本的專案資料夾權限，離開後仍能開啟與論文修訂無關的機密製程筆記與其他專案檔案！'
+            : '已終止原專案權限，阿文完全無法存取與後續論文無關的其他實驗室資料。'
+        }
+      ];
+    }
+
+    // role === 'qing'
+    const transferred = c.rawLogLocation === 'project';
+    return [
+      {
+        title: `1. 原始量測紀錄（${c.rawLogName}）`,
+        canOpen: transferred && c.qingHasProjectAccess,
+        cls: !transferred ? 'danger' : !c.qingHasProjectAccess ? 'warn' : c.qingConfirmedOpen ? 'ok' : 'warn',
+        badge: !transferred
+          ? '❌ 找不到檔案（尚未移交）'
+          : !c.qingHasProjectAccess
+          ? '⚠ 檔案已移交，接手人仍無法開啟'
+          : c.qingConfirmedOpen
+          ? '✅ 可正常開啟（小晴已親自確認接收）'
+          : '🟡 可開啟（請找 2F 實驗區小晴親自確認接收）',
+        detail: !transferred
+          ? `專案指定位置（${c.rawLogTargetPath}）目前沒有此檔案，檔案仍在阿文個人工作區。${c.awenOrigAccess === 'revoked' ? ' 因阿文原權限已終止，請找 1F 阿明組長請管理員協助移交！' : ' 請到 2F 實驗區請阿文移交。'}`
+          : !c.qingHasProjectAccess
+          ? `檔案已移交至 ${c.rawLogTargetPath}，但小晴帳號尚未開通此資料夾存取權限，點開會顯示「權限不足」！`
+          : c.qingConfirmedOpen
+          ? `檔案已妥善存放於 ${c.rawLogTargetPath}，且小晴已親自測試開啟無誤並完成接收確認。`
+          : `檔案已移交且小晴權限已開通！請到 2F 實驗區請小晴親自測試開啟，交接清單才會勾選「接收人已確認」。`
+      },
+      {
+        title: '2. 後續論文需要的兩張會議用圖（ClearSky_會議用摘要圖_v2）',
+        canOpen: c.qingHasProjectAccess,
+        cls: c.qingHasProjectAccess ? 'ok' : 'warn',
+        badge: c.qingHasProjectAccess ? '✅ 可存取（專案資料夾）' : '⚠ 尚未確認專案權限',
+        detail: c.qingHasProjectAccess
+          ? '小晴已具備晴空計畫專案資料夾權限，可隨時對照會議用兩張圖與阿文合作修改論文。'
+          : '為小晴確認晴空計畫工作所需存取權限後即可檢視。'
+      },
+      {
+        title: '3. 與晴空計畫無關的其他實驗室專案資料',
+        canOpen: false,
+        cls: 'ok',
+        badge: '🔒 無法存取（符合最小權限原則）',
+        detail: '依工作需要僅開放晴空計畫存取權限，不開放無關專案資料夾。'
+      }
+    ];
+  }
+
+  function getCh3PendingItems(state) {
+    const c = state.ch3;
+    const pending = [];
+    if (c.rawLogLocation !== 'project') {
+      pending.push(
+        c.awenOrigAccess === 'revoked'
+          ? '原始量測紀錄尚未移交（因已終止阿文原權限，須找 1F 阿明組長請管理員協助移交指定檔案）'
+          : '原始量測紀錄仍在阿文個人工作區，尚未移交至專案指定位置'
+      );
+    }
+    if (!c.qingHasProjectAccess) {
+      pending.push('尚未為接手人小晴確認專案資料夾存取權限');
+    }
+    if (!c.qingConfirmedOpen) {
+      pending.push('尚未由 2F 實驗區的小晴親自測試開啟紀錄並確認接收');
+    }
+    if (c.awenOrigAccess !== 'revoked') {
+      pending.push('阿文的原專案資料夾權限仍開放中（可存取原始紀錄與無關專案資料，須終止原權限）');
+    }
+    if (!c.awenPaperGrant) {
+      pending.push('尚未依阿明組長核定範圍，為阿文設定僅含兩張會議圖的限期授權（離開後 30 天）');
+    }
+    if (!c.badgeReturned) {
+      pending.push('尚未於 1F 大門接待櫃台收回阿文的實體門禁卡並完成登記');
+    }
+    if (!c.ndaRemindedToAwen) {
+      pending.push('尚未透過交接對話提醒阿文離開後仍須遵守的保密義務與資料攜出限制');
+    }
+    return pending;
+  }
+
+  function evaluateChapter3Handover(state) {
+    const c = state.ch3;
+    const pending = getCh3PendingItems(state);
+    const complete = pending.length === 0;
+    const origOpen = c.awenOrigAccess !== 'revoked';
+
+    let ch3EndingId = 'ch3_complete';
+    let banner = {
+      icon: '🏅',
+      title: '完美離職交接與限期授權',
+      desc: '資料完整移交並由小晴確認開啟，終止原專案權限、改設兩張圖 30 天限期授權，並完成 1F 門禁卡收回與保密提醒。'
+    };
+
+    if (!complete) {
+      ch3EndingId = origOpen ? 'ch3_overbroad_risk' : 'ch3_incomplete';
+      banner = origOpen
+        ? {
+            icon: '⚠️',
+            title: '交班警報：原專案權限仍開放',
+            desc: '保留原專案權限會讓離任人員持續存取與後續論文無關的機密資料！交班清單已列出風險與待辦事項。'
+          }
+        : {
+            icon: '⚠️',
+            title: '離職交接尚有未完成待辦',
+            desc: '本次帶著未完成事項交班，交班清單已明確標出剩餘待辦項目，建議重玩補齊完整流程。'
+          };
+    } else if (c.interruptedByEarlyRevoke && c.adminTransferCompleted) {
+      ch3EndingId = 'ch3_admin_remediated';
+      banner = {
+        icon: '🚒',
+        title: '交接中斷後成功補救',
+        desc: '雖曾太早終止原權限導致交接中斷，但未恢復阿文整包權限，而是透過阿明組長以管理員協助移交指定檔案並由小晴確認開啟！'
+      };
+    }
+
+    unlockCh3Ending(ch3EndingId);
+
+    // Section 1: 資料交接與小晴接收確認
+    let transferBadge = { text: '已移交並確認接收', cls: 'ok' };
+    if (c.rawLogLocation !== 'project' || !c.qingConfirmedOpen) {
+      transferBadge = { text: '交接未完成', cls: 'danger' };
+    } else if (c.interruptedByEarlyRevoke) {
+      transferBadge = { text: '中斷後管理員補救完成', cls: 'warn' };
+    }
+
+    const transferDetail =
+      `接手人：小晴｜檔案：${c.rawLogName}｜指定存放位置：${c.rawLogTargetPath}。` +
+      (c.interruptedByEarlyRevoke
+        ? `【交接曾中斷】因先終止阿文原權限導致小晴無法取得檔案；${
+            c.adminTransferCompleted
+              ? '已由 1F 阿明組長透過管理員權限僅移交指定紀錄（未恢復阿文整包原權限）完成補救。'
+              : '尚未請 1F 阿明組長啟動管理員協助移交！'
+          }`
+        : c.rawLogLocation === 'project'
+        ? '已由阿文將原始紀錄自個人工作區移交至專案指定位置。'
+        : '檔案目前仍留在阿文個人工作區，尚未移交。') +
+      ` 接收人狀態：${c.qingConfirmedOpen ? '✅ 小晴已於 2F 實驗區親自測試開啟並確認接收。' : c.qingHasProjectAccess ? '⚠ 權限已開通但小晴尚未親自確認開啟。' : '❌ 小晴尚未開通權限或無法開啟。'}`;
+
+    const transferReminder = c.interruptedByEarlyRevoke
+      ? '「先確認檔案已移交並由接手人實測開啟，再終止原權限最順暢；若不慎提早關閉權限，應請管理員單獨移交指定檔案，切勿重新打開整包原權限。」'
+      : '「離職交接不是把檔案丟進資料夾就好，必須確認存放於專案指定位置，並讓接手同事親自打開確認無誤。」';
+
+    // Section 2: 權限終止與兩張圖限期授權
+    let accessBadge = { text: '原權限已終止＋限期授權', cls: 'ok' };
+    if (origOpen) {
+      accessBadge = { text: '原權限仍開放（過廣）', cls: 'danger' };
+    } else if (!c.awenPaperGrant) {
+      accessBadge = { text: '已停權（未設合作授權）', cls: 'warn' };
+    }
+
+    const accessDetail =
+      `原專案權限：${origOpen ? '🚨 仍開放中！阿文目前仍可存取「原始量測紀錄」、「兩張會議圖」以及「與後續論文無關的其他專案機密資料」。' : '✅ 已終止，阿文已無法存取原始紀錄與無關專案資料。'}` +
+      ` 後續論文合作授權：${
+        c.awenPaperGrant
+          ? `✅ 已設定獨立限期授權——範圍：${c.awenPaperPurpose}；期限：${c.awenPaperDuration}。`
+          : '⬜ 尚未設定僅含兩張會議圖的限期授權。'
+      }`;
+
+    const accessReminder =
+      '「人員離職當日應立即取消原專案權限；若仍有論文修訂等合作需求，應另行核定最小範圍、用途與明確期限的獨立授權。」';
+
+    // Section 3: 實體門禁、保密提醒與待辦追蹤
+    let complianceBadge = complete
+      ? { text: '全數完成', cls: 'ok' }
+      : { text: `尚有 ${pending.length} 項待辦`, cls: origOpen ? 'danger' : 'warn' };
+
+    const complianceItems = [
+      `【1F 實體門禁卡】${c.badgeReturned ? '✅ 已於 1F 大門接待櫃台收回阿文的門禁卡並完成登記（與電子權限分開管制）。' : '❌ 尚未於 1F 大門接待櫃台收回並登記門禁卡！'}`,
+      `【離職保密義務提醒】${c.ndaRemindedToAwen ? '✅ 已透過交接對話向阿文再次提醒離職後仍適用之保密約定與研究資料攜出限制。' : '❌ 尚未向阿文確認保密約定並提醒離職後保密義務！'}`
+    ];
+
+    if (pending.length > 0) {
+      pending.forEach((p) => complianceItems.push(`【待辦事項】${p}`));
+    } else {
+      complianceItems.push(`【例行追蹤】${c.awenPaperDuration}後系統將自動撤銷阿文的兩張會議圖唯讀授權，屆時可再確認權限清單。`);
+    }
+
+    const complianceReminder =
+      '「實體門禁憑證回收、電子存取權限終止、資料實測交接與保密義務提醒四者缺一不可，須分項確認並留下紀錄。」';
+
+    return {
+      chapter: 3,
+      complete,
+      hasRisk: origOpen || !complete,
+      banner,
+      sections: {
+        transfer: { badge: transferBadge, detail: transferDetail, reminder: transferReminder },
+        access: { badge: accessBadge, detail: accessDetail, reminder: accessReminder },
+        compliance: { badge: complianceBadge, items: complianceItems, reminder: complianceReminder }
+      }
+    };
+  }
+
   window.BS.State = {
     ENDINGS_CATALOG,
     createInitialState,
@@ -595,7 +914,11 @@
     isEmailResolved,
     isVisitorResolved,
     canHandover,
+    isCh3FullyComplete,
+    getCh3AccessPreview,
+    getCh3PendingItems,
     evaluateHandover,
-    evaluateChapter2Handover
+    evaluateChapter2Handover,
+    evaluateChapter3Handover
   };
 })();

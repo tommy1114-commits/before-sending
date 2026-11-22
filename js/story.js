@@ -5,11 +5,69 @@
     // ctx provides: getState(), getNPCs(), advanceTime(mins), refreshHUD(),
     //               restartChapter(), returnToMenu(), moveNpcTo(id, x, y, dir)
 
+    function handleCommonScenery(state, targetId) {
+      if (targetId === 'elevator_up') {
+        ctx.transitionToFloor(2, 2, 9, 'down');
+        return true;
+      }
+      if (targetId === 'elevator_down') {
+        ctx.transitionToFloor(1, 2, 9, 'down');
+        return true;
+      }
+      if (targetId === 'lobby_sign') {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '1F 大廳形象牆',
+            portrait: 'reception',
+            text: '中研院RCCI實驗室一樓大廳形象牆。這裡是訪客核准拍照區，構圖專業且完全不會拍到管制實驗區內部資訊。'
+          }
+        ]);
+        return true;
+      }
+      if (targetId === 'cleanroom_window') {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '1F 管制實驗區觀測窗',
+            portrait: 'monitor',
+            text: '透過大面玻璃觀測窗可看到一樓管制實驗區的機台運作。門禁告示寫著：「未經授權人員禁止入內，訪客參觀須事前申請並全程陪同。」'
+          }
+        ]);
+        return true;
+      }
+      if (targetId === 'conference_door') {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '1F 演講與會議廳',
+            portrait: 'poster',
+            text: state.chapter === 2
+              ? '一樓演講與會議廳，明天研討會前夕燈光已暗。對外公開的海報與簡報，務必先確認授權與版本！'
+              : '一樓大型演講與會議廳。舉辦外部交流活動時，來賓須先於大門櫃台登記並遵守拍攝規範。'
+          }
+        ]);
+        return true;
+      }
+      if (targetId === 'notice_board') {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '2F 營業秘密宣導布告欄',
+            portrait: 'desk',
+            text: '【實驗室營業秘密三提醒】\n① 對外給廠商資料：先確認有效 NDA、最小範圍與連結效期。\n② 訪客接待與拍照：一樓登記、全程陪同、拍前巡視白板螢幕樣品。\n③ 論文與海報公開：確認合作授權與專利安排，核准綁定版本。'
+          }
+        ]);
+        return true;
+      }
+      return false;
+    }
+
     function interact(target) {
       if (!target) return;
       const state = ctx.getState();
 
-      if (state.chapter === 2) {
+      if (handleCommonScenery(state, target.id)) return;
+
+      if (state.chapter === 3) {
+        interactCh3(state, target);
+      } else if (state.chapter === 2) {
         interactCh2(state, target);
       } else {
         interactCh1(state, target);
@@ -21,7 +79,9 @@
       if (state.introShown) return;
       state.introShown = true;
 
-      if (state.chapter === 2) {
+      if (state.chapter === 3) {
+        playCh3Intro();
+      } else if (state.chapter === 2) {
         playCh2Intro();
       } else {
         playCh1Intro();
@@ -34,14 +94,14 @@
     function playCh1Intro() {
       window.BS.UI.startDialogue([
         {
-          speaker: '值班備忘錄（辦公區）',
+          speaker: '值班備忘錄（2F 辦公區）',
           portrait: 'desk',
-          text: '下午 3:40，下班前還有兩件事要處理：\n① 電腦裡有合作方急著要會議資料的來信。\n② 訪客入口有預約來賓想拍實驗室參訪照。'
+          text: '下午 3:40，下班前還有兩件事要處理：\n① 2F 辦公區電腦有合作方急著要會議資料的來信。\n② 1F 大門櫃台有預約來賓陳先生等候拍照（可由左側樓梯／電梯下樓）。'
         },
         {
           speaker: '小安（值班研究助理）',
           portrait: 'player',
-          text: '順序可以自己安排。跟外部廠商交流資料前，記得先確認對方是否已簽署有效 NDA！有不確定的地方，就查電腦合約清單，或問實驗區的阿文與辦公區的阿明組長吧！'
+          text: '順序可以自己安排。跟外部廠商交流資料前，記得先確認對方是否已簽署有效 NDA！有不確定的地方，就查電腦合約清單，或問 2F 實驗區的阿文與組長辦公室的阿明組長吧！'
         }
       ]);
     }
@@ -573,9 +633,9 @@
       window.BS.Audio.select();
       window.BS.UI.startDialogue([
         {
-          speaker: '訪客接待處（登記簿）',
+          speaker: '1F 大門接待櫃台（登記簿）',
           portrait: 'reception',
-          text: '【今日預約登記】\n來訪人員：陳先生（外校參訪來賓）｜時間：15:30\n核准活動範圍：訪客入口形象牆拍照留念；若進入實驗區須由值班人員全程陪同，且拍攝前須確認畫面無未遮蔽之研究資訊。'
+          text: '【今日預約登記】\n來訪人員：陳先生（外校參訪來賓）｜時間：15:30\n核准活動範圍：1F 大門大廳形象牆拍照留念；若須上 2F 實驗區參觀拍照，須由值班人員全程陪同，且拍攝前須確認畫面無未遮蔽之研究資訊。'
         }
       ]);
     }
@@ -611,11 +671,11 @@
                 onSelect: () => launchCh1Camera(state, 'lab')
               },
               {
-                label: '改帶陳先生回訪客入口指定角度拍攝',
+                label: '改帶陳先生回 1F 大門形象牆指定角度拍攝',
                 onSelect: () => {
-                  ctx.moveNpcTo('npc_visitor', 18, 13, 'up');
                   v.pausedAndFixed = true;
-                  launchCh1Camera(state, 'entrance');
+                  ctx.moveNpcTo('npc_visitor', 1, 7, 12, 'up');
+                  ctx.transitionToFloor(1, 6, 12, 'right', () => launchCh1Camera(state, 'entrance'));
                 }
               },
               { label: '再給我一分鐘整理現場', onSelect: () => {} }
@@ -642,7 +702,7 @@
               {
                 speaker: '小安',
                 portrait: 'player',
-                text: '（會公開放在網頁上！那更不能讓實驗區裡還沒收好的研究資料入鏡。）'
+                text: '（會公開放在網頁上！那更不能讓 2F 實驗區裡還沒收好的研究資料入鏡。）'
               }
             ], () => handleCh1Visitor(state));
           }
@@ -650,36 +710,38 @@
       }
 
       choices.push({
-        label: '引導在「訪客入口指定角度」拍形象牆照片（核准範圍）',
+        label: '引導在「1F 大廳形象牆指定角度」拍照（核准範圍）',
         onSelect: () => launchCh1Camera(state, 'entrance')
       });
 
       choices.push({
-        label: '陪同進入「實驗區」查看取景畫面並拍攝',
+        label: '陪同上「2F 實驗區」查看取景畫面並拍攝',
         onSelect: () => {
           v.status = 'in_lab';
-          ctx.moveNpcTo('npc_visitor', 15, 8, 'up');
           ctx.advanceTime(2);
           ctx.refreshHUD();
           window.BS.UI.startDialogue([
             {
               speaker: '小安',
               portrait: 'player',
-              text: '好的，請您跟我一起刷卡進入實驗區，並請先讓我確認一下相機的取景預覽畫面。'
+              text: '好的，請您跟我一起搭電梯上 2F、刷卡進入實驗區，並請先讓我確認一下相機的取景預覽畫面。'
             }
-          ], () => launchCh1Camera(state, 'lab'));
+          ], () => {
+            ctx.moveNpcTo('npc_visitor', 2, 14, 8, 'up');
+            ctx.transitionToFloor(2, 13, 8, 'right', () => launchCh1Camera(state, 'lab'));
+          });
         }
       });
 
-      choices.push({ label: '請陳先生稍等一下（先看接待處或實驗區）', onSelect: () => {} });
+      choices.push({ label: '請陳先生在一樓櫃台稍等（先看登記簿或上樓巡視）', onSelect: () => {} });
 
       window.BS.UI.startDialogue([
         {
-          speaker: '訪客 陳先生',
+          speaker: '訪客 陳先生（1F 大門櫃台）',
           portrait: 'visitor',
           text: state.clues.visitorPurpose
-            ? '照片會放進公開參訪報告裡。請問我們要在入口這裡拍，還是可以進去實驗區拍一張呢？'
-            : '你好！我是預約三點半參訪的陳先生，想拍一張實驗室的照片當參訪紀錄，請問可以進去實驗區拍嗎？',
+            ? '照片會放進公開參訪報告裡。請問我們要在一樓大廳形象牆拍，還是可以上二樓實驗區拍一張呢？'
+            : '你好！我是預約三點半參訪的陳先生，剛在一樓大門櫃台報到，想拍一張實驗室的照片當參訪紀錄，請問可以上二樓實驗區拍嗎？',
           choices
         }
       ]);
@@ -695,64 +757,66 @@
             {
               speaker: '小安',
               portrait: 'player',
-              text: '陳先生不好意思，先暫停一下下！背景拍到正在進行中的研究資料，我先去把白板、螢幕跟樣品標籤收妥，整理好馬上幫您拍！'
+              text: '陳先生不好意思，先暫停一下下！背景拍到正在進行中的研究資料，我先去把 2F 實驗區的白板、螢幕跟樣品標籤收妥，整理好馬上幫您拍！'
             },
             {
               speaker: '訪客 陳先生',
               portrait: 'visitor',
-              text: '沒問題，保密最重要！我在實驗區門口這裡等您，整理好再叫我。'
+              text: '沒問題，保密最重要！我在 2F 實驗區門口這裡等您，整理好再叫我。'
             }
           ]);
         },
 
         onSwitchToEntrance() {
           state.visitor.pausedAndFixed = true;
-          ctx.moveNpcTo('npc_visitor', 18, 13, 'up');
           ctx.refreshHUD();
           window.BS.UI.startDialogue([
             {
               speaker: '小安',
               portrait: 'player',
-              text: '陳先生，實驗區裡面目前還有未收妥的研究資料，我們改回訪客入口的形象牆指定角度拍，光線跟招牌也更好看喔！'
+              text: '陳先生，2F 實驗區裡面目前還有未收妥的研究資料，我們改回 1F 大廳的形象牆指定角度拍，光線跟招牌也更好看喔！'
             }
-          ], () => launchCh1Camera(state, 'entrance'));
+          ], () => {
+            ctx.moveNpcTo('npc_visitor', 1, 7, 12, 'up');
+            ctx.transitionToFloor(1, 6, 12, 'right', () => launchCh1Camera(state, 'entrance'));
+          });
         },
 
         onShoot(shootMode, leakedItems) {
           ctx.advanceTime(3);
           if (shootMode === 'entrance') {
             state.visitor.status = 'done_entrance';
-            state.visitor.photoSpot = '訪客入口形象牆（核准角度）';
+            state.visitor.photoSpot = '1F 大廳形象牆（核准角度）';
             state.visitor.leakedItems = [];
-            ctx.moveNpcTo('npc_visitor', 18, 13, 'up');
+            ctx.moveNpcTo('npc_visitor', 1, 7, 12, 'up');
             ctx.refreshHUD();
             window.BS.Audio.success();
             window.BS.UI.startDialogue([
               {
                 speaker: '訪客 陳先生',
                 portrait: 'visitor',
-                text: '喀嚓！這張形象牆拍起來很專業耶，完全符合我們的參訪紀錄需求，謝謝你！'
+                text: '喀嚓！這張 1F 大廳形象牆拍起來很專業耶，完全符合我們的參訪紀錄需求，謝謝你！'
               }
             ]);
           } else if (leakedItems.length === 0) {
             state.visitor.status = 'done_lab_clean';
-            state.visitor.photoSpot = '實驗區（全程陪同並完成清場）';
+            state.visitor.photoSpot = '2F 實驗區（全程陪同並完成清場）';
             state.visitor.leakedItems = [];
-            ctx.moveNpcTo('npc_visitor', 18, 13, 'up');
+            ctx.moveNpcTo('npc_visitor', 1, 7, 12, 'up');
             ctx.refreshHUD();
             window.BS.Audio.success();
             window.BS.UI.startDialogue([
               {
                 speaker: '訪客 陳先生',
                 portrait: 'visitor',
-                text: '喀嚓！畫面既看得出實驗室環境，又完全保護了研究機密。謝謝你細心陪同，我回到入口處準備離開囉！'
+                text: '喀嚓！畫面既看得出實驗室環境，又完全保護了研究機密。謝謝你細心陪同，我先搭電梯回 1F 大廳準備離開囉！'
               }
             ]);
           } else {
             state.visitor.status = 'done_lab_leaked';
-            state.visitor.photoSpot = '實驗區（未完成清場）';
+            state.visitor.photoSpot = '2F 實驗區（未完成清場）';
             state.visitor.leakedItems = leakedItems.slice();
-            ctx.moveNpcTo('npc_visitor', 18, 13, 'up');
+            ctx.moveNpcTo('npc_visitor', 1, 7, 12, 'up');
             ctx.refreshHUD();
             window.BS.Audio.alert();
             window.BS.UI.showToast(`⚠ 注意：照片已拍入「${leakedItems.join('、')}」！`, true, 4500);
@@ -760,7 +824,7 @@
               {
                 speaker: '小安',
                 portrait: 'player',
-                text: `喀嚓……慘了，放大剛才的預覽，背景真的把「${leakedItems.join('、')}」都拍進去了……待會一定要記錄在交班並告訴阿明組長。`
+                text: `喀嚓……慘了，陳先生下樓離開了，但放大剛才的預覽，背景真的把「${leakedItems.join('、')}」都拍進去了……待會一定要記錄在交班並告訴阿明組長。`
               }
             ]);
           }
@@ -777,12 +841,13 @@
             text: '第一章已經完成交班！要重新檢視交班紀錄，還是再玩一次嘗試不同路線呢？',
             choices: [
               {
-                label: '📑 重新檢視本次交班紀錄',
+                label: '🏆 重新檢視通關畫面與交班紀錄',
                 onSelect: () => {
                   const result = window.BS.State.evaluateHandover(state);
-                  window.BS.UI.openHandoverModal(result, {
+                  window.BS.UI.openClearScreen(result, {
                     onReplay: () => ctx.restartChapter(),
-                    onReturnMenu: () => ctx.returnToMenu()
+                    onReturnMenu: () => ctx.returnToMenu(),
+                    onStartChapter: (ch) => ctx.startChapter(ch)
                   });
                 }
               },
@@ -814,7 +879,7 @@
           {
             speaker: '值班桌（交班紀錄簿）',
             portrait: 'desk',
-            text: `現在還不能交班下班喔！還有待處理事項：\n• ${missing.join('\n• ')}\n\n先完成這兩件事再回來填寫交班紀錄吧！（也可點右上角「📋 筆記」隨時查看進度）`
+            text: `現在還不能交班下班喔！還有待處理事項：\n• ${missing.join('\n• ')}\n\n先完成這兩件事再回來填寫交班紀錄吧！（按下方 SELECT 鍵或 Tab 可隨時查看筆記與進度）`
           }
         ]);
         return;
@@ -842,9 +907,10 @@
                 } else {
                   window.BS.Audio.fanfare();
                 }
-                window.BS.UI.openHandoverModal(result, {
+                window.BS.UI.openClearScreen(result, {
                   onReplay: () => ctx.restartChapter(),
-                  onReturnMenu: () => ctx.returnToMenu()
+                  onReturnMenu: () => ctx.returnToMenu(),
+                  onStartChapter: (ch) => ctx.startChapter(ch)
                 });
               }
             },
@@ -878,8 +944,8 @@
           text: '晚上六點了，公開研討會海報可不能馬虎。先去辦公區電腦看看草稿有三張什麼圖，也可以找實驗區的阿文和辦公區的阿明組長確認！'
         }
       ], () => {
-        // Move 阿文 back to his Lab bench so player walks to 實驗區的阿文 for clues
-        ctx.moveNpcTo('npc_colleague', 20, 6, 'left');
+        // Move 阿文 back to his 2F Lab bench so player walks to 2F 實驗區的阿文 for clues
+        ctx.moveNpcTo('npc_colleague', 2, 20, 5, 'left');
         ctx.refreshHUD();
       });
     }
@@ -1268,12 +1334,13 @@
             text: '第二章已經完成交班！要重新檢視交班紀錄，還是再試一次其他路線呢？',
             choices: [
               {
-                label: '📑 重新檢視第二章交班紀錄',
+                label: '🏆 重新檢視通關畫面與交班紀錄',
                 onSelect: () => {
                   const result = window.BS.State.evaluateChapter2Handover(state);
-                  window.BS.UI.openHandoverModal(result, {
+                  window.BS.UI.openClearScreen(result, {
                     onReplay: () => ctx.restartChapter(),
-                    onReturnMenu: () => ctx.returnToMenu()
+                    onReturnMenu: () => ctx.returnToMenu(),
+                    onStartChapter: (ch) => ctx.startChapter(ch)
                   });
                 }
               },
@@ -1325,14 +1392,577 @@
                 } else {
                   window.BS.Audio.fanfare();
                 }
-                window.BS.UI.openHandoverModal(result, {
+                window.BS.UI.openClearScreen(result, {
                   onReplay: () => ctx.restartChapter(),
-                  onReturnMenu: () => ctx.returnToMenu()
+                  onReturnMenu: () => ctx.returnToMenu(),
+                  onStartChapter: (ch) => ctx.startChapter(ch)
                 });
               }
             },
             {
               label: unfinishedRemedy ? '先回去補救（電腦聯絡主辦方／找阿明組長）' : '再在實驗室走走',
+              onSelect: () => {}
+            }
+          ]
+        }
+      ]);
+    }
+
+    // =========================================================================
+    // CHAPTER 3: 阿文的最後一天
+    // =========================================================================
+    function playCh3Intro() {
+      window.BS.UI.startDialogue([
+        {
+          speaker: '同事 阿文（2F 辦公區旁）',
+          portrait: 'colleague',
+          text: '下午五點了，今天就是我在實驗室的最後一天。\n「我把交接清單放在電腦裡了。對了，下個月改論文還要用之前開會那兩張圖。我原本的資料夾權限可以先留著嗎？」'
+        },
+        {
+          speaker: '同事 阿文',
+          portrait: 'colleague',
+          text: '我先回 2F 實驗區整理個人工作區。接手我研究的小晴也在 2F 實驗區，阿明組長跟門禁回收櫃台都在 1F 大廳喔！'
+        },
+        {
+          speaker: '小安',
+          portrait: 'player',
+          text: '離職交接可不能漏掉任何一步！先看看 2F 值班電腦的交接清單與存取預覽，或是先問 2F 的阿文與小晴、下樓找 1F 阿明組長與大門櫃台都可以！'
+        }
+      ], () => {
+        ctx.moveNpcTo('npc_colleague', 2, 20, 5, 'left');
+        ctx.refreshHUD();
+      });
+    }
+
+    function interactCh3(state, target) {
+      switch (target.id) {
+        case 'pc':
+          handleCh3Computer(state);
+          break;
+        case 'duty_desk':
+          handleCh3DutyDesk(state);
+          break;
+        case 'npc_colleague':
+          handleCh3Colleague(state);
+          break;
+        case 'npc_qing':
+          handleCh3Qing(state);
+          break;
+        case 'npc_lead':
+          handleCh3Lead(state);
+          break;
+        case 'monitor':
+          handleCh3LabTerminal(state);
+          break;
+        case 'reception':
+          handleCh3Reception(state);
+          break;
+        case 'whiteboard':
+          window.BS.UI.startDialogue([
+            {
+              speaker: '實驗白板',
+              portrait: 'whiteboard',
+              text: '白板已經整理乾淨。今天重點是把阿文個人區裡的原始量測紀錄移交給小晴，並完成 1F 門禁收回與權限終止！'
+            }
+          ]);
+          break;
+        case 'samples':
+          window.BS.UI.startDialogue([
+            {
+              speaker: '樣品保管箱',
+              portrait: 'samples',
+              text: '阿文已經把實體樣品清點收進樣品盒交給小晴了。接下來要確認電子原始紀錄的移交、存取權限與 1F 門禁卡回收！'
+            }
+          ]);
+          break;
+      }
+    }
+
+    function handleCh3Computer(state) {
+      const c = state.ch3;
+      if (!c.openedChecklist) {
+        c.openedChecklist = true;
+        ctx.advanceTime(2);
+        ctx.refreshHUD();
+      }
+
+      window.BS.UI.openOffboardModal(state, {
+        onGrantQing() {
+          c.qingHasProjectAccess = true;
+          ctx.advanceTime(2);
+          ctx.refreshHUD();
+        },
+        onGrantAwenPaper() {
+          c.awenPaperGrant = true;
+          ctx.advanceTime(2);
+          ctx.refreshHUD();
+        },
+        onRevokeAwenOrig() {
+          const early = c.rawLogLocation !== 'project';
+          c.awenOrigAccess = 'revoked';
+          if (early) {
+            c.interruptedByEarlyRevoke = true;
+            window.BS.UI.showToast('⚠ 原始紀錄尚未移交就停權了！可找 2F 小晴確認，再下樓請 1F 阿明組長安排管理員移交！', true, 5200);
+          }
+          ctx.advanceTime(2);
+          ctx.refreshHUD();
+          return early;
+        },
+        onKeepAwenOrig() {
+          c.awenOrigAccess = 'kept_explicit';
+          c.everKeptExplicit = true;
+          ctx.advanceTime(1);
+          ctx.refreshHUD();
+          window.BS.UI.showToast('⚠ 已暫時保留阿文原權限！請看「阿文視角」確認是否授權過廣。', true, 4200);
+        }
+      });
+    }
+
+    function handleCh3Colleague(state) {
+      const c = state.ch3;
+      c.clues.talkedToWen = true;
+      ctx.refreshHUD();
+
+      const choices = [];
+
+      // 1. Transfer Raw Log
+      if (c.rawLogLocation !== 'project') {
+        choices.push({
+          label: `請阿文將原始量測紀錄（${c.rawLogName}）移交至專案指定位置`,
+          onSelect: () => {
+            if (c.awenOrigAccess === 'revoked') {
+              window.BS.Audio.alert();
+              window.BS.UI.startDialogue([
+                {
+                  speaker: '同事 阿文',
+                  portrait: 'colleague',
+                  text: `咦？我剛剛點開個人工作區（${c.rawLogOrigPath}），系統顯示我的原帳號已經被停權登不進去了！`
+                },
+                {
+                  speaker: '同事 阿文',
+                  portrait: 'colleague',
+                  text: '沒關係，千萬別把我的整包原權限重開！你下樓找 1F 的阿明組長，請他由管理員協助單獨移交這一份指定紀錄給小晴就好！'
+                }
+              ]);
+            } else {
+              c.rawLogLocation = 'project';
+              c.transferredBy = 'awen';
+              ctx.advanceTime(3);
+              ctx.refreshHUD();
+              window.BS.Audio.success();
+              window.BS.UI.showToast('✅ 阿文已將原始紀錄移交至專案指定位置！', false, 3600);
+              window.BS.UI.startDialogue([
+                {
+                  speaker: '同事 阿文',
+                  portrait: 'colleague',
+                  text: `沒問題！我已經把原本存在我個人工作區的「${c.rawLogName}」，完整移交到專案指定位置（${c.rawLogTargetPath}）了。`
+                },
+                {
+                  speaker: '同事 阿文',
+                  portrait: 'colleague',
+                  text: '記得在 2F 值班電腦確認小晴的存取權限，再請旁邊的小晴實際打開確認能不能讀取喔！'
+                }
+              ]);
+            }
+          }
+        });
+      }
+
+      // 2. Remind Post-Departure NDA Obligations
+      if (!c.ndaRemindedToAwen) {
+        choices.push({
+          label: '確認保密約定，並提醒阿文離開後的保密義務與資料攜出限制',
+          onSelect: () => {
+            c.ndaRemindedToAwen = true;
+            ctx.advanceTime(2);
+            ctx.refreshHUD();
+            window.BS.Audio.success();
+            window.BS.UI.showToast('✅ 已記錄：完成阿文離職保密義務提醒！', false, 3400);
+            window.BS.UI.startDialogue([
+              {
+                speaker: '小安',
+                portrait: 'player',
+                text: '阿文，離職前跟你再次確認一下：我們簽署的保密約定在離開實驗室後依然有效，未經核准的研究資料、原始數據跟製程筆記都不能自行備份攜出；下個月改論文也只限在核准的兩張圖與期限內使用喔！'
+              },
+              {
+                speaker: '同事 阿文',
+                portrait: 'colleague',
+                text: '瞭解，我完全同意也會確實遵守！個人電腦跟隨身碟我都已經清查過、沒有留存實驗室機密檔案，交接清單可以放心幫我打勾。'
+              }
+            ]);
+          }
+        });
+      }
+
+      // 3. Collect Physical Access Badge
+      if (!c.badgeReturned && !c.awenGaveBadge) {
+        choices.push({
+          label: '請阿文先交出實驗室實體門禁卡（準備拿到 1F 櫃台收回登記）',
+          onSelect: () => {
+            c.awenGaveBadge = true;
+            ctx.advanceTime(1);
+            ctx.refreshHUD();
+            window.BS.Audio.confirm();
+            window.BS.UI.showToast('🪪 已取得阿文門禁卡！請下樓至 1F 大門接待櫃台完成收回登記。', false, 4000);
+            window.BS.UI.startDialogue([
+              {
+                speaker: '同事 阿文',
+                portrait: 'colleague',
+                text: '給妳，這是我的門禁卡！麻煩拿到 1F 大門接待櫃台幫我辦理收回登記喔。'
+              }
+            ]);
+          }
+        });
+      }
+
+      choices.push({ label: '先處理其他交接項目', onSelect: () => {} });
+
+      let introMsg = `小安，我有一份原始量測紀錄「${c.rawLogName}」目前還在我的個人工作區（${c.rawLogOrigPath}），還沒移到專案資料夾。`;
+      if (c.rawLogLocation === 'project') {
+        introMsg = '原始量測紀錄已經放進專案指定位置了！還有門禁卡、保密義務提醒或權限設定要跟我確認的嗎？';
+      }
+
+      window.BS.UI.startDialogue([
+        {
+          speaker: '同事 阿文（2F 實驗區）',
+          portrait: 'colleague',
+          text: introMsg,
+          choices
+        }
+      ]);
+    }
+
+    function handleCh3Qing(state) {
+      const c = state.ch3;
+      c.clues.talkedToQing = true;
+      ctx.refreshHUD();
+
+      if (c.qingConfirmedOpen) {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '接手同事 小晴（2F 實驗區）',
+            portrait: 'qing',
+            text: `我剛剛已經確認「${c.rawLogName}」在專案資料夾可以正常開啟，交接清單的接收人確認也勾好了！剩下的權限終止、1F 門禁收回跟保密提醒就交給妳囉。`
+          }
+        ]);
+        return;
+      }
+
+      // Case A: File NOT transferred yet
+      if (c.rawLogLocation !== 'project') {
+        if (c.awenOrigAccess === 'revoked') {
+          window.BS.Audio.alert();
+          window.BS.UI.startDialogue([
+            {
+              speaker: '接手同事 小晴（2F 實驗區）',
+              portrait: 'qing',
+              text: `小安！我接手晴空計畫最需要「${c.rawLogName}」這份原始量測紀錄，但專案指定位置（${c.rawLogTargetPath}）裡是空的！`
+            },
+            {
+              speaker: '接手同事 小晴',
+              portrait: 'qing',
+              text: '剛剛聽阿文說他的原權限已經先被終止了，他自己也登不進去拿……快下樓找 1F 的阿明組長，請求由管理員協助單獨移交那一份紀錄吧！（不用恢復阿文整包權限喔！）'
+            }
+          ]);
+        } else {
+          window.BS.UI.startDialogue([
+            {
+              speaker: '接手同事 小晴（2F 實驗區）',
+              portrait: 'qing',
+              text: `嗨小安！我接手阿文的晴空計畫，最關鍵的是要確認能找到並開啟「${c.rawLogName}」這份原始量測紀錄。`
+            },
+            {
+              speaker: '接手同事 小晴',
+              portrait: 'qing',
+              text: `我剛去專案資料夾（${c.rawLogTargetPath}）看過，目前還沒看到檔案，應該還在阿文的個人工作區！麻煩先請旁邊的阿文移交過來，移交後再來讓我測開看看。`
+            }
+          ]);
+        }
+        return;
+      }
+
+      // Case B: File transferred, but Qing lacks permission!
+      if (!c.qingHasProjectAccess) {
+        window.BS.Audio.alert();
+        window.BS.UI.startDialogue([
+          {
+            speaker: '接手同事 小晴（2F 實驗區）',
+            portrait: 'qing',
+            text: `我看到「${c.rawLogName}」已經移交到專案指定位置（${c.rawLogTargetPath}）了！我現在點開測測看……`
+          },
+          {
+            speaker: '接手同事 小晴',
+            portrait: 'qing',
+            text: '哎呀，系統跳出「權限不足，無法開啟」！檔案雖然移交過來了，但我的帳號還沒開通這個專案資料夾的存取權限。麻煩到 2F 值班電腦幫我開通並用「小晴視角」預覽確認，再來找我測開！'
+          }
+        ]);
+        return;
+      }
+
+      // Case C: File transferred AND Qing has access -> Direct confirmation in dialogue!
+      c.qingConfirmedOpen = true;
+      ctx.advanceTime(2);
+      ctx.refreshHUD();
+      window.BS.Audio.success();
+      window.BS.UI.showToast('✅ 小晴已實測開啟原始紀錄並確認接收！交接清單已更新！', false, 4000);
+      window.BS.UI.startDialogue([
+        {
+          speaker: '接手同事 小晴（2F 實驗區）',
+          portrait: 'qing',
+          text: `我現在直接點開 ${c.rawLogTargetPath} 測試……`
+        },
+        {
+          speaker: '接手同事 小晴',
+          portrait: 'qing',
+          text: '成功打開了！量測欄位、日期和原始波形全都完整無缺！我已經在交接清單勾選「接收人已確認（小晴）」了，你可以安心進行後續的權限終止和 1F 門禁收回囉！'
+        }
+      ]);
+    }
+
+    function handleCh3LabTerminal(state) {
+      const c = state.ch3;
+      c.clues.inspectedLabTerminal = true;
+      ctx.refreshHUD();
+      window.BS.Audio.select();
+      window.BS.UI.startDialogue([
+        {
+          speaker: '2F 實驗紀錄電腦（交接檔案對照）',
+          portrait: 'monitor',
+          text:
+            `【交接清單位址對照】\n` +
+            `• 檔名：${c.rawLogName}\n` +
+            `• 原位置：${c.rawLogOrigPath}\n` +
+            `• 接手指定位置：${c.rawLogTargetPath}\n` +
+            `• 目前狀態：${
+              c.rawLogLocation === 'project'
+                ? c.qingConfirmedOpen
+                  ? '✅ 已移交至指定位置，小晴已確認開啟'
+                  : c.qingHasProjectAccess
+                  ? '🟡 已移交且小晴權限已開通（待小晴親自確認）'
+                  : '⚠ 已移交，但小晴尚無開啟權限（請至 2F 值班電腦開通）'
+                : '❌ 尚在阿文個人工作區（未移交）'
+            }`
+        }
+      ]);
+    }
+
+    function handleCh3Lead(state) {
+      const c = state.ch3;
+      const choices = [];
+
+      // Priority: Admin-assisted single-file transfer remediation (Route 2!)
+      if (c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project') {
+        choices.push({
+          label: `🚒 補救請求：已提早終止阿文原權限，請管理員協助移交指定紀錄（${c.rawLogName}）`,
+          onSelect: () => {
+            c.rawLogLocation = 'project';
+            c.transferredBy = 'admin';
+            c.adminTransferCompleted = true;
+            ctx.advanceTime(3);
+            ctx.refreshHUD();
+            window.BS.Audio.success();
+            window.BS.UI.showToast('🚒 管理員已單獨移交指定原始紀錄（未恢復阿文整包權限）！', false, 4200);
+            window.BS.UI.startDialogue([
+              {
+                speaker: '負責人 阿明組長（1F 大廳）',
+                portrait: 'lead',
+                text: '了解！離職停權太早確實常讓交接中斷，但千萬不能因此把阿文原本整包專案權限又重新打開。'
+              },
+              {
+                speaker: '負責人 阿明組長',
+                portrait: 'lead',
+                text: `我馬上聯繫資訊管理員，從後端直接把指定的那一份「${c.rawLogName}」移交到專案指定位置（${c.rawLogTargetPath}）……好了，已完成移交！`
+              },
+              {
+                speaker: '負責人 阿明組長',
+                portrait: 'lead',
+                text: '接下來你回 2F 確認小晴的存取權限，並請小晴親自打開確認無誤就行。這段中斷與管理員補救過程也會完整記在交班紀錄裡！'
+              }
+            ]);
+          }
+        });
+      }
+
+      choices.push({
+        label: c.clues.mingConfirmedScope
+          ? '再次確認阿文後續改論文的授權範圍與保密提醒'
+          : '確認阿文後續改論文需要的兩張圖、用途、期限與保密提醒',
+        onSelect: () => {
+          c.clues.mingConfirmedScope = true;
+          ctx.advanceTime(2);
+          ctx.refreshHUD();
+          window.BS.Audio.success();
+          window.BS.UI.showToast('✅ 已由 1F 阿明組長核定：僅兩張圖・論文修訂・離開後 30 天！', false, 4000);
+          window.BS.UI.startDialogue([
+            {
+              speaker: '負責人 阿明組長（1F 大廳）',
+              portrait: 'lead',
+              text: '阿文下個月改論文的部分我確認過了：原本整個專案資料夾權限**不能保留**，離職當日必須終止，避免他繼續看到與論文無關的機密資料！'
+            },
+            {
+              speaker: '負責人 阿明組長',
+              portrait: 'lead',
+              text: '我核准另行開立獨立的限期授權：\n• 內容：僅限會議用兩張摘要圖（ClearSky_會議用摘要圖_v2：圖A、圖B）\n• 用途：後續論文修訂\n• 期限：離開後 30 天自動到期'
+            },
+            {
+              speaker: '負責人 阿明組長',
+              portrait: 'lead',
+              text: '你現在回 2F 值班電腦就能設定這份限期授權了。另外別忘了兩件事：① 到旁邊的 1F 大門接待櫃台把阿文的實體門禁卡收回登記；② 跟阿文親自提醒離職後仍須遵守的保密約定！'
+            }
+          ]);
+        }
+      });
+
+      choices.push({
+        label: '確認這兩層樓還有哪些交接步驟',
+        onSelect: () => {
+          const pending = window.BS.State.getCh3PendingItems(state);
+          window.BS.UI.startDialogue([
+            {
+              speaker: '負責人 阿明組長（1F 大廳）',
+              portrait: 'lead',
+              text: pending.length === 0
+                ? '全部交接項目都完成得滴水不漏！上 2F 辦公區值班桌填寫交班紀錄就能下班囉。'
+                : `目前還有 ${pending.length} 項待處理：\n• ${pending.slice(0, 3).join('\n• ')}${pending.length > 3 ? '\n……（可按 SELECT 查看完整清單）' : ''}`
+            }
+          ]);
+        }
+      });
+
+      choices.push({ label: '先忙其他項目', onSelect: () => {} });
+
+      window.BS.UI.startDialogue([
+        {
+          speaker: '負責人 阿明組長（1F 大廳）',
+          portrait: 'lead',
+          text: '小安，我正在 1F 櫃台旁處理阿文的離職核簽。離職當日一定要把研究交接、電子權限終止跟 1F 門禁卡回收分頭確認清楚喔！',
+          choices
+        }
+      ]);
+    }
+
+    function handleCh3Reception(state) {
+      const c = state.ch3;
+      if (c.badgeReturned) {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '1F 大門接待櫃台（門禁憑證登記）',
+            portrait: 'reception',
+            text: '✅ 阿文的實體門禁卡已收回並完成註銷登記。\n（提醒：實體門禁卡與電子檔案權限分開管制，電子權限請於 2F 值班電腦確認終止！）'
+          }
+        ]);
+        return;
+      }
+
+      window.BS.UI.startDialogue([
+        {
+          speaker: '1F 大門接待櫃台（門禁憑證登記）',
+          portrait: 'reception',
+          text: c.awenGaveBadge
+            ? '你手上有阿文剛交還的實驗室實體門禁卡。要現在於 1F 櫃台完成收回與門禁註銷登記嗎？'
+            : '阿文今天離職，1F 櫃台尚未收到他的實體門禁卡回收紀錄。要立刻通知阿文交回門禁卡並於 1F 櫃台完成收回登記嗎？（門禁卡與電子權限將各自獨立記錄）',
+          choices: [
+            {
+              label: '🪪 辦理阿文門禁卡收回與註銷登記',
+              onSelect: () => {
+                c.awenGaveBadge = true;
+                c.badgeReturned = true;
+                ctx.advanceTime(2);
+                ctx.refreshHUD();
+                window.BS.Audio.success();
+                window.BS.UI.showToast('✅ 已於 1F 大門接待櫃台完成阿文門禁卡收回登記！', false, 3800);
+                window.BS.UI.startDialogue([
+                  {
+                    speaker: '1F 大門接待櫃台',
+                    portrait: 'reception',
+                    text: '已收回阿文的實驗室門禁卡並於系統登錄停用！門禁回收狀態已同步更新到交接清單。'
+                  }
+                ]);
+              }
+            },
+            { label: '等一下再登記', onSelect: () => {} }
+          ]
+        }
+      ]);
+    }
+
+    function handleCh3DutyDesk(state) {
+      if (state.handoverDone) {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '2F 值班桌（交班紀錄簿）',
+            portrait: 'desk',
+            text: '第三章「阿文的最後一天」已經完成交班！要重新檢視通關畫面與交班紀錄，還是再挑戰其他路線呢？',
+            choices: [
+              {
+                label: '🏆 重新檢視通關畫面與交班紀錄',
+                onSelect: () => {
+                  const result = window.BS.State.evaluateChapter3Handover(state);
+                  window.BS.UI.openClearScreen(result, {
+                    onReplay: () => ctx.restartChapter(),
+                    onReturnMenu: () => ctx.returnToMenu(),
+                    onStartChapter: (ch) => ctx.startChapter(ch)
+                  });
+                }
+              },
+              {
+                label: '🔄 再玩一次第三章',
+                onSelect: () => ctx.restartChapter()
+              },
+              {
+                label: '🏠 返回首頁選單',
+                onSelect: () => ctx.returnToMenu()
+              },
+              { label: '先取消', onSelect: () => {} }
+            ]
+          }
+        ]);
+        return;
+      }
+
+      if (!window.BS.State.canHandover(state)) {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '2F 值班桌（交班紀錄簿）',
+            portrait: 'desk',
+            text: '還沒開始處理阿文的離職交接喔！請先打開旁邊的 2F 值班電腦查看交接清單與存取預覽，或找 2F 的阿文與小晴、1F 的阿明組長與大門櫃台確認事項。'
+          }
+        ]);
+        return;
+      }
+
+      const pending = window.BS.State.getCh3PendingItems(state);
+      const hasPending = pending.length > 0;
+
+      window.BS.UI.startDialogue([
+        {
+          speaker: '2F 值班桌（交班紀錄簿）',
+          portrait: 'desk',
+          text: hasPending
+            ? `⚠ 目前交接清單還有 ${pending.length} 項待辦未完成（例如：${pending[0]}）。確定要帶著待辦事項直接交班嗎？`
+            : '太棒了！所有跨樓層離職交接、權限終止、限期授權、1F 門禁收回與保密提醒都已完成！要現在填寫交班紀錄並下班嗎？',
+          choices: [
+            {
+              label: hasPending ? '✍ 仍帶著待辦事項交班（檢視風險與未完成項目）' : '✍ 填寫交班紀錄並完成本章',
+              onSelect: () => {
+                state.handoverDone = true;
+                state.timeMinutes = Math.max(state.timeMinutes, 17 * 60 + 25);
+                ctx.refreshHUD();
+                const result = window.BS.State.evaluateChapter3Handover(state);
+                if (result.hasRisk) {
+                  window.BS.Audio.alert();
+                } else {
+                  window.BS.Audio.fanfare();
+                }
+                window.BS.UI.openClearScreen(result, {
+                  onReplay: () => ctx.restartChapter(),
+                  onReturnMenu: () => ctx.returnToMenu(),
+                  onStartChapter: (ch) => ctx.startChapter(ch)
+                });
+              }
+            },
+            {
+              label: hasPending ? '先回去補齊剩餘交接事項' : '再在兩層樓繞一下',
               onSelect: () => {}
             }
           ]

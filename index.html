@@ -8,68 +8,77 @@
 </head>
 <body>
   <div class="app-shell">
-    <!-- Top Handheld Bezel Header -->
-    <header class="hud-bar" aria-label="狀態列">
-      <div class="hud-left">
-        <span class="game-badge" id="hud-chapter-badge">寄出之前</span>
-        <span class="hud-clock" id="hud-clock" title="目前時間">🕒 15:40</span>
-        <span class="hud-zone" id="hud-zone">辦公區</span>
-      </div>
-      <div class="hud-right">
-        <div class="hud-tasks" id="hud-tasks" aria-label="任務進度">
-          <span class="task-pill" id="pill-task1" title="任務一">✉ 來信：待處理</span>
-          <span class="task-pill" id="pill-task2" title="任務二">📷 訪客：待接待</span>
-        </div>
-        <button class="hud-btn" id="btn-clues" type="button" title="查看已掌握線索">📋 筆記</button>
-        <button class="hud-btn" id="btn-endings" type="button" title="查看第一章結局圖鑑">🏆 圖鑑</button>
-        <button class="hud-btn" id="btn-restart" type="button" title="重新開始目前章節">🔄 重來</button>
-        <button class="hud-btn" id="btn-menu" type="button" title="返回章節選單">🏠 選單</button>
-        <button class="hud-btn" id="btn-pad-toggle" type="button" title="切換螢幕虛擬按鍵">🎮 搖桿</button>
-        <button class="hud-btn" id="btn-sound" type="button" title="開關音效">🔊</button>
-      </div>
-    </header>
-
     <!-- Main GBA Viewport Stage -->
     <main class="stage-wrap">
       <div class="screen-bezel">
         <canvas id="game-canvas" width="384" height="256" aria-label="遊戲畫面"></canvas>
 
-        <!-- Chapter Select Title Screen Overlay -->
-        <section class="overlay-screen" id="title-screen" role="dialog" aria-modal="true" aria-labelledby="title-heading">
-          <div class="title-card">
-            <div class="title-tag">RCCI LAB TRADE SECRET RPG · v2.0</div>
-            <h1 id="title-heading" class="pixel-title">寄出之前</h1>
-            <p class="title-subtitle">中研院RCCI實驗室營業秘密情境小遊戲。<br>自由探索辦公區與實驗區、向同事與組長核對資訊，在安全空間練習關鍵決策！</p>
+        <!-- Minimal In-Game Micro HUD (hidden on title screen) -->
+        <div class="micro-hud hidden" id="micro-hud" aria-label="遊戲狀態">
+          <div class="micro-left">
+            <span class="micro-pill chapter" id="micro-chapter">Ch1</span>
+            <span class="micro-pill" id="micro-clock">15:40</span>
+            <span class="micro-pill" id="micro-zone">2F 辦公區</span>
+          </div>
+          <div class="micro-right">
+            <span class="micro-pill task hidden" id="micro-status"></span>
+            <span class="micro-pill hint">START 選單 · SELECT 筆記</span>
+          </div>
+        </div>
 
-            <div class="chapter-grid">
-              <button class="chapter-card" id="btn-start-ch1" type="button">
-                <div class="chapter-head">
-                  <span class="chapter-num">第一章</span>
-                  <span class="chapter-time">下午 15:40</span>
-                </div>
-                <div class="chapter-name">寄出之前</div>
-                <div class="chapter-desc">合作方急催測試資料夾、預約訪客想拍照。練習權限控管、現場遮蔽與誤分享通報。</div>
-              </button>
-
-              <button class="chapter-card ch2" id="btn-start-ch2" type="button">
-                <div class="chapter-head">
-                  <span class="chapter-num">第二章</span>
-                  <span class="chapter-time">晚上 18:00</span>
-                </div>
-                <div class="chapter-name">投稿前一晚</div>
-                <div class="chapter-desc">阿文把合作會議圖放進今晚要交的研討會海報。練習對外公開審閱、版本核對與誤傳補救。</div>
-              </button>
+        <!-- GBA Animated Title Screen Overlay -->
+        <section class="overlay-screen title-overlay" id="title-screen" role="dialog" aria-modal="true" aria-labelledby="title-heading">
+          <canvas id="title-bg-canvas" width="384" height="256" aria-hidden="true"></canvas>
+          <div class="title-content">
+            <div class="title-header-block">
+              <div class="title-kicker">中研院 RCCI 實驗室 · 營業秘密情境 RPG</div>
+              <h1 id="title-heading" class="pixel-hero-title">寄出之前</h1>
+              <div class="title-sub-en">BEFORE SENDING</div>
             </div>
 
-            <div class="title-tips">
-              <div class="tip-item"><strong>操作</strong>：方向鍵 / WASD 移動，空白鍵 / Enter 互動（手機與 iPad 使用螢幕虛擬按鍵）</div>
-              <div class="tip-item"><strong>自由遊玩</strong>：兩章皆可直接進入，隨時可回選單切換或重玩不同路線。</div>
+            <div class="title-menu-box" role="menu" aria-label="章節選單">
+              <div class="title-menu-list" id="title-menu-list">
+                <button class="cursor-menu-item selected" id="btn-start-ch1" data-idx="0" type="button" role="menuitem">
+                  <span class="menu-cursor">▶</span>
+                  <span class="menu-body">
+                    <span class="menu-main">第一章　寄出之前 <span class="menu-time">15:40</span></span>
+                    <span class="menu-sub">NDA 簽署查核・合作方來信・1F 大門訪客拍照</span>
+                  </span>
+                </button>
+                <button class="cursor-menu-item" id="btn-start-ch2" data-idx="1" type="button" role="menuitem">
+                  <span class="menu-cursor">▶</span>
+                  <span class="menu-body">
+                    <span class="menu-main">第二章　投稿前一晚 <span class="menu-time">18:00</span></span>
+                    <span class="menu-sub">研討會海報審閱・版本比對・誤傳補救</span>
+                  </span>
+                </button>
+                <button class="cursor-menu-item" id="btn-start-ch3" data-idx="2" type="button" role="menuitem">
+                  <span class="menu-cursor">▶</span>
+                  <span class="menu-body">
+                    <span class="menu-main">第三章　阿文的最後一天 <span class="menu-time">17:00</span></span>
+                    <span class="menu-sub">跨樓層研究交接・人物存取視角・門禁與權限終止</span>
+                  </span>
+                </button>
+              </div>
+              <div class="title-menu-footer">↑↓ 移動游標 · A / Enter 確認 · 三章皆可直接進入</div>
             </div>
+          </div>
+        </section>
 
-            <div class="title-actions">
-              <button class="pixel-btn" id="btn-title-endings" type="button">🏆 第一章結局圖鑑 (<span id="title-ending-count">0/5</span>)</button>
+        <!-- Stage Clear Celebration Screen -->
+        <section class="modal-overlay clear-overlay hidden" id="clear-screen" role="dialog" aria-modal="true" aria-labelledby="clear-headline">
+          <canvas id="clear-fx-canvas" width="384" height="256" aria-hidden="true"></canvas>
+          <div class="clear-card" id="clear-card"></div>
+        </section>
+
+        <!-- GBA START Pause Menu Modal -->
+        <section class="modal-overlay hidden" id="pause-modal" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+          <div class="modal-window pause-window">
+            <div class="modal-header">
+              <span id="pause-title">⏸ PAUSE — 遊戲暫停</span>
+              <button class="modal-close" id="btn-pause-close" type="button" aria-label="繼續遊戲">✕</button>
             </div>
-            <p class="title-footnote">本遊戲之人物、研究資料與事件均為虛構情境 · 支援離線本機與 GitHub Pages</p>
+            <div class="modal-body" id="pause-body"></div>
           </div>
         </section>
 
@@ -85,7 +94,7 @@
             <div class="dialogue-speaker" id="dialogue-speaker"></div>
             <div class="dialogue-text" id="dialogue-text"></div>
             <div class="dialogue-choices hidden" id="dialogue-choices"></div>
-            <div class="dialogue-next-hint hidden" id="dialogue-next-hint">▼ 按空白鍵 / 點擊繼續</div>
+            <div class="dialogue-next-hint hidden" id="dialogue-next-hint">▼ 按 A / 空白鍵 / 點擊繼續</div>
           </div>
         </section>
 
@@ -93,7 +102,7 @@
         <section class="modal-overlay hidden" id="computer-modal" role="dialog" aria-modal="true" aria-labelledby="pc-title">
           <div class="modal-window pc-window">
             <div class="modal-header">
-              <span id="pc-title">💻 值班電腦 — 郵件與雲端分享</span>
+              <span id="pc-title">💻 2F 值班電腦 — 郵件、NDA 查核與雲端分享</span>
               <button class="modal-close" id="btn-pc-close" type="button" aria-label="關閉電腦">✕</button>
             </div>
             <div class="modal-body" id="pc-body"></div>
@@ -104,10 +113,21 @@
         <section class="modal-overlay hidden" id="poster-modal" role="dialog" aria-modal="true" aria-labelledby="poster-title">
           <div class="modal-window poster-window">
             <div class="modal-header">
-              <span id="poster-title">💻 辦公區電腦 — 研討會海報編輯與投稿系統</span>
+              <span id="poster-title">💻 2F 辦公區電腦 — 研討會海報編輯與投稿系統</span>
               <button class="modal-close" id="btn-poster-close" type="button" aria-label="關閉海報系統">✕</button>
             </div>
             <div class="modal-body" id="poster-body"></div>
+          </div>
+        </section>
+
+        <!-- Chapter 3: Offboarding Checklist & Access Perspective Preview Modal -->
+        <section class="modal-overlay hidden" id="offboard-modal" role="dialog" aria-modal="true" aria-labelledby="offboard-title">
+          <div class="modal-window poster-window">
+            <div class="modal-header">
+              <span id="offboard-title">💻 2F 值班電腦 — 離職交接清單與存取視角預覽</span>
+              <button class="modal-close" id="btn-offboard-close" type="button" aria-label="關閉交接系統">✕</button>
+            </div>
+            <div class="modal-body" id="offboard-body"></div>
           </div>
         </section>
 
@@ -122,11 +142,11 @@
           </div>
         </section>
 
-        <!-- Clues / Field Notes Modal -->
+        <!-- SELECT: Clues / Field Notes Modal -->
         <section class="modal-overlay hidden" id="clues-modal" role="dialog" aria-modal="true" aria-labelledby="clues-title">
           <div class="modal-window notes-window">
             <div class="modal-header">
-              <span id="clues-title">📋 值班筆記與進度</span>
+              <span id="clues-title">📋 值班筆記與進度（SELECT）</span>
               <button class="modal-close" id="btn-clues-close" type="button" aria-label="關閉筆記">✕</button>
             </div>
             <div class="modal-body" id="clues-body"></div>
@@ -149,6 +169,7 @@
           <div class="modal-window handover-window">
             <div class="modal-header">
               <span id="handover-title">📑 值班交班紀錄</span>
+              <button class="modal-close" id="btn-handover-close" type="button" aria-label="返回通關畫面">✕</button>
             </div>
             <div class="modal-body" id="handover-body"></div>
           </div>
@@ -156,17 +177,10 @@
       </div>
     </main>
 
-    <!-- Footer Controls / Touch Gamepad -->
-    <footer class="controls-bar">
-      <div class="desktop-hint" id="desktop-hint">
-        <span><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> / <kbd>WASD</kbd> 移動</span>
-        <span><kbd>Space</kbd> / <kbd>Enter</kbd> 互動</span>
-        <span><kbd>Esc</kbd> 關閉視窗</span>
-        <span class="hint-sep">|</span>
-        <span id="nearby-hint">走近物件或同事查看提示</span>
-      </div>
-
-      <div class="touch-gamepad hidden" id="touch-gamepad" aria-label="虛擬控制器">
+    <!-- Authentic GBA Handheld Controls Deck -->
+    <footer class="controls-bar gba-deck" aria-label="GBA 控制器">
+      <div class="gba-controls-row">
+        <!-- Left D-Pad -->
         <div class="dpad" role="group" aria-label="方向鍵">
           <button class="dpad-btn up" data-dir="up" type="button" aria-label="上">▲</button>
           <button class="dpad-btn left" data-dir="left" type="button" aria-label="左">◀</button>
@@ -174,9 +188,32 @@
           <button class="dpad-btn right" data-dir="right" type="button" aria-label="右">▶</button>
           <button class="dpad-btn down" data-dir="down" type="button" aria-label="下">▼</button>
         </div>
+
+        <!-- Center GBA SELECT & START Pill Buttons + Prompt -->
+        <div class="gba-center-col">
+          <div class="nearby-strip" id="nearby-hint">↑↓ 選擇章節，按 A 或 Enter 開始</div>
+          <div class="gba-mid-btns">
+            <div class="gba-pill-wrap">
+              <button class="gba-pill-btn" id="btn-select-gba" type="button" aria-label="SELECT 筆記"></button>
+              <span class="gba-pill-label">SELECT<small>筆記</small></span>
+            </div>
+            <div class="gba-pill-wrap">
+              <button class="gba-pill-btn" id="btn-start-gba" type="button" aria-label="START 選單"></button>
+              <span class="gba-pill-label">START<small>暫停選單</small></span>
+            </div>
+          </div>
+          <div class="desktop-key-hint">
+            <span><kbd>WASD</kbd>/<kbd>↑↓←→</kbd> 移動</span>
+            <span><kbd>Space</kbd>/<kbd>Enter</kbd> A鍵</span>
+            <span><kbd>Tab</kbd> SELECT</span>
+            <span><kbd>Esc</kbd>/<kbd>P</kbd> START</span>
+          </div>
+        </div>
+
+        <!-- Right B / A Buttons -->
         <div class="ab-buttons">
-          <button class="ab-btn btn-b" id="touch-b" type="button" aria-label="返回或筆記">B<span>返回</span></button>
-          <button class="ab-btn btn-a" id="touch-a" type="button" aria-label="互動確認">A<span>互動</span></button>
+          <button class="ab-btn btn-b" id="touch-b" type="button" aria-label="B 返回">B<span>返回</span></button>
+          <button class="ab-btn btn-a" id="touch-a" type="button" aria-label="A 互動">A<span>互動</span></button>
         </div>
       </div>
     </footer>

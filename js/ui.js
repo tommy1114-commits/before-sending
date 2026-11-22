@@ -180,12 +180,336 @@
     return false;
   }
 
+  let titleCursorIdx = 0;
+  let pauseCursorIdx = 0;
+  let pauseActions = [];
+  let clearFxParticles = [];
+  let clearFxIsWarn = false;
+  let lastClearContext = null;
+
   // ===== Modal Helpers =====
   function closeAllModals() {
-    ['computer-modal', 'poster-modal', 'camera-modal', 'clues-modal', 'endings-modal', 'handover-modal'].forEach((id) => {
-      $(id).classList.add('hidden');
+    [
+      'computer-modal',
+      'poster-modal',
+      'offboard-modal',
+      'camera-modal',
+      'clues-modal',
+      'endings-modal',
+      'handover-modal',
+      'pause-modal',
+      'clear-screen'
+    ].forEach((id) => {
+      const el = $(id);
+      if (el) el.classList.add('hidden');
     });
     activeModal = null;
+  }
+
+  // ===== Title Screen Retro Cursor Menu =====
+  function setTitleCursor(idx) {
+    const items = Array.from(document.querySelectorAll('#title-menu-list .cursor-menu-item'));
+    if (!items.length) return;
+    titleCursorIdx = ((idx % items.length) + items.length) % items.length;
+    items.forEach((btn, i) => btn.classList.toggle('selected', i === titleCursorIdx));
+  }
+
+  function moveTitleCursor(delta) {
+    setTitleCursor(titleCursorIdx + delta);
+    window.BS.Audio.select();
+  }
+
+  function confirmTitleCursor() {
+    const items = Array.from(document.querySelectorAll('#title-menu-list .cursor-menu-item'));
+    if (items[titleCursorIdx]) {
+      items[titleCursorIdx].click();
+    }
+  }
+
+  // ===== GBA START Pause Menu =====
+  function setPauseCursor(idx) {
+    const items = Array.from(document.querySelectorAll('#pause-menu-list .cursor-menu-item'));
+    if (!items.length) return;
+    pauseCursorIdx = ((idx % items.length) + items.length) % items.length;
+    items.forEach((btn, i) => btn.classList.toggle('selected', i === pauseCursorIdx));
+  }
+
+  function movePauseCursor(delta) {
+    setPauseCursor(pauseCursorIdx + delta);
+    window.BS.Audio.select();
+  }
+
+  function confirmPauseCursor() {
+    if (pauseActions[pauseCursorIdx]) {
+      pauseActions[pauseCursorIdx]();
+    }
+  }
+
+  function openPauseModal(state, zoneName, callbacks) {
+    activeModal = 'pause';
+    $('pause-modal').classList.remove('hidden');
+    const unlocked = window.BS.State.loadUnlockedEndings();
+    const total = window.BS.State.ENDINGS_CATALOG.length;
+    const chLabel =
+      state.chapter === 3
+        ? '第三章「阿文的最後一天」'
+        : state.chapter === 2
+        ? '第二章「投稿前一晚」'
+        : '第一章「寄出之前」';
+    const muted = window.BS.Audio.isMuted();
+
+    const menuItems = [
+      {
+        label: '繼續遊戲',
+        action: () => {
+          window.BS.Audio.confirm();
+          closeAllModals();
+        }
+      },
+      {
+        label: '📋 值班筆記與任務進度（SELECT）',
+        action: () => {
+          window.BS.Audio.select();
+          closeAllModals();
+          openCluesModal(state);
+        }
+      },
+      {
+        label: `🏆 第一章結局圖鑑（${unlocked.length}/${total}）`,
+        action: () => {
+          window.BS.Audio.select();
+          closeAllModals();
+          openEndingsModal();
+        }
+      },
+      {
+        label: '🔄 重新開始本章節（保留結局紀錄）',
+        action: () => {
+          window.BS.Audio.confirm();
+          closeAllModals();
+          callbacks.onRestart();
+        }
+      },
+      {
+        label: muted ? '🔇 音效：關閉（按確認開啟）' : '🔊 音效：開啟（按確認靜音）',
+        action: () => {
+          const nowMuted = window.BS.Audio.toggleMute();
+          if (!nowMuted) window.BS.Audio.select();
+          openPauseModal(state, zoneName, callbacks);
+          setPauseCursor(4);
+        }
+      },
+      {
+        label: '🏠 返回首頁章節選單',
+        action: () => {
+          window.BS.Audio.cancel();
+          closeAllModals();
+          callbacks.onReturnMenu();
+        }
+      }
+    ];
+
+    pauseActions = menuItems.map((m) => m.action);
+    pauseCursorIdx = 0;
+
+    $('pause-body').innerHTML = `
+      <div class="pause-meta-box">
+        <strong>${chLabel}</strong><br>
+        🕒 ${window.BS.State.formatClock(state.timeMinutes)} ｜ 📍 ${zoneName}
+      </div>
+      <div class="pause-menu-list" id="pause-menu-list">
+        ${menuItems
+          .map(
+            (m, idx) => `
+          <button class="cursor-menu-item ${idx === 0 ? 'selected' : ''}" data-pidx="${idx}" type="button">
+            <span class="menu-cursor">▶</span>
+            <span class="menu-body"><span class="menu-main">${m.label}</span></span>
+          </button>
+        `
+          )
+          .join('')}
+      </div>
+      <div style="margin-top:8px; text-align:center; font-size:11.5px; color:#5b6476;">
+        ↑↓ 選擇 · A / Enter 確認 · START / B 繼續遊戲
+      </div>
+    `;
+
+    $('pause-body').querySelectorAll('.cursor-menu-item').forEach((btn) => {
+      const idx = Number(btn.dataset.pidx);
+      btn.addEventListener('mouseenter', () => {
+        setPauseCursor(idx);
+        window.BS.Audio.select();
+      });
+      btn.addEventListener('click', () => {
+        pauseActions[idx]();
+      });
+    });
+  }
+
+  // ===== Stage Clear Celebration Screen =====
+  function initClearFx(isWarn) {
+    clearFxIsWarn = isWarn;
+    clearFxParticles = [];
+    const colors = isWarn
+      ? ['#f87171', '#fbbf24', '#fed7aa', '#ffffff']
+      : ['#ffd166', '#5eead4', '#60a5fa', '#f472b6', '#ffffff'];
+    for (let i = 0; i < 48; i++) {
+      clearFxParticles.push({
+        x: Math.random() * 384,
+        y: Math.random() * 256,
+        vx: (Math.random() - 0.5) * 0.7,
+        vy: isWarn ? 0.25 + Math.random() * 0.45 : 0.45 + Math.random() * 0.85,
+        size: Math.random() < 0.5 ? 3 : 4,
+        color: colors[i % colors.length]
+      });
+    }
+  }
+
+  function renderClearFx(tick) {
+    if (activeModal !== 'clear') return;
+    const canvas = $('clear-fx-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    clearFxParticles.forEach((p, idx) => {
+      p.x += p.vx + Math.sin(tick * 0.05 + idx) * 0.25;
+      p.y += p.vy;
+      if (p.y > 260) {
+        p.y = -6;
+        p.x = Math.random() * 384;
+      }
+      if (p.x < -6) p.x = 388;
+      if (p.x > 390) p.x = -4;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(Math.round(p.x), Math.round(p.y), p.size, p.size);
+    });
+  }
+
+  function openClearScreen(result, callbacks) {
+    activeModal = 'clear';
+    lastClearContext = { result, callbacks };
+    $('clear-screen').classList.remove('hidden');
+
+    const isCh2 = result.chapter === 2;
+    const isCh3 = result.chapter === 3;
+    let isWarn = false;
+    let rank = 'S';
+    let kicker = isCh3 ? '★ CHAPTER 3 CLEAR! ★' : isCh2 ? '★ CHAPTER 2 CLEAR! ★' : '★ CHAPTER 1 CLEAR! ★';
+    let headline = isCh3
+      ? '恭喜完成第三章「阿文的最後一天」！'
+      : isCh2
+      ? '恭喜完成第二章「投稿前一晚」！'
+      : '恭喜完成第一章「寄出之前」！';
+    let icon = '🏆';
+    let title = '';
+    let desc = '';
+    let extraNote = '';
+
+    if (isCh3) {
+      icon = result.banner.icon;
+      title = result.banner.title;
+      desc = result.banner.desc;
+      if (result.hasRisk) {
+        isWarn = true;
+        rank = '!';
+        kicker = '⚠ CHAPTER 3 ENDED · 尚有未完成待辦';
+        headline = '第三章結束（留下權限或交接待辦）';
+        extraNote = '交班清單已詳細列出所有未完成與權限過廣項目，歡迎查看紀錄後再挑戰一次完整交接！';
+      } else if (result.sections.transfer.badge.cls === 'warn') {
+        rank = 'A';
+        extraNote = '成功透過管理員補救移交指定檔案，未恢復整包原權限，穩健完成離職交接！';
+      } else {
+        rank = 'S';
+        extraNote = '跨樓層完成研究交接、小晴實測確認、權限終止、限期授權與 1F 門禁收回，滿分典範！';
+      }
+    } else if (isCh2) {
+      icon = result.banner.icon;
+      title = result.banner.title;
+      desc = result.banner.desc;
+      if (result.sections.route.badge.cls === 'danger') {
+        isWarn = true;
+        rank = '!';
+        kicker = '⚠ CHAPTER 2 ENDED · 尚有未補救項目';
+        headline = '第二章結束（留下風險待處理）';
+        extraNote = '沒關係，這正是情境練習的價值！看看交班紀錄，再挑戰一次完整補救或核准提交吧！';
+      } else if (result.sections.route.badge.cls === 'warn') {
+        rank = 'A';
+        extraNote = '穩健面對風險與不確定性，已留下清楚的追蹤紀錄！';
+      } else {
+        rank = 'S';
+        extraNote = '完美核對授權、版本綁定與檔名，穩妥完成研討會海報投稿！';
+      }
+    } else {
+      icon = result.ending.icon;
+      title = result.ending.title;
+      desc = result.ending.desc;
+      extraNote = `第一章結局圖鑑已收錄：${result.unlockedCount} / ${result.totalEndings}`;
+      if (result.ending.id === 'alarm_handover') {
+        isWarn = true;
+        rank = '!';
+        kicker = '⚠ CHAPTER 1 ENDED · 交班警報';
+        headline = '第一章結束（仍有外洩風險）';
+        extraNote = `沒關係，遊戲就是用來安全試錯的！查看交班紀錄了解風險，再重玩挑戰其他結局吧！（已收錄 ${result.unlockedCount}/${result.totalEndings}）`;
+      } else if (result.ending.id === 'flawless') {
+        rank = 'S';
+      } else {
+        rank = 'A';
+      }
+    }
+
+    initClearFx(isWarn);
+
+    const nextChNum = isCh3 ? 1 : isCh2 ? 3 : 2;
+    const nextChLabel = isCh3
+      ? '▶ 重溫第一章「寄出之前」'
+      : isCh2
+      ? '▶ 繼續挑戰第三章「阿文的最後一天」'
+      : '▶ 繼續挑戰第二章「投稿前一晚」';
+    const card = $('clear-card');
+    card.className = 'clear-card' + (isWarn ? ' warn-clear' : '');
+    card.innerHTML = `
+      <div class="clear-kicker">${kicker}</div>
+      <h2 class="clear-headline" id="clear-headline">${headline}</h2>
+      <div class="clear-badge-row">
+        <div class="clear-rank-stamp ${isWarn ? 'rank-warn' : ''}">${rank}</div>
+        <div>
+          <div class="clear-ending-title">${icon} ${title}</div>
+          <div class="clear-ending-desc">${desc}</div>
+        </div>
+      </div>
+      <p style="margin:0 0 10px; font-size:12.5px; color:#384963; font-weight:600;">${extraNote}</p>
+      <div class="clear-actions">
+        <button class="pixel-btn primary" id="btn-clear-handover" type="button">📑 查看完整交班紀錄與自評表對照</button>
+        <div class="clear-actions-row">
+          <button class="pixel-btn warn" id="btn-clear-next-ch" type="button">${nextChLabel}</button>
+          <button class="pixel-btn" id="btn-clear-replay" type="button">🔄 再玩一次本章</button>
+          <button class="pixel-btn" id="btn-clear-menu" type="button">🏠 返回首頁選單</button>
+        </div>
+      </div>
+    `;
+
+    $('btn-clear-handover').onclick = () => {
+      window.BS.Audio.confirm();
+      closeAllModals();
+      openHandoverModal(result, callbacks);
+    };
+    $('btn-clear-next-ch').onclick = () => {
+      window.BS.Audio.confirm();
+      closeAllModals();
+      callbacks.onStartChapter(nextChNum);
+    };
+    $('btn-clear-replay').onclick = () => {
+      window.BS.Audio.confirm();
+      closeAllModals();
+      callbacks.onReplay();
+    };
+    $('btn-clear-menu').onclick = () => {
+      window.BS.Audio.select();
+      closeAllModals();
+      callbacks.onReturnMenu();
+    };
   }
 
   // ===== Chapter 1: Computer Email & Cloud Share UI =====
@@ -1246,10 +1570,362 @@
     ctx.fillText('PREVIEW 16:9', 20, 20);
   }
 
+  // ===== Chapter 3: Offboarding Checklist & Access Perspective Preview =====
+  function openOffboardModal(state, callbacks) {
+    activeModal = 'offboard';
+    $('offboard-modal').classList.remove('hidden');
+
+    let activeTab = 'checklist'; // 'checklist' | 'preview'
+    let previewRole = 'awen';    // 'awen' | 'qing'
+    let inlineNotice = '';
+
+    function render() {
+      const c = state.ch3;
+      const body = $('offboard-body');
+      const pending = window.BS.State.getCh3PendingItems(state);
+      const transferred = c.rawLogLocation === 'project';
+      const origRevoked = c.awenOrigAccess === 'revoked';
+
+      // Next-step dynamic hint telling player which floor & who to see next!
+      let nextStepHint = '';
+      if (!transferred && origRevoked) {
+        nextStepHint = '🚨 <strong>交接中斷補救：</strong>原始量測紀錄尚未移交，且阿文原權限已終止！請下樓找 <strong>1F 阿明組長</strong> 請求管理員協助移交指定檔案。';
+      } else if (!transferred) {
+        nextStepHint = '💡 <strong>下一步建議：</strong>原始量測紀錄還在阿文個人工作區，請到 <strong>2F 實驗區找阿文</strong> 協助移交至專案指定位置（也可先下樓找 <strong>1F 阿明組長</strong> 確認兩張圖的限期授權範圍）。';
+      } else if (!c.qingHasProjectAccess) {
+        nextStepHint = '💡 <strong>下一步建議：</strong>檔案已移交，但小晴尚無法開啟！請先在此為<strong>小晴確認專案存取權限</strong>，再切到「存取預覽」檢查。';
+      } else if (!c.qingConfirmedOpen) {
+        nextStepHint = '💡 <strong>下一步建議：</strong>小晴權限已開通！請到 <strong>2F 實驗區找小晴</strong> 親自測試開啟紀錄並確認接收。';
+      } else if (!c.clues.mingConfirmedScope) {
+        nextStepHint = '💡 <strong>下一步建議：</strong>請下樓找 <strong>1F 阿明組長</strong> 確認阿文後續改論文所需的兩張圖與限期授權，並順便於 <strong>1F 大門接待櫃台</strong> 收回門禁卡！';
+      } else if (!c.awenPaperGrant || !origRevoked) {
+        nextStepHint = '💡 <strong>下一步建議：</strong>請在此設定阿文「僅兩張圖（離開後 30 天）」限期授權並<strong>終止阿文原專案權限</strong>，再切到「阿文視角」確認隔離效果！';
+      } else if (!c.badgeReturned) {
+        nextStepHint = '💡 <strong>下一步建議：</strong>電子權限已處理妥當，請下樓到 <strong>1F 大門接待櫃台</strong> 收回阿文的實體門禁卡並登記！';
+      } else if (!c.ndaRemindedToAwen) {
+        nextStepHint = '💡 <strong>下一步建議：</strong>別忘了再到 <strong>2F 實驗區找阿文</strong> 確認提醒離職後的保密義務！';
+      } else {
+        nextStepHint = '✅ <strong>全數離職交接項目已完成！</strong>請關閉電腦，到旁邊的 <strong>2F 值班桌</strong> 完成交班與通關！';
+      }
+
+      let tabHtml = '';
+      if (activeTab === 'checklist') {
+        tabHtml = `
+          <div class="${!transferred && origRevoked ? 'inline-danger-box' : pending.length === 0 ? 'inline-ok-box' : 'inline-warning-box'}">
+            ${nextStepHint}
+          </div>
+          ${inlineNotice ? `<div class="inline-ok-box">${inlineNotice}</div>` : ''}
+
+          <div class="pc-card" style="margin-bottom:10px;">
+            <h3>📋 阿文離職交接清單（晴空計畫）</h3>
+            <table class="checklist-table">
+              <tbody>
+                <tr>
+                  <th style="width:32%;">接手同事</th>
+                  <td><strong>小晴</strong>（2F 實驗區）</td>
+                </tr>
+                <tr>
+                  <th>原始量測紀錄位置</th>
+                  <td>
+                    <code>${c.rawLogName}</code><br>
+                    ${
+                      transferred
+                        ? `<span class="status-badge ok">✅ 已移交至專案指定位置</span> <code>${c.rawLogTargetPath}</code>${c.adminTransferCompleted ? '（由管理員協助移交）' : ''}`
+                        : `<span class="status-badge danger">❌ 仍在個人工作區</span> <code>${c.rawLogOrigPath}</code>`
+                    }
+                  </td>
+                </tr>
+                <tr>
+                  <th>接手人權限與接收確認</th>
+                  <td>
+                    權限：${c.qingHasProjectAccess ? '<span class="status-badge ok">✅ 已開通專案權限</span>' : '<span class="status-badge warn">⬜ 尚未開通</span>'}
+                    　接收：${c.qingConfirmedOpen ? '<span class="status-badge ok">✅ 接收人（小晴）已親自確認開啟</span>' : '<span class="status-badge warn">⬜ 待小晴實測確認</span>'}
+                  </td>
+                </tr>
+                <tr>
+                  <th>阿文原專案權限</th>
+                  <td>
+                    ${
+                      origRevoked
+                        ? '<span class="status-badge ok">✅ 已終止原專案權限</span>'
+                        : c.awenOrigAccess === 'kept_explicit'
+                        ? '<span class="status-badge danger">🚨 暫時保留中（授權過廣！可至存取預覽確認）</span>'
+                        : '<span class="status-badge warn">⚠ 仍開放中（離職當日應終止）</span>'
+                    }
+                  </td>
+                </tr>
+                <tr>
+                  <th>後續論文兩張圖授權</th>
+                  <td>
+                    ${
+                      c.awenPaperGrant
+                        ? `<span class="status-badge ok">✅ 已設定限期授權</span> ${c.awenPaperPurpose}｜期限：<strong>${c.awenPaperDuration}</strong>`
+                        : c.clues.mingConfirmedScope
+                        ? '<span class="status-badge warn">⬜ 阿明組長已核定範圍（僅兩張圖／離開後 30 天），待系統設定</span>'
+                        : '<span class="status-badge warn">⬜ 待下樓找 1F 阿明組長確認範圍與期限</span>'
+                    }
+                  </td>
+                </tr>
+                <tr>
+                  <th>1F 實體門禁卡回收</th>
+                  <td>${c.badgeReturned ? '<span class="status-badge ok">✅ 已於 1F 大門接待櫃台收回並登記</span>' : '<span class="status-badge warn">⬜ 尚未於 1F 櫃台收回登記</span>'}</td>
+                </tr>
+                <tr>
+                  <th>離職保密義務提醒</th>
+                  <td>${c.ndaRemindedToAwen ? '<span class="status-badge ok">✅ 已透過交接對話提醒阿文保密義務</span>' : '<span class="status-badge warn">⬜ 尚未與阿文確認保密義務提醒</span>'}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="ch3-action-grid">
+            <div class="ch3-action-box">
+              <div style="font-size:12.5px;">
+                <strong>1. 接手人（小晴）專案權限</strong><br>
+                <span style="color:#4c586e;">確認小晴具備晴空計畫指定資料夾存取權限，才能開啟移交的原始紀錄。</span>
+              </div>
+              <button class="pixel-btn ${c.qingHasProjectAccess ? '' : 'primary'}" id="btn-ch3-grant-qing" type="button" ${c.qingHasProjectAccess ? 'disabled' : ''}>
+                ${c.qingHasProjectAccess ? '✅ 小晴專案權限已開通' : '🔑 為小晴確認專案存取權限'}
+              </button>
+            </div>
+
+            <div class="ch3-action-box">
+              <div style="font-size:12.5px;">
+                <strong>2. 阿文「兩張會議圖」限期授權</strong><br>
+                <span style="color:#4c586e;">依 1F 阿明組長核定範圍，僅授權圖A、圖B 供論文修訂（離開後 30 天到期）。</span>
+              </div>
+              <button class="pixel-btn ${c.awenPaperGrant ? '' : 'primary'}" id="btn-ch3-grant-paper" type="button" ${!c.clues.mingConfirmedScope || c.awenPaperGrant ? 'disabled' : ''}>
+                ${
+                  c.awenPaperGrant
+                    ? '✅ 已設定兩張圖限期授權（30 天）'
+                    : c.clues.mingConfirmedScope
+                    ? '⏳ 設定兩張圖限期授權（離開後 30 天）'
+                    : '🔒 先找 1F 阿明組長確認範圍與期限'
+                }
+              </button>
+            </div>
+
+            <div class="ch3-action-box">
+              <div style="font-size:12.5px;">
+                <strong>3. 終止阿文原專案資料夾權限</strong><br>
+                <span style="color:#4c586e;">離職時應取消原專案與個人區權限，避免留存與論文無關的存取權。</span>
+              </div>
+              <button class="pixel-btn ${origRevoked ? '' : 'danger'}" id="btn-ch3-revoke-awen" type="button" ${origRevoked ? 'disabled' : ''}>
+                ${origRevoked ? '✅ 已終止阿文原專案權限' : '🔒 終止阿文的原專案權限'}
+              </button>
+            </div>
+
+            <div class="ch3-action-box">
+              <div style="font-size:12.5px;">
+                <strong>4. 測試保留原權限／切換視角</strong><br>
+                <span style="color:#4c586e;">若先答應阿文保留原權限，可到「存取預覽」看看阿文還能存取哪些檔案。</span>
+              </div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                ${
+                  !origRevoked && c.awenOrigAccess !== 'kept_explicit'
+                    ? '<button class="pixel-btn warn" id="btn-ch3-keep-awen" type="button" style="flex:1; font-size:12px;">⚠ 先保留原權限</button>'
+                    : ''
+                }
+                <button class="pixel-btn" id="btn-ch3-goto-preview" type="button" style="flex:1; font-size:12px;">👁 開啟人物存取預覽 →</button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        // Tab 2: Perspective Access Preview (Awen vs Qing)
+        const cards = window.BS.State.getCh3AccessPreview(state, previewRole);
+        tabHtml = `
+          <div class="role-switch-bar">
+            <button class="role-switch-btn ${previewRole === 'awen' ? 'active' : ''}" id="btn-role-awen" type="button">👤 切換至：阿文視角（離任人員）</button>
+            <button class="role-switch-btn ${previewRole === 'qing' ? 'active' : ''}" id="btn-role-qing" type="button">👤 切換至：小晴視角（接手同事）</button>
+          </div>
+
+          <div class="access-card-list">
+            ${cards
+              .map(
+                (card) => `
+              <div class="access-card ${card.cls}">
+                <div class="access-card-top">
+                  <strong>${card.title}</strong>
+                  <span class="status-badge ${card.cls}">${card.badge}</span>
+                </div>
+                <div style="font-size:12.5px; color:#344156;">${card.detail}</div>
+              </div>
+            `
+              )
+              .join('')}
+          </div>
+
+          <div class="pc-actions">
+            ${
+              previewRole === 'qing' && transferred && !c.qingHasProjectAccess
+                ? '<button class="pixel-btn primary" id="btn-preview-grant-qing" type="button">🔑 立即為小晴開通專案權限並重檢</button>'
+                : ''
+            }
+            ${
+              previewRole === 'awen' && !origRevoked
+                ? '<button class="pixel-btn danger" id="btn-preview-revoke-awen" type="button">🔒 立即終止阿文原專案權限並重檢</button>'
+                : ''
+            }
+            ${
+              previewRole === 'awen' && c.clues.mingConfirmedScope && !c.awenPaperGrant
+                ? '<button class="pixel-btn primary" id="btn-preview-grant-paper" type="button">⏳ 設定兩張圖 30 天限期授權</button>'
+                : ''
+            }
+            <button class="pixel-btn" id="btn-ch3-back-list" type="button">← 返回離職交接清單</button>
+          </div>
+        `;
+      }
+
+      body.innerHTML = `
+        <div class="poster-tabs">
+          <button class="poster-tab-btn ${activeTab === 'checklist' ? 'active' : ''}" id="tab-ch3-list" type="button">📋 離職交接清單與權限操作</button>
+          <button class="poster-tab-btn ${activeTab === 'preview' ? 'active' : ''}" id="tab-ch3-preview" type="button">👁 存取預覽（切換阿文／小晴視角）</button>
+        </div>
+        ${tabHtml}
+      `;
+
+      $('tab-ch3-list').onclick = () => {
+        activeTab = 'checklist';
+        window.BS.Audio.select();
+        render();
+      };
+      $('tab-ch3-preview').onclick = () => {
+        activeTab = 'preview';
+        if (previewRole === 'awen') c.checkedAwenView = true;
+        if (previewRole === 'qing') c.checkedQingView = true;
+        window.BS.Audio.select();
+        render();
+      };
+
+      if (activeTab === 'checklist') {
+        if ($('btn-ch3-grant-qing')) {
+          $('btn-ch3-grant-qing').onclick = () => {
+            callbacks.onGrantQing();
+            inlineNotice = '✅ 已為小晴開通晴空計畫存取權限！可到「存取預覽」檢查，並請 2F 實驗區小晴親自確認開啟。';
+            window.BS.Audio.success();
+            render();
+          };
+        }
+        if ($('btn-ch3-grant-paper')) {
+          $('btn-ch3-grant-paper').onclick = () => {
+            callbacks.onGrantAwenPaper();
+            inlineNotice = '✅ 已依阿明組長核定範圍，設定阿文「僅兩張會議圖・離開後 30 天」獨立限期授權！';
+            window.BS.Audio.success();
+            render();
+          };
+        }
+        if ($('btn-ch3-revoke-awen')) {
+          $('btn-ch3-revoke-awen').onclick = () => {
+            const early = callbacks.onRevokeAwenOrig();
+            if (early) {
+              inlineNotice = '';
+              window.BS.Audio.alert();
+            } else {
+              inlineNotice = '✅ 已終止阿文原專案資料夾權限！建議切換到「存取預覽 → 阿文視角」確認隔離效果。';
+              window.BS.Audio.success();
+            }
+            render();
+          };
+        }
+        if ($('btn-ch3-keep-awen')) {
+          $('btn-ch3-keep-awen').onclick = () => {
+            callbacks.onKeepAwenOrig();
+            activeTab = 'preview';
+            previewRole = 'awen';
+            c.checkedAwenView = true;
+            window.BS.Audio.alert();
+            render();
+          };
+        }
+        if ($('btn-ch3-goto-preview')) {
+          $('btn-ch3-goto-preview').onclick = () => {
+            activeTab = 'preview';
+            if (previewRole === 'awen') c.checkedAwenView = true;
+            window.BS.Audio.select();
+            render();
+          };
+        }
+      } else {
+        $('btn-role-awen').onclick = () => {
+          previewRole = 'awen';
+          c.checkedAwenView = true;
+          window.BS.Audio.select();
+          render();
+        };
+        $('btn-role-qing').onclick = () => {
+          previewRole = 'qing';
+          c.checkedQingView = true;
+          window.BS.Audio.select();
+          render();
+        };
+        if ($('btn-preview-grant-qing')) {
+          $('btn-preview-grant-qing').onclick = () => {
+            callbacks.onGrantQing();
+            window.BS.Audio.success();
+            render();
+          };
+        }
+        if ($('btn-preview-revoke-awen')) {
+          $('btn-preview-revoke-awen').onclick = () => {
+            callbacks.onRevokeAwenOrig();
+            window.BS.Audio.success();
+            render();
+          };
+        }
+        if ($('btn-preview-grant-paper')) {
+          $('btn-preview-grant-paper').onclick = () => {
+            callbacks.onGrantAwenPaper();
+            window.BS.Audio.success();
+            render();
+          };
+        }
+        $('btn-ch3-back-list').onclick = () => {
+          activeTab = 'checklist';
+          window.BS.Audio.select();
+          render();
+        };
+      }
+    }
+
+    render();
+  }
+
   // ===== Field Notes / Clues Modal =====
   function openCluesModal(state) {
     activeModal = 'clues';
     $('clues-modal').classList.remove('hidden');
+
+    if (state.chapter === 3) {
+      const c = state.ch3;
+      const pending = window.BS.State.getCh3PendingItems(state);
+      $('clues-title').textContent = '📋 第三章筆記 — 阿文的最後一天（SELECT）';
+      $('clues-body').innerHTML = `
+        <div class="section-card">
+          <h3>🏢 雙樓層交接路線圖</h3>
+          <ul style="margin:6px 0 0; padding-left:18px;">
+            <li><strong>2F 辦公區</strong>：值班電腦（交接清單＋阿文／小晴存取預覽）、值班桌（交班）。</li>
+            <li><strong>2F 實驗區</strong>：阿文（移交原始紀錄、提醒保密義務）、小晴（實測開啟紀錄並確認接收）、實驗紀錄電腦（對照原位置與接手位置）。</li>
+            <li><strong>1F 大門大廳</strong>：阿明組長（核定兩張圖 30 天授權範圍；或誤提早停權時啟動管理員協助移交）、1F 大門接待櫃台（收回並登記阿文的實體門禁卡）。</li>
+          </ul>
+        </div>
+
+        <div class="section-card">
+          <h3>✅ 交接清單目前狀態（剩餘 ${pending.length} 項待辦）</h3>
+          <ul style="margin:6px 0 0; padding-left:18px;">
+            <li>${c.rawLogLocation === 'project' ? '✅' : '⬜'} <strong>原始紀錄移交</strong>：<code>${c.rawLogName}</code>（${c.rawLogLocation === 'project' ? '已移交至專案指定位置' : '仍在阿文個人工作區'}）</li>
+            <li>${c.qingHasProjectAccess ? '✅' : '⬜'} <strong>小晴專案存取權限</strong>：${c.qingHasProjectAccess ? '已開通' : '尚未於 2F 值班電腦開通'}</li>
+            <li>${c.qingConfirmedOpen ? '✅' : '⬜'} <strong>小晴親自確認開啟</strong>：${c.qingConfirmedOpen ? '小晴已確認接收' : '請到 2F 實驗區找小晴實測確認'}</li>
+            <li>${c.clues.mingConfirmedScope ? '✅' : '⬜'} <strong>1F 阿明組長核定範圍</strong>：${c.clues.mingConfirmedScope ? '僅兩張會議圖・論文修訂・離開後 30 天' : '請下樓找 1F 阿明組長確認'}</li>
+            <li>${c.awenOrigAccess === 'revoked' ? '✅' : '⬜'} <strong>終止阿文原專案權限</strong>：${c.awenOrigAccess === 'revoked' ? '已終止' : '🚨 仍開放中！'}</li>
+            <li>${c.awenPaperGrant ? '✅' : '⬜'} <strong>設定兩張圖限期授權</strong>：${c.awenPaperGrant ? '已設定（離開後 30 天）' : '尚未設定'}</li>
+            <li>${c.badgeReturned ? '✅' : '⬜'} <strong>1F 實體門禁卡收回</strong>：${c.badgeReturned ? '已於 1F 櫃台登記收回' : '請下樓至 1F 大門接待櫃台登記'}</li>
+            <li>${c.ndaRemindedToAwen ? '✅' : '⬜'} <strong>離職保密義務提醒</strong>：${c.ndaRemindedToAwen ? '已向阿文提醒確認' : '請找 2F 實驗區阿文確認提醒'}</li>
+          </ul>
+        </div>
+      `;
+      return;
+    }
 
     if (state.chapter === 2) {
       const c = state.ch2;
@@ -1309,12 +1985,12 @@
             e.misshared && !e.reportedToLead ? '⚠ 連結已停用，請找負責人阿明組長完成通報' :
             '✅ 已處理完成'
           }</li>
-          <li><strong>訪客拍照（訪客入口）</strong>：${
-            v.status === 'waiting' ? '陳先生在訪客入口等候接待' :
-            v.status === 'in_lab' ? '已陪同進實驗區，整理完白板／螢幕／標籤後再找陳先生重拍' :
+          <li><strong>訪客拍照（1F 大門櫃台）</strong>：${
+            v.status === 'waiting' ? '陳先生在一樓大門櫃台等候接待（由左側樓梯／電梯下樓）' :
+            v.status === 'in_lab' ? '已陪同上 2F 實驗區，整理完白板／螢幕／標籤後再找陳先生重拍' :
             '✅ 已完成接待與拍攝'
           }</li>
-          <li><strong>最後交班（辦公區值班桌）</strong>：兩件事處理完後，回值班桌填寫交班紀錄！</li>
+          <li><strong>最後交班（2F 辦公區值班桌）</strong>：兩件事處理完後，回 2F 值班桌填寫交班紀錄！</li>
         </ul>
       </div>
 
@@ -1370,10 +2046,98 @@
     `;
   }
 
-  // ===== Handover Summary Modal (Ch1 & Ch2) =====
+  // ===== Handover Summary Modal (Ch1, Ch2 & Ch3) =====
   function openHandoverModal(result, callbacks) {
     activeModal = 'handover';
     $('handover-modal').classList.remove('hidden');
+
+    if (result.chapter === 3) {
+      const { banner, sections } = result;
+      $('handover-title').textContent = '📑 第三章交班紀錄 — 阿文的最後一天';
+      $('handover-body').innerHTML = `
+        <div class="ending-banner">
+          <div class="ending-label">第三章「阿文的最後一天」離職交班紀錄</div>
+          <h2>${banner.icon} ${banner.title}</h2>
+          <p>${banner.desc}</p>
+        </div>
+
+        <div class="section-card">
+          <h3>
+            <span>1. 研究資料移交與接手人（小晴）確認</span>
+            <span class="status-badge ${sections.transfer.badge.cls}">${sections.transfer.badge.text}</span>
+          </h3>
+          <p style="margin:4px 0;">${sections.transfer.detail}</p>
+          <div class="reminder-quote">💡 ${sections.transfer.reminder}</div>
+        </div>
+
+        <div class="section-card">
+          <h3>
+            <span>2. 原專案權限終止與兩張圖限期授權</span>
+            <span class="status-badge ${sections.access.badge.cls}">${sections.access.badge.text}</span>
+          </h3>
+          <p style="margin:4px 0;">${sections.access.detail}</p>
+          <div class="reminder-quote">💡 ${sections.access.reminder}</div>
+        </div>
+
+        <div class="section-card">
+          <h3>
+            <span>3. 實體門禁、保密提醒與待辦事項</span>
+            <span class="status-badge ${sections.compliance.badge.cls}">${sections.compliance.badge.text}</span>
+          </h3>
+          <ul style="margin:4px 0; padding-left:18px;">
+            ${sections.compliance.items.map((t) => `<li>${t}</li>`).join('')}
+          </ul>
+          <div class="reminder-quote">💡 ${sections.compliance.reminder}</div>
+        </div>
+
+        <div class="section-card">
+          <h3>📘 本章情境與實驗室營業秘密自評表對照</h3>
+          <table class="checklist-table">
+            <thead>
+              <tr>
+                <th>遊戲片段</th>
+                <th>對應自評表構面</th>
+                <th>練習的關鍵行為</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2F 紀錄移交與小晴實測</td>
+                <td>離職與權限終止作業／文件分級標示與存取管理</td>
+                <td>離職前將個人區資料移交至專案指定位置，並由接手人實際確認可開啟，避免僅由離任者持有。</td>
+              </tr>
+              <tr>
+                <td>切換視角、停權與限期授權</td>
+                <td>離職與權限終止作業</td>
+                <td>離職當日取消原專案權限；仍有合作論文需求者，依核准範圍另行設定最小內容與明確期限之授權。</td>
+              </tr>
+              <tr>
+                <td>1F 門禁收回與保密提醒</td>
+                <td>離職與權限終止作業／實體環境與出入控管</td>
+                <td>門禁憑證回收與電子權限分別管制登記，離職前再次確認保密約定並提醒攜出限制。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pc-actions" style="justify-content:center; margin-top:14px;">
+          <button class="pixel-btn primary" id="btn-replay-game" type="button">🔄 再玩一次第三章（挑戰其他路線）</button>
+          <button class="pixel-btn" id="btn-handover-menu" type="button">🏠 返回章節選單</button>
+        </div>
+      `;
+
+      $('btn-replay-game').onclick = () => {
+        window.BS.Audio.confirm();
+        closeAllModals();
+        callbacks.onReplay();
+      };
+      $('btn-handover-menu').onclick = () => {
+        window.BS.Audio.select();
+        closeAllModals();
+        callbacks.onReturnMenu();
+      };
+      return;
+    }
 
     if (result.chapter === 2) {
       const { banner, sections } = result;
@@ -1572,6 +2336,10 @@
       window.BS.Audio.cancel();
       closeAllModals();
     });
+    $('btn-offboard-close').addEventListener('click', () => {
+      window.BS.Audio.cancel();
+      closeAllModals();
+    });
     $('btn-cam-close').addEventListener('click', () => {
       window.BS.Audio.cancel();
       closeAllModals();
@@ -1583,6 +2351,17 @@
     $('btn-endings-close').addEventListener('click', () => {
       window.BS.Audio.cancel();
       closeAllModals();
+    });
+    $('btn-pause-close').addEventListener('click', () => {
+      window.BS.Audio.cancel();
+      closeAllModals();
+    });
+    $('btn-handover-close').addEventListener('click', () => {
+      window.BS.Audio.cancel();
+      closeAllModals();
+      if (lastClearContext) {
+        openClearScreen(lastClearContext.result, lastClearContext.callbacks);
+      }
     });
   }
 
@@ -1596,8 +2375,17 @@
     startDialogue,
     advanceDialogue,
     handleDialogueKey,
+    setTitleCursor,
+    moveTitleCursor,
+    confirmTitleCursor,
+    openPauseModal,
+    movePauseCursor,
+    confirmPauseCursor,
+    openClearScreen,
+    renderClearFx,
     openComputerModal,
     openPosterModal,
+    openOffboardModal,
     openCameraModal,
     openCluesModal,
     openEndingsModal,
