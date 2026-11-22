@@ -1950,7 +1950,7 @@
         const hasAwen = c.clues.awenInfo;
         const hasInst = c.clues.instrumentFile || c.rawFileLocation !== 'instrument';
         const linkMismatch = c.rawFileLocation === 'team' && rec.rawFileLink !== 'team';
-        const missingQuickFill = hasAwen && (!rec.date || !rec.summary || !rec.recorder);
+        const missingQuickFill = (!rec.date || !rec.summary || !rec.recorder);
 
         // Before vs After Correction Pane
         let afterPaneHtml = '';
@@ -1994,13 +1994,11 @@
         }
 
         let corrActionsHtml = '';
-        if (!hasAwen) {
-          corrActionsHtml = `<div class="inline-warning-box" style="margin-top:8px;">🔒 請先到 <strong>2F 實驗區找阿文</strong>確認正確樣品編號與更正原因，即可操作更正！</div>`;
-        } else if (rec.correctionMode === 'none') {
+        if (rec.correctionMode === 'none') {
           corrActionsHtml = `
             <div style="display:flex; flex-direction:column; gap:6px; margin-top:8px;">
-              <button class="pixel-btn primary" id="btn-ch4-corr-append" type="button">✅ 新增一筆更正紀錄（保留原值 S03，記錄原因、時間與更正人）</button>
-              <button class="pixel-btn danger" id="btn-ch4-corr-overwrite" type="button">⚠ 直接覆寫舊內容（把 S03 直接改成 S08，不保留原內容）</button>
+              <button class="pixel-btn primary" id="btn-ch4-corr-append" type="button" style="font-weight:700;">✅ 新增一筆更正紀錄（保留原值 S03，更正為 S08 並記錄留痕）【推薦標準做法】</button>
+              <button class="pixel-btn danger" id="btn-ch4-corr-overwrite" type="button">⚠ 直接覆寫舊內容（把 S03 直接改寫為 S08，不保留原內容）</button>
             </div>
           `;
         } else if (rec.correctionMode === 'overwritten') {
@@ -2214,7 +2212,10 @@
               : ''
           }
           <div class="pc-card">
-            <h3>📋 更新「本次量測資料」盤點清冊（整批資料一筆項目）</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+              <h3 style="margin:0;">📋 更新「本次量測資料」盤點清冊（整批資料一筆項目）</h3>
+              <button class="pixel-btn primary" id="btn-inv-fill-all" type="button" style="padding:4px 10px; font-size:12px; font-weight:700;">⚡ 一鍵套用標準盤點清冊</button>
+            </div>
             <p style="margin:0 0 8px; font-size:12.5px; color:#4b576d;">
               清冊用來幫助主管與接手同事快速找到這批資料與負責人，<strong>以整批資料為單位</strong>，不寫入機密技術細節。
               ${!c.clues.qingChecklistReq ? '（小提示：也可以下樓問 <strong>1F 大廳的小晴</strong>，聽聽她明天盤點會先看哪幾個欄位！）' : '（✅ 已向 1F 小晴確認明日盤點重點）'}
@@ -2435,7 +2436,8 @@
         if ($('btn-ch4-loc-team')) {
           $('btn-ch4-loc-team').onclick = () => {
             c.rawFileLocation = 'team';
-            inlineMsg = '✅ 已將原始檔原樣歸檔至團隊指定資料夾！請記得回「步驟一：實驗紀錄卡」同步更新原始檔連結。';
+            rec.rawFileLink = 'team'; // Auto-sync link with record card!
+            inlineMsg = '✅ 已將原始檔原樣歸檔至團隊指定資料夾，且實驗紀錄卡連結已自動同步更新！';
             window.BS.Audio.success();
             if (callbacks.onUpdate) callbacks.onUpdate();
             render();
@@ -2453,6 +2455,19 @@
 
       // Tab 3 bindings
       if (activeTab === 'inventory') {
+        if ($('btn-inv-fill-all')) {
+          $('btn-inv-fill-all').onclick = () => {
+            inv.nameScope = 'batch_clean';
+            inv.dataType = '電子實驗紀錄＋儀器原始量測檔（CSV）';
+            inv.protectReason = '未公開量測成果／專利評估';
+            inv.location = 'team_folder';
+            inv.owner = '阿文';
+            inlineMsg = '✅ 已一鍵套用標準盤點清冊五欄位（以整批資料命名，未寫入機密技術細節）！';
+            window.BS.Audio.success();
+            if (callbacks.onUpdate) callbacks.onUpdate();
+            render();
+          };
+        }
         $('btn-inv-name-clean').onclick = () => {
           inv.nameScope = 'batch_clean';
           inlineMsg = '✅ 已選用整批資料名稱（未暴露機密技術細節）。';
@@ -2562,11 +2577,41 @@
           )
           .join('')}
       </div>
-      <div class="pc-actions" style="justify-content:space-between; margin-top:12px;">
-        <button class="pixel-btn" id="btn-lookup-fix" type="button">🔧 返回樓層／工作台修正</button>
+      <div class="pc-actions" style="justify-content:space-between; margin-top:12px; gap:8px; flex-wrap:wrap;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="pixel-btn" id="btn-lookup-fix" type="button">🔧 返回工作台修正</button>
+          ${!lookup.allOk ? '<button class="pixel-btn primary" id="btn-lookup-autofix" type="button" style="font-weight:700;">✨ 一鍵自動校正全部合規</button>' : ''}
+        </div>
         <button class="pixel-btn ${lookup.allOk ? 'primary' : 'warn'}" id="btn-lookup-handover" type="button">✍ 以目前結果完成本章交班</button>
       </div>
     `;
+
+    if ($('btn-lookup-autofix')) {
+      $('btn-lookup-autofix').onclick = () => {
+        const c = state.ch4;
+        const rec = c.record;
+        const inv = c.inventory;
+        c.rawFileLocation = 'team';
+        c.clues.awenInfo = true;
+        c.clues.instrumentFile = true;
+        rec.rawFileLink = 'team';
+        rec.date = '2026-11-22';
+        rec.summary = '晴空計畫薄膜樣品 S08 室溫阻抗與穩定度基準量測';
+        rec.recorder = '阿文';
+        rec.correctionMode = 'tracked_append';
+        rec.sampleIdCurrent = 'CS-2026-S08';
+        rec.correctionReason = '核對儀器原始檔名與樣品盤標籤，確認筆誤 S03 應為 S08';
+        rec.correctionTime = window.BS.State.formatClock(state.timeMinutes);
+        rec.correctionBy = '小安（與阿文確認）';
+        inv.nameScope = 'batch_clean';
+        inv.dataType = '電子實驗紀錄＋儀器原始量測檔（CSV）';
+        inv.protectReason = '未公開量測成果／專利評估';
+        inv.location = 'team_folder';
+        inv.owner = '阿文';
+        window.BS.Audio.success();
+        openLookupModal(state, callbacks);
+      };
+    }
 
     $('btn-lookup-fix').onclick = () => {
       window.BS.Audio.select();
