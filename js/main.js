@@ -883,7 +883,10 @@
     if (bgmBtn) {
       window.BS.Audio.onBgmStateChange((status) => {
         bgmBtn.classList.remove('locked', 'muted');
-        if (status === 'muted') {
+        if (status === 'error') {
+          bgmBtn.textContent = '⚠ 找不到音樂檔';
+          bgmBtn.classList.add('muted');
+        } else if (status === 'muted') {
           bgmBtn.textContent = '🔇 音樂：關';
           bgmBtn.classList.add('muted');
         } else if (status === 'playing') {

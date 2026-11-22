@@ -5,7 +5,7 @@
   let muted = false;
 
   // ===== Title Screen Dual-Deck Crossfade BGM Engine =====
-  const BGM_SRC = 'audio/homepage-bgm.mp3';
+  const BGM_SRC = 'audio/homepage-bgm.mp3?v=3.1';
   const BGM_BASE_VOL = 0.42;
   const BGM_START_OFFSET = 0.05;   // Skip 51ms MP3 encoder padding
   const BGM_CROSSFADE_SEC = 2.0;   // Smooth 2.0s equal-power crossfade overlap
@@ -17,6 +17,7 @@
   let bgmWanted = false;
   let bgmPlaying = false;
   let bgmNeedsGesture = false;
+  let bgmLoadError = false;
   let loopTicker = null;
   let fadeOutTicker = null;
   let fadeInStartMs = 0;
@@ -29,7 +30,8 @@
   function emitBgmState() {
     if (!bgmStateListener) return;
     let status = 'stopped';
-    if (muted) status = 'muted';
+    if (bgmLoadError) status = 'error';
+    else if (muted) status = 'muted';
     else if (bgmPlaying) status = 'playing';
     else if (bgmWanted && bgmNeedsGesture) status = 'locked';
     bgmStateListener(status);
@@ -40,6 +42,14 @@
     a.preload = 'auto';
     a.loop = false;
     a.volume = 0;
+    a.addEventListener('error', () => {
+      bgmLoadError = true;
+      bgmPlaying = false;
+      emitBgmState();
+    });
+    a.addEventListener('canplay', () => {
+      bgmLoadError = false;
+    });
     a.addEventListener('ended', () => {
       // Fallback if browser throttled timers in background tab
       if (!bgmWanted || muted || crossfading || idx !== activeIdx) return;
@@ -295,6 +305,7 @@
     stopTitleBgm,
     unlockTitleBgmIfNeeded,
     getTitleBgmStatus() {
+      if (bgmLoadError) return 'error';
       if (muted) return 'muted';
       if (bgmPlaying) return 'playing';
       if (bgmWanted && bgmNeedsGesture) return 'locked';
