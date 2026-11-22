@@ -41,7 +41,7 @@
         {
           speaker: '小安（值班研究助理）',
           portrait: 'player',
-          text: '順序可以自己安排。有不確定的地方，就去問問實驗區的阿文或辦公區的阿明組長吧！處理完再回值班桌交班。'
+          text: '順序可以自己安排。跟外部廠商交流資料前，記得先確認對方是否已簽署有效 NDA！有不確定的地方，就查電腦合約清單，或問實驗區的阿文與辦公區的阿明組長吧！'
         }
       ]);
     }
@@ -86,6 +86,14 @@
       }
 
       window.BS.UI.openComputerModal(state, {
+        onVerifyNda() {
+          state.clues.ndaCheckedInSystem = true;
+          state.clues.ndaScope = true;
+          ctx.advanceTime(2);
+          ctx.refreshHUD();
+          window.BS.UI.showToast('✅ 已確認星海科技簽署有效 NDA-CS-2026（限蘇小姐・僅摘要圖）', false, 3800);
+        },
+
         onHoldingReply() {
           state.email.usedHoldingReply = true;
           state.email.status = 'holding';
@@ -284,40 +292,69 @@
       const choices = [];
       if (!state.clues.ndaScope) {
         choices.push({
-          label: '確認晴空計畫的保密約定（NDA）與對外提供範圍',
+          label: '確認星海科技是否已簽署有效 NDA（保密協議）與提供範圍',
           onSelect: () => {
-            state.clues.ndaScope = true;
-            ctx.advanceTime(3);
-            ctx.refreshHUD();
-            window.BS.Audio.success();
             window.BS.UI.startDialogue([
               {
                 speaker: '負責人 阿明組長',
                 portrait: 'lead',
-                text: '我幫你翻一下專案資料夾……嗯，星海科技簽的是「NDA-CS-2026」。'
-              },
-              {
-                speaker: '負責人 阿明組長',
-                portrait: 'lead',
-                text: '這份約定只涵蓋「階段進度會議用的兩張核准摘要圖」，接收對象限星海科技專案團隊（蘇小姐），不包含原始量測數據和製程筆記，也未授權轉傳給協力廠商。'
-              },
-              {
-                speaker: '負責人 阿明組長',
-                portrait: 'lead',
-                text: '分享連結時記得設成「指定收件人唯讀」並加上到期日（例如 7 天）。若不確定核准版圖檔在哪，去實驗區問問阿文！'
+                text: '問得好！跟外部廠商交流研究資料前，第一步一定要先確認「對方到底有沒有簽署有效的 NDA」。\n先考考你：如果今天來要測試資料的廠商「還沒簽 NDA」或「NDA 已經到期」，我們該怎麼做？',
+                choices: [
+                  {
+                    label: '未簽署或已到期就先不能提供機密資料，須先確認有效 NDA、效期與涵蓋範圍',
+                    onSelect: () => {
+                      state.clues.ndaScope = true;
+                      ctx.advanceTime(3);
+                      ctx.refreshHUD();
+                      window.BS.Audio.success();
+                      window.BS.UI.startDialogue([
+                        {
+                          speaker: '負責人 阿明組長',
+                          portrait: 'lead',
+                          text: '完全正確！沒簽有效 NDA 就把機密交出去，事後很難主張合理保密措施。\n我幫你查過了：星海科技已簽署「NDA-CS-2026」（效期 2026/01/01～2027/12/31），目前在效期內。'
+                        },
+                        {
+                          speaker: '負責人 阿明組長',
+                          portrait: 'lead',
+                          text: '不過這份 NDA 只涵蓋「階段進度會議用的兩張核准摘要圖」，接收對象限星海科技專案團隊（蘇小姐），不包含原始量測數據和製程筆記，也未授權轉傳給協力廠商。'
+                        },
+                        {
+                          speaker: '負責人 阿明組長',
+                          portrait: 'lead',
+                          text: '分享連結時記得設成「指定收件人唯讀」並加上到期日（例如 7 天）。你也可以在電腦的「NDA 合約清單」複習各廠商狀態；若要確認核准版圖檔在哪，記得去實驗區問阿文！'
+                        }
+                      ]);
+                    }
+                  },
+                  {
+                    label: '開會比較急，先寄檔案過去，NDA 下週再補簽就好',
+                    onSelect: () => {
+                      window.BS.Audio.alert();
+                      window.BS.UI.startDialogue([
+                        {
+                          speaker: '負責人 阿明組長',
+                          portrait: 'lead',
+                          text: '千萬不行喔！資料一旦先送出去，在沒有事前簽署 NDA 的情況下就容易喪失營業秘密的保護基礎。就算開會再趕，確認不到有效 NDA 前也只能先回覆確認中、絕不能先寄機密資料！再想一次看看？'
+                        }
+                      ], () => handleCh1Lead(state));
+                    }
+                  }
+                ]
               }
             ]);
           }
         });
       } else {
         choices.push({
-          label: '再次確認 NDA-CS-2026 的重點',
+          label: '再次確認星海科技 NDA-CS-2026 的重點',
           onSelect: () => {
             window.BS.UI.startDialogue([
               {
                 speaker: '負責人 阿明組長',
                 portrait: 'lead',
-                text: '重點三個：只給會議所需的兩張核准圖、限星海科技蘇小姐檢視、設定分享期限。寄出後記得在交班紀錄寫清楚實際提供的版本與對象。'
+                text: state.clues.ndaCheckedInSystem
+                  ? '聽說你已經先在電腦查核過 NDA 合約清單了，很棒！重點再記一次：確認已簽署且在效期內、只給會議所需的兩張核准圖、限蘇小姐檢視並設定分享期限。'
+                  : '重點三個：確認已簽署有效 NDA（NDA-CS-2026 效期至 2027 年底）、只給會議所需的兩張核准圖、限星海科技蘇小姐檢視並設定分享期限。'
               }
             ]);
           }

@@ -48,10 +48,11 @@
       timeMinutes: 15 * 60 + 40, // 15:40
       introShown: false,
       clues: {
-        meetingVersion: false,   // Talked to 阿文 -> unlocked approved 2 charts
-        ndaScope: false,         // Talked to 阿明組長 -> confirmed NDA-CS-2026 scope
-        visitorLog: false,       // Checked 接待處 logbook -> knows approved scope
-        visitorPurpose: false    // Asked 陳先生 why he wants the photo
+        meetingVersion: false,     // Talked to 阿文 -> unlocked approved 2 charts
+        ndaCheckedInSystem: false, // Verified NDA signing list on PC
+        ndaScope: false,           // Confirmed NDA signing & scope (via PC NDA check or 阿明組長)
+        visitorLog: false,         // Checked 接待處 logbook -> knows approved scope
+        visitorPurpose: false      // Asked 陳先生 why he wants the photo
       },
       email: {
         status: 'unread',        // 'unread' | 'read' | 'holding' | 'sent_safe' | 'sent_unverified' | 'misshared_active' | 'misshared_remediated'
@@ -390,18 +391,18 @@
       }
     } else if (e.status === 'sent_safe') {
       const expText = e.sentPermission === 'restricted_7d' ? '指定收件人唯讀、7 天效期' : '指定收件人唯讀（建議加設效期）';
-      emailBadge = { text: '核准範圍分享', cls: 'ok' };
+      emailBadge = { text: '已確認NDA並合規分享', cls: 'ok' };
       emailDetail =
-        `已確認會議用核准版本（圖A、圖B）與保密約定 NDA-CS-2026，僅分享給星海科技蘇小姐（權限：${expText}），未夾帶原始量測數據或製程筆記。` +
+        `寄出前已確認星海科技已簽署有效保密協議（NDA-CS-2026，仍在效期內），並核對核准版本（僅圖A、圖B），限定分享給星海科技蘇小姐（權限：${expText}），未夾帶原始量測數據或製程筆記。` +
         (e.usedHoldingReply ? ' 期間並先回覆確認中，避免倉促寄出。' : '');
       emailReminder = e.sentPermission === 'restricted_7d'
-        ? '「對外提供資料時，核對保密約定、僅給最小必要範圍並設效期，就是最穩妥的防護。」'
-        : '「指定收件人很好！若能順手加上分享期限，就能避免會議結束後連結長期有效。」';
+        ? '「與廠商交流資料前，第一步先確認是否已簽署有效 NDA 與涵蓋範圍，再僅給最小必要檔案並設效期，就是最穩妥的防護。」'
+        : '「已先確認 NDA 簽署並指定收件人很好！若能順手加上分享期限，就能避免會議結束後連結長期有效。」';
     } else {
-      emailBadge = { text: '部分未確認', cls: 'warn' };
+      emailBadge = { text: '未確認NDA簽署', cls: 'warn' };
       emailDetail =
-        `僅分享了會議用兩張圖給蘇小姐（未夾帶原始數據），但寄出前尚未向阿明組長確認保密約定（NDA-CS-2026）涵蓋對象與用途。`;
-      emailReminder = '「即使檔案看起來單純，對外合作前仍應由權責窗口確認保密約定是否涵蓋用途與對象。」';
+        `僅分享了會議用兩張圖給蘇小姐（未夾帶原始數據），但寄出前尚未確認星海科技是否已簽署有效 NDA（保密協議）及其涵蓋對象與用途。`;
+      emailReminder = '「與廠商交流研究資料前，務必先確認對方是否已簽署有效 NDA、仍在效期內，且涵蓋這次提供的資料與對象！」';
     }
 
     let visitorBadge = { text: '合規完成', cls: 'ok' };

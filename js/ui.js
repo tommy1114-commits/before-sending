@@ -195,6 +195,8 @@
 
     let selectedPayload = state.clues.meetingVersion ? 'charts_only' : 'full_folder';
     let selectedPerm = state.clues.ndaScope ? 'restricted_7d' : 'public_link';
+    let showNdaRegistry = false;
+    let ndaQuizFeedback = '';
 
     function render() {
       const e = state.email;
@@ -287,23 +289,134 @@
         return;
       }
 
+      // Case 3A: Interactive NDA Signing Registry & Verification Check
+      if (showNdaRegistry) {
+        body.innerHTML = `
+          <div class="pc-card" style="margin-bottom:10px;">
+            <h3>📑 實驗室外部合作 NDA（保密協議）簽署清單</h3>
+            <p style="margin:0 0 8px; font-size:12.5px; color:#4b576d;">
+              與外部廠商交流研究資料前，請先確認對方<strong>是否已簽署 NDA、是否仍在效期內，以及涵蓋的對象與資料範圍</strong>。
+            </p>
+            <table class="checklist-table">
+              <thead>
+                <tr>
+                  <th>外部廠商</th>
+                  <th>NDA 簽署狀態與效期</th>
+                  <th>涵蓋對象與資料範圍</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>晨曦光電</strong></td>
+                  <td><span class="status-badge danger">未簽署</span><br>尚在初步洽談</td>
+                  <td>尚未簽署保密協議，禁止提供任何機密或未公開測試資料。</td>
+                </tr>
+                <tr style="background:#f3fbf7;">
+                  <td><strong>星海科技</strong><br><span style="font-size:11px;color:#475569;">晴空計畫</span></td>
+                  <td><span class="status-badge ok">已簽署有效</span><br><code>NDA-CS-2026</code><br>2026/01/01～2027/12/31</td>
+                  <td>限星海科技專案窗口（蘇小姐）於階段進度會議使用「核准摘要圖表」；<strong>不含原始量測數據、製程筆記，且未授權轉傳協力廠商</strong>。</td>
+                </tr>
+                <tr>
+                  <td><strong>遠航精密</strong></td>
+                  <td><span class="status-badge warn">已到期</span><br><code>NDA-YH-2024</code><br>2025/12/31 屆滿</td>
+                  <td>原合約已過期，須完成續簽後才可再提供研究資料。</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pc-card">
+            <h3>✅ NDA 簽署核對確認</h3>
+            ${
+              state.clues.ndaScope
+                ? '<div class="inline-ok-box">✅ 你已完成星海科技 NDA 簽署查核（NDA-CS-2026 有效，僅限蘇小姐檢視兩張會議摘要圖）。</div>'
+                : `
+                  <p style="margin:0 0 8px; font-size:13px;">
+                    依上方清單，星海科技蘇小姐今天來信索取測試資料，以下哪一項判斷正確？
+                  </p>
+                  ${ndaQuizFeedback ? `<div class="inline-warning-box">${ndaQuizFeedback}</div>` : ''}
+                  <div style="display:flex; flex-direction:column; gap:6px;">
+                    <button class="choice-btn" id="nda-opt-ok" type="button">
+                      <span class="choice-arrow">▶</span>
+                      <span>星海科技已簽署有效 NDA-CS-2026（在效期內），但僅限蘇小姐看會議用摘要圖，不可提供原始數據或轉傳協力廠商。</span>
+                    </button>
+                    <button class="choice-btn" id="nda-opt-over" type="button">
+                      <span class="choice-arrow">▶</span>
+                      <span>只要廠商有簽過 NDA，就能把整個測試資料夾直接寄出並讓對方轉給協力廠商。</span>
+                    </button>
+                    <button class="choice-btn" id="nda-opt-expired" type="button">
+                      <span class="choice-arrow">▶</span>
+                      <span>星海科技的 NDA 已經到期，所以今天完全不能提供任何檔案。</span>
+                    </button>
+                  </div>
+                `
+            }
+          </div>
+
+          <div class="pc-actions">
+            <button class="pixel-btn" id="btn-nda-back" type="button">← 返回郵件與分享設定</button>
+          </div>
+        `;
+
+        if ($('nda-opt-ok')) {
+          $('nda-opt-ok').onclick = () => {
+            window.BS.Audio.success();
+            ndaQuizFeedback = '';
+            selectedPerm = 'restricted_7d';
+            if (callbacks.onVerifyNda) callbacks.onVerifyNda();
+            showNdaRegistry = false;
+            render();
+          };
+          $('nda-opt-over').onclick = () => {
+            window.BS.Audio.alert();
+            ndaQuizFeedback = '⚠ 不對喔！有簽 NDA 不代表全部資料都能給。NDA-CS-2026 僅涵蓋「會議用摘要圖表」給「蘇小姐」，不含原始量測數據、製程筆記與協力廠商！';
+            render();
+          };
+          $('nda-opt-expired').onclick = () => {
+            window.BS.Audio.alert();
+            ndaQuizFeedback = '⚠ 看錯廠商囉！已到期的是「遠航精密（NDA-YH-2024）」，星海科技的 NDA-CS-2026 效期至 2027/12/31，仍在有效期間內。';
+            render();
+          };
+        }
+        $('btn-nda-back').onclick = () => {
+          window.BS.Audio.select();
+          showNdaRegistry = false;
+          render();
+        };
+        return;
+      }
+
       // Case 3: Normal Compose & Share Panel
       const isPublic = selectedPerm === 'public_link';
       const isFull = selectedPayload === 'full_folder';
-      const previewRisky = isPublic || isFull;
+      const missingNda = !state.clues.ndaScope;
+      const previewRisky = isPublic || isFull || missingNda;
 
       let previewHtml = '';
       if (isPublic && isFull) {
-        previewHtml = `<strong>👁 收件人視角預覽：</strong>任何取得連結的人（包含被轉傳的協力廠商）都能開啟並下載 <strong>4 個檔案</strong>，內含 <code>原始量測數據</code> 與 <code>未審製程筆記</code>！`;
+        previewHtml = `<strong>👁 收件人視角預覽：</strong>任何取得連結的人（包含被轉傳的協力廠商）都能開啟並下載 <strong>4 個檔案</strong>，內含 <code>原始量測數據</code> 與 <code>未審製程筆記</code>！${missingNda ? ' <strong>且你尚未確認廠商是否簽署有效 NDA！</strong>' : ''}`;
       } else if (isPublic && !isFull) {
         previewHtml = `<strong>👁 收件人視角預覽：</strong>雖然只有兩張會議圖，但連結設為「持連結者皆可存取」，若遭轉傳給非授權對象仍可直接開啟！`;
       } else if (!isPublic && isFull) {
         previewHtml = `<strong>👁 收件人視角預覽：</strong>僅蘇小姐可開啟，但資料夾仍包含超出會議需求的 <code>原始量測數據</code> 與 <code>未審製程筆記</code>！`;
+      } else if (missingNda) {
+        previewHtml = `<strong>👁 收件人視角預覽：</strong>檔案已限縮為 2 張會議圖且指定蘇小姐，但<strong>尚未確認星海科技是否已簽署有效 NDA</strong>！請先按上方「📑 查詢 NDA 合約清單」或詢問阿明組長。`;
       } else {
-        previewHtml = `<strong>👁 收件人視角預覽：</strong>僅星海科技蘇小姐可唯讀檢視 <strong>2 張已核准會議圖</strong>${selectedPerm === 'restricted_7d' ? '，且 7 天後自動失效' : '（未設定到期日）'}。${state.clues.ndaScope ? '（已核對 NDA-CS-2026）' : '（尚未向阿明組長確認 NDA 涵蓋範圍）'}`;
+        previewHtml = `<strong>👁 收件人視角預覽：</strong>已確認有效 NDA-CS-2026；僅星海科技蘇小姐可唯讀檢視 <strong>2 張已核准會議圖</strong>${selectedPerm === 'restricted_7d' ? '，且 7 天後自動失效' : '（未設定到期日）'}。`;
       }
 
+      const ndaStatusBar = state.clues.ndaScope
+        ? `<div class="inline-ok-box" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <span><strong>✅ NDA 簽署查核通過：</strong>星海科技已簽署有效 <code>NDA-CS-2026</code>（限蘇小姐｜僅會議摘要圖，不含原始數據與協力廠商）</span>
+            <button class="pixel-btn" id="btn-open-nda-list" type="button" style="padding:4px 10px; font-size:12px;">📑 檢視 NDA 清單</button>
+          </div>`
+        : `<div class="inline-warning-box" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <span><strong>❓ 步驟 0 — NDA 簽署查核：</strong>尚未確認「星海科技」是否已簽署有效 NDA（保密協議）與適用範圍！</span>
+            <button class="pixel-btn warn" id="btn-open-nda-list" type="button" style="padding:5px 10px; font-size:12px;">📑 查詢實驗室 NDA 合約清單</button>
+          </div>`;
+
       body.innerHTML = `
+        ${ndaStatusBar}
         <div class="pc-grid">
           <div class="pc-card">
             <h3>✉ 合作方來信（四點會議急件）</h3>
@@ -311,7 +424,7 @@
             <div class="email-content">
               「小安您好，四點就要開進度會議了！麻煩把 <strong>ClearSky_TestData 整個測試資料夾</strong>設成連結寄給我，我們開會只需要看裡面<strong>兩張結果圖</strong>，謝謝！」
             </div>
-            ${e.usedHoldingReply ? '<div style="font-size:12px;color:#1d6b58;margin-bottom:6px;">✅ 你已先回覆「正在確認核准版本與範圍」，蘇小姐表示沒問題。</div>' : ''}
+            ${e.usedHoldingReply ? '<div style="font-size:12px;color:#1d6b58;margin-bottom:6px;">✅ 你已先回覆「正在確認 NDA 與核准版本」，蘇小姐表示沒問題。</div>' : ''}
             <div style="font-size:12px;font-weight:700;color:#39465e;margin-bottom:4px;">📂 ClearSky_TestData 資料夾內容：</div>
             <div class="file-list">
               <div class="file-item"><span>01_會議摘要圖A.png / 02_摘要圖B.png</span><span class="file-tag safe">${state.clues.meetingVersion ? '已核准版本' : '待確認版本'}</span></div>
@@ -320,8 +433,8 @@
             </div>
             <div style="font-size:12px;color:#525f75;margin-top:6px;">
               <strong>核對狀態：</strong><br>
-              • 核准版本：${state.clues.meetingVersion ? '<span style="color:#1b6e44;font-weight:700;">✅ 已問過阿文（找到會議用兩張圖）</span>' : '<span style="color:#9a5b13;">尚未確認（可到實驗區問同事阿文）</span>'}<br>
-              • 保密約定：${state.clues.ndaScope ? '<span style="color:#1b6e44;font-weight:700;">✅ 已由阿明組長確認 NDA-CS-2026</span>' : '<span style="color:#9a5b13;">尚未確認（可找辦公區負責人阿明組長）</span>'}
+              • NDA 簽署：${state.clues.ndaScope ? '<span style="color:#1b6e44;font-weight:700;">✅ 已確認有效 NDA-CS-2026</span>' : '<span style="color:#9a5b13;">尚未確認（點上方查詢清單或問阿明組長）</span>'}<br>
+              • 核准版本：${state.clues.meetingVersion ? '<span style="color:#1b6e44;font-weight:700;">✅ 已問過阿文（找到會議用兩張圖）</span>' : '<span style="color:#9a5b13;">尚未確認（可到實驗區問同事阿文）</span>'}
             </div>
           </div>
 
@@ -375,6 +488,15 @@
           <button class="pixel-btn ${previewRisky ? 'danger' : 'primary'}" id="pc-send-btn" type="button">📤 確認並寄出連結</button>
         </div>
       `;
+
+      if ($('btn-open-nda-list')) {
+        $('btn-open-nda-list').onclick = () => {
+          window.BS.Audio.select();
+          showNdaRegistry = true;
+          ndaQuizFeedback = '';
+          render();
+        };
+      }
 
       body.querySelectorAll('input[name="pc-payload"]').forEach((inp) => {
         inp.onchange = () => {
@@ -1027,13 +1149,15 @@
       px(ctx, 0, 110, w, 50, '#c6cdd6');
       px(ctx, 18, 22, 74, 80, '#a6cedb');
       px(ctx, 22, 26, 66, 72, '#c8e6ef');
-      px(ctx, 110, 28, 136, 46, '#20594e');
-      px(ctx, 114, 32, 128, 38, '#2f7d6d');
+      px(ctx, 104, 28, 146, 46, '#20594e');
+      px(ctx, 108, 32, 138, 38, '#2f7d6d');
       ctx.fillStyle = '#e8fff9';
-      ctx.font = 'bold 13px sans-serif';
-      ctx.fillText('明光材料實驗室', 132, 51);
-      ctx.font = 'bold 9px monospace';
-      ctx.fillText('LUMINA MATERIALS LAB', 127, 63);
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('中研院RCCI實驗室', 177, 50);
+      ctx.font = 'bold 8px monospace';
+      ctx.fillText('ACADEMIA SINICA RCCI LAB', 177, 63);
+      ctx.textAlign = 'left';
       px(ctx, 256, 86, 18, 24, '#a85a3a');
       px(ctx, 250, 62, 30, 26, '#2f7d4f');
       px(ctx, 256, 52, 18, 14, '#47a36b');
@@ -1198,7 +1322,7 @@
         <h3>🔍 已掌握的核對資訊</h3>
         <ul style="margin:6px 0 0; padding-left:18px;">
           <li>${c.meetingVersion ? '✅' : '⬜'} <strong>會議用核准版本</strong>：${c.meetingVersion ? '阿文已整理只含兩張圖的會議版（ClearSky_會議用摘要圖_v2）。' : '尚未確認（可到實驗區問同事阿文）。'}</li>
-          <li>${c.ndaScope ? '✅' : '⬜'} <strong>保密約定範圍（NDA-CS-2026）</strong>：${c.ndaScope ? '阿明組長確認僅涵蓋兩張摘要圖供星海科技開會用，不含原始數據與製程筆記，不可轉傳協力廠商。' : '尚未確認（可問辦公區負責人阿明組長）。'}</li>
+          <li>${c.ndaScope ? '✅' : '⬜'} <strong>廠商 NDA 簽署查核（NDA-CS-2026）</strong>：${c.ndaScope ? '已確認星海科技已簽署有效 NDA（效期內），僅涵蓋兩張摘要圖供蘇小姐開會用，不含原始數據、製程筆記與協力廠商。' : '尚未確認是否已簽署有效 NDA（可於電腦查詢 NDA 合約清單或詢問辦公區阿明組長）。'}</li>
           <li>${c.visitorLog ? '✅' : '⬜'} <strong>訪客接待登記</strong>：${c.visitorLog ? '已核對登記簿：核准入口形象牆拍照；若進實驗區須全程陪同且不得拍入敏感資訊。' : '尚未確認（可調查訪客入口接待處）。'}</li>
           <li>${c.visitorPurpose ? '✅' : '⬜'} <strong>訪客拍攝用途</strong>：${c.visitorPurpose ? '陳先生表示照片將放進對外公開的參訪紀錄報告。' : '尚未詢問訪客陳先生。'}</li>
         </ul>
@@ -1392,9 +1516,9 @@
           </thead>
           <tbody>
             <tr>
-              <td>回覆合作來信</td>
+              <td>查核 NDA 並回覆來信</td>
               <td>文件分級標示與存取管理／文件發表與外部合作管理</td>
-              <td>確認收件者、版本、連結權限與期限；核對保密約定，僅提供必要資料並留存紀錄。</td>
+              <td>先確認廠商是否已簽署有效 NDA、效期與適用對象；再確認收件者、版本、連結權限與期限，僅提供必要資料並留存紀錄。</td>
             </tr>
             <tr>
               <td>接待與拍照</td>
