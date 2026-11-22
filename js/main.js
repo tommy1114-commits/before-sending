@@ -381,6 +381,8 @@
     }
   }
 
+  let lastMenuNavTime = 0;
+
   window.addEventListener('keydown', (e) => {
     if (fade.active) return;
 
@@ -404,11 +406,17 @@
     if (isTitleVisible() && !modal) {
       if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
         e.preventDefault();
+        const now = Date.now();
+        if (now - lastMenuNavTime < 180) return;
+        lastMenuNavTime = now;
         window.BS.UI.moveTitleCursor(-1);
         return;
       }
       if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
         e.preventDefault();
+        const now = Date.now();
+        if (now - lastMenuNavTime < 180) return;
+        lastMenuNavTime = now;
         window.BS.UI.moveTitleCursor(1);
         return;
       }
@@ -424,11 +432,17 @@
     if (modal === 'pause') {
       if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
         e.preventDefault();
+        const now = Date.now();
+        if (now - lastMenuNavTime < 180) return;
+        lastMenuNavTime = now;
         window.BS.UI.movePauseCursor(-1);
         return;
       }
       if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
         e.preventDefault();
+        const now = Date.now();
+        if (now - lastMenuNavTime < 180) return;
+        lastMenuNavTime = now;
         window.BS.UI.movePauseCursor(1);
         return;
       }
@@ -502,16 +516,25 @@
       if (btn) btn.classList.add('pressed');
       const modal = window.BS.UI.getActiveModal();
       if (isTitleVisible() && !modal) {
+        const now = Date.now();
+        if (now - lastMenuNavTime < 180) return;
+        lastMenuNavTime = now;
         if (dir === 'up') window.BS.UI.moveTitleCursor(-1);
         if (dir === 'down') window.BS.UI.moveTitleCursor(1);
         return;
       }
       if (modal === 'pause') {
+        const now = Date.now();
+        if (now - lastMenuNavTime < 180) return;
+        lastMenuNavTime = now;
         if (dir === 'up') window.BS.UI.movePauseCursor(-1);
         if (dir === 'down') window.BS.UI.movePauseCursor(1);
         return;
       }
       if (window.BS.UI.isOverlayOpen()) {
+        const now = Date.now();
+        if (now - lastMenuNavTime < 180) return;
+        lastMenuNavTime = now;
         if (dir === 'up') window.BS.UI.handleDialogueKey('ArrowUp');
         if (dir === 'down') window.BS.UI.handleDialogueKey('ArrowDown');
         return;
@@ -524,8 +547,8 @@
       if (dir) releaseDir(dir);
     }
 
-    function updateDpadPointer(pointerId, x, y) {
-      const targetBtn = getDpadButtonAt(x, y);
+    function updateDpadPointer(pointerId, x, y, explicitBtn) {
+      const targetBtn = explicitBtn || getDpadButtonAt(x, y);
       const newDir = targetBtn ? targetBtn.dataset.dir : null;
       const prevDir = activePointers.get(pointerId);
 
@@ -563,7 +586,8 @@
         try {
           dpad.setPointerCapture(ev.pointerId);
         } catch {}
-        updateDpadPointer(ev.pointerId, ev.clientX, ev.clientY);
+        const explicitBtn = (ev.target && ev.target.closest) ? ev.target.closest('.dpad-btn') : null;
+        updateDpadPointer(ev.pointerId, ev.clientX, ev.clientY, explicitBtn);
       }, { passive: false });
 
       dpad.addEventListener('pointermove', (ev) => {
@@ -588,25 +612,15 @@
       });
     }
 
-    // Bind individual direction buttons for discrete taps as well as drag gestures
+    // Prevent default click and context menu on direction buttons (events handled by dpad container)
     dpadButtons.forEach((btn) => {
-      btn.addEventListener('pointerdown', (ev) => {
-        const dir = btn.dataset.dir;
-        activateDir(dir, btn);
-      });
-      btn.addEventListener('pointerup', (ev) => {
-        const dir = btn.dataset.dir;
-        deactivateDir(dir, btn);
-      });
-      btn.addEventListener('pointercancel', (ev) => {
-        const dir = btn.dataset.dir;
-        deactivateDir(dir, btn);
-      });
       btn.addEventListener('click', (ev) => {
         ev.preventDefault();
+        ev.stopPropagation();
       });
       btn.addEventListener('contextmenu', (ev) => {
         ev.preventDefault();
+        ev.stopPropagation();
         return false;
       }, { capture: true, passive: false });
     });
