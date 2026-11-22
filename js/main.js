@@ -498,11 +498,13 @@
     const dpad = document.querySelector('.dpad');
     const dpadButtons = Array.from(document.querySelectorAll('.dpad-btn'));
     const activePointers = new Map(); // pointerId -> currentDir
+    const menuLatchedPointers = new Set(); // pointerId -> already triggered menu action
 
     function clearAllDpadState() {
       dpadButtons.forEach((b) => b.classList.remove('pressed'));
       heldDirs.length = 0;
       activePointers.clear();
+      menuLatchedPointers.clear();
     }
 
     function getDpadButtonAt(x, y) {
@@ -511,32 +513,36 @@
       return el.closest('.dpad-btn');
     }
 
-    function activateDir(dir, btn) {
+    function activateDir(dir, btn, pointerId) {
       if (!dir) return;
       if (btn) btn.classList.add('pressed');
       const modal = window.BS.UI.getActiveModal();
-      if (isTitleVisible() && !modal) {
-        const now = Date.now();
-        if (now - lastMenuNavTime < 180) return;
-        lastMenuNavTime = now;
-        if (dir === 'up') window.BS.UI.moveTitleCursor(-1);
-        if (dir === 'down') window.BS.UI.moveTitleCursor(1);
-        return;
-      }
-      if (modal === 'pause') {
-        const now = Date.now();
-        if (now - lastMenuNavTime < 180) return;
-        lastMenuNavTime = now;
-        if (dir === 'up') window.BS.UI.movePauseCursor(-1);
-        if (dir === 'down') window.BS.UI.movePauseCursor(1);
-        return;
-      }
-      if (window.BS.UI.isOverlayOpen()) {
-        const now = Date.now();
-        if (now - lastMenuNavTime < 180) return;
-        lastMenuNavTime = now;
-        if (dir === 'up') window.BS.UI.handleDialogueKey('ArrowUp');
-        if (dir === 'down') window.BS.UI.handleDialogueKey('ArrowDown');
+      const inMenu = (isTitleVisible() && !modal) || (modal === 'pause') || window.BS.UI.isOverlayOpen();
+
+      if (inMenu) {
+        // Enforce discrete 1-tap = 1-step latching for any touch/pointer to prevent skipping
+        if (pointerId !== undefined && pointerId !== null) {
+          if (menuLatchedPointers.has(pointerId)) {
+            return;
+          }
+          menuLatchedPointers.add(pointerId);
+        }
+
+        if (isTitleVisible() && !modal) {
+          if (dir === 'up') window.BS.UI.moveTitleCursor(-1);
+          if (dir === 'down') window.BS.UI.moveTitleCursor(1);
+          return;
+        }
+        if (modal === 'pause') {
+          if (dir === 'up') window.BS.UI.movePauseCursor(-1);
+          if (dir === 'down') window.BS.UI.movePauseCursor(1);
+          return;
+        }
+        if (window.BS.UI.isOverlayOpen()) {
+          if (dir === 'up') window.BS.UI.handleDialogueKey('ArrowUp');
+          if (dir === 'down') window.BS.UI.handleDialogueKey('ArrowDown');
+          return;
+        }
         return;
       }
       pushDir(dir);
@@ -561,13 +567,16 @@
 
       if (newDir) {
         activePointers.set(pointerId, newDir);
-        activateDir(newDir, targetBtn);
+        activateDir(newDir, targetBtn, pointerId);
       } else {
         activePointers.delete(pointerId);
       }
     }
 
     function releaseDpadPointer(pointerId) {
+      if (pointerId !== undefined && pointerId !== null) {
+        menuLatchedPointers.delete(pointerId);
+      }
       const dir = activePointers.get(pointerId);
       if (dir) {
         const btn = dpadButtons.find((b) => b.dataset.dir === dir);
@@ -577,10 +586,15 @@
       if (activePointers.size === 0) {
         dpadButtons.forEach((b) => b.classList.remove('pressed'));
         heldDirs.length = 0;
+        menuLatchedPointers.clear();
       }
     }
 
     if (dpad) {
+      dpad.addEventListener('touchstart', (ev) => {
+        ev.preventDefault();
+      }, { passive: false });
+
       dpad.addEventListener('pointerdown', (ev) => {
         ev.preventDefault();
         try {
@@ -612,8 +626,11 @@
       });
     }
 
-    // Prevent default click and context menu on direction buttons (events handled by dpad container)
+    // Prevent default click, touch, and context menu on direction buttons
     dpadButtons.forEach((btn) => {
+      btn.addEventListener('touchstart', (ev) => {
+        ev.preventDefault();
+      }, { passive: false });
       btn.addEventListener('click', (ev) => {
         ev.preventDefault();
         ev.stopPropagation();
@@ -625,13 +642,16 @@
       }, { capture: true, passive: false });
     });
 
-    // Action button binder with pointer capture
+    // Action button binder with pointer capture and latching
     function bindActionButton(id, triggerFn) {
       const btn = $(id);
       if (!btn) return;
+      let pressedPointerId = null;
 
       const start = (ev) => {
         ev.preventDefault();
+        if (pressedPointerId !== null) return;
+        pressedPointerId = ev.pointerId;
         btn.classList.add('pressed');
         try {
           btn.setPointerCapture(ev.pointerId);
@@ -641,12 +661,16 @@
 
       const end = (ev) => {
         ev.preventDefault();
+        if (pressedPointerId === ev.pointerId) {
+          pressedPointerId = null;
+        }
         btn.classList.remove('pressed');
         try {
           btn.releasePointerCapture(ev.pointerId);
         } catch {}
       };
 
+      btn.addEventListener('touchstart', (ev) => ev.preventDefault(), { passive: false });
       btn.addEventListener('pointerdown', start, { passive: false });
       btn.addEventListener('pointerup', end, { passive: false });
       btn.addEventListener('pointercancel', end, { passive: false });
@@ -663,9 +687,12 @@
     function bindPillButton(id, triggerFn) {
       const btn = $(id);
       if (!btn) return;
+      let pressedPointerId = null;
 
       const start = (ev) => {
         ev.preventDefault();
+        if (pressedPointerId !== null) return;
+        pressedPointerId = ev.pointerId;
         btn.classList.add('pressed');
         try {
           btn.setPointerCapture(ev.pointerId);
@@ -675,12 +702,16 @@
 
       const end = (ev) => {
         ev.preventDefault();
+        if (pressedPointerId === ev.pointerId) {
+          pressedPointerId = null;
+        }
         btn.classList.remove('pressed');
         try {
           btn.releasePointerCapture(ev.pointerId);
         } catch {}
       };
 
+      btn.addEventListener('touchstart', (ev) => ev.preventDefault(), { passive: false });
       btn.addEventListener('pointerdown', start, { passive: false });
       btn.addEventListener('pointerup', end, { passive: false });
       btn.addEventListener('pointercancel', end, { passive: false });
@@ -721,14 +752,17 @@
   function setupButtons() {
     window.BS.UI.bindStaticHandlers();
 
-    // Title Cursor Menu hover + click
-    document.querySelectorAll('#title-menu-list .cursor-menu-item').forEach((btn) => {
-      const idx = Number(btn.dataset.idx);
-      btn.addEventListener('mouseenter', () => {
-        window.BS.UI.setTitleCursor(idx);
-        window.BS.Audio.select();
+    // Title Cursor Menu hover + click (only on fine pointer devices like desktop mouse)
+    const canHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (canHover) {
+      document.querySelectorAll('#title-menu-list .cursor-menu-item').forEach((btn) => {
+        const idx = Number(btn.dataset.idx);
+        btn.addEventListener('mouseenter', () => {
+          window.BS.UI.setTitleCursor(idx);
+          window.BS.Audio.select();
+        });
       });
-    });
+    }
 
     $('btn-start-ch1').addEventListener('click', () => {
       window.BS.Audio.confirm();

@@ -101,7 +101,9 @@
       btn.type = 'button';
       btn.className = 'choice-btn' + (idx === 0 ? ' selected' : '');
       btn.innerHTML = `<span class="choice-arrow">${idx === 0 ? '▶' : ''}</span><span>${ch.label}</span>`;
-      btn.addEventListener('mouseenter', () => updateChoiceHighlight(idx));
+      if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        btn.addEventListener('mouseenter', () => updateChoiceHighlight(idx));
+      }
       btn.addEventListener('click', (ev) => {
         ev.stopPropagation();
         chooseOption(idx);
@@ -322,10 +324,12 @@
 
     $('pause-body').querySelectorAll('.cursor-menu-item').forEach((btn) => {
       const idx = Number(btn.dataset.pidx);
-      btn.addEventListener('mouseenter', () => {
-        setPauseCursor(idx);
-        window.BS.Audio.select();
-      });
+      if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        btn.addEventListener('mouseenter', () => {
+          setPauseCursor(idx);
+          window.BS.Audio.select();
+        });
+      }
       btn.addEventListener('click', () => {
         pauseActions[idx]();
       });
