@@ -1275,7 +1275,7 @@ html, body {
   grid-template-rows: repeat(3, 40px);
   gap: 3px;
   flex-shrink: 0;
-  margin-left: 14px;
+  margin-left: 20px;
 }
 
 .dpad-btn {
@@ -1900,6 +1900,7 @@ html, body {
   .gba-center-col {
     gap: 4px;
     padding-bottom: 6px;
+    margin-left: 4px;
   }
   .nearby-strip {
     font-size: 10.5px;
@@ -1974,8 +1975,8 @@ html, body {
     grid-template-columns: repeat(3, clamp(36px, 10vw, 42px));
     grid-template-rows: repeat(3, clamp(36px, 10vw, 42px));
     gap: 3px;
-    margin-left: clamp(12px, 3.6vw, 20px);
-    margin-right: 6px;
+    margin-left: clamp(20px, 5.5vw, 28px);
+    margin-right: 4px;
   }
   .dpad-btn {
     font-size: 18px;
@@ -1983,12 +1984,25 @@ html, body {
   }
   .ab-buttons {
     gap: 8px;
-    margin-left: 6px;
+    margin-left: 2px;
+    margin-right: 0px;
   }
   .ab-btn {
     width: 48px;
     height: 48px;
     font-size: 15px;
+  }
+  .btn-a {
+    transform: translateY(-4px);
+  }
+  .btn-b {
+    transform: translateY(0px);
+  }
+  .btn-a:active, .btn-a.pressed {
+    transform: translateY(-2px);
+  }
+  .btn-b:active, .btn-b.pressed {
+    transform: translateY(2px);
   }
 }
 
