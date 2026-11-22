@@ -1888,7 +1888,9 @@ html, body {
     background: rgba(15, 23, 36, 0.95);
   }
   .gba-controls-row {
-    gap: 4px;
+    gap: 6px;
+    padding: 0 4px;
+    align-items: flex-end;
   }
   .desktop-key-hint,
   .micro-pill.hint {
@@ -1896,7 +1898,7 @@ html, body {
   }
   .gba-center-col {
     gap: 4px;
-    padding-top: 1px;
+    padding-bottom: 6px;
   }
   .nearby-strip {
     font-size: 10.5px;
@@ -1911,9 +1913,16 @@ html, body {
   .gba-mid-btns {
     gap: 12px;
   }
+  .gba-pill-wrap {
+    gap: 3px;
+  }
   .gba-pill-btn {
-    width: 42px;
-    height: 15px;
+    width: 36px;
+    height: 13px;
+  }
+  .gba-pill-label {
+    font-size: 8.5px;
+    letter-spacing: 0.05em;
   }
   .gba-pill-label small {
     display: none;
@@ -1961,18 +1970,23 @@ html, body {
     overscroll-behavior: contain;
   }
   .dpad {
-    grid-template-columns: repeat(3, clamp(42px, 12.5vw, 52px));
-    grid-template-rows: repeat(3, clamp(42px, 12.5vw, 52px));
+    grid-template-columns: repeat(3, clamp(36px, 10vw, 42px));
+    grid-template-rows: repeat(3, clamp(36px, 10vw, 42px));
     gap: 3px;
+    margin-right: 8px;
   }
   .dpad-btn {
-    font-size: 20px;
-    border-radius: 9px;
+    font-size: 18px;
+    border-radius: 8px;
+  }
+  .ab-buttons {
+    gap: 8px;
+    margin-left: 6px;
   }
   .ab-btn {
-    width: 54px;
-    height: 54px;
-    font-size: 17px;
+    width: 48px;
+    height: 48px;
+    font-size: 15px;
   }
 }
 
