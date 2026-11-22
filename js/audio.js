@@ -28,19 +28,34 @@
   let bgmStateListener = null;
 
   function emitBgmState() {
-    if (!bgmStateListener) return;
     let status = 'stopped';
     if (bgmLoadError) status = 'error';
     else if (bgmPlaying) status = 'playing';
     else if (bgmWanted && bgmNeedsGesture) status = 'locked';
-    bgmStateListener(status);
+
+    if (bgmStateListener) {
+      bgmStateListener(status);
+    }
+
+    const hint = document.getElementById('bgm-autoplay-hint');
+    if (hint) {
+      if (bgmWanted && bgmNeedsGesture && !bgmPlaying) {
+        hint.classList.remove('hidden');
+      } else {
+        hint.classList.add('hidden');
+      }
+    }
   }
 
   function createDeck(idx) {
-    const a = new Audio(BGM_SRC);
-    a.preload = 'auto';
-    a.loop = false;
-    a.volume = 0;
+    let a = document.getElementById(`bgm-deck-${idx}`);
+    if (!a) {
+      a = new Audio(BGM_SRC);
+      a.preload = 'auto';
+      a.loop = false;
+      a.playsInline = true;
+    }
+    a.volume = BGM_BASE_VOL;
     a.addEventListener('error', () => {
       bgmLoadError = true;
       bgmPlaying = false;
@@ -48,6 +63,7 @@
     });
     a.addEventListener('canplay', () => {
       bgmLoadError = false;
+      emitBgmState();
     });
     a.addEventListener('ended', () => {
       // Fallback if browser throttled timers in background tab
@@ -59,7 +75,7 @@
       try {
         nextDeck.currentTime = BGM_START_OFFSET;
       } catch {}
-      nextDeck.volume = 0;
+      nextDeck.volume = BGM_BASE_VOL;
       nextDeck.play().catch(() => {});
     });
     return a;
@@ -177,9 +193,11 @@
     other.volume = 0;
 
     const activeDeck = ds[activeIdx];
-    activeDeck.volume = 0;
+    activeDeck.volume = BGM_BASE_VOL;
     try {
-      activeDeck.currentTime = BGM_START_OFFSET;
+      if (activeDeck.currentTime < BGM_START_OFFSET) {
+        activeDeck.currentTime = BGM_START_OFFSET;
+      }
     } catch {}
 
     const playPromise = activeDeck.play();
@@ -192,7 +210,7 @@
           }
           bgmPlaying = true;
           bgmNeedsGesture = false;
-          fadeInStartMs = performance.now();
+          activeDeck.volume = BGM_BASE_VOL;
           if (!loopTicker) {
             loopTicker = setInterval(tickBgmLoop, 30);
           }
@@ -206,7 +224,7 @@
     } else {
       bgmPlaying = true;
       bgmNeedsGesture = false;
-      fadeInStartMs = performance.now();
+      activeDeck.volume = BGM_BASE_VOL;
       if (!loopTicker) {
         loopTicker = setInterval(tickBgmLoop, 30);
       }
@@ -247,6 +265,9 @@
   function unlockTitleBgmIfNeeded() {
     if (bgmWanted && !bgmPlaying) {
       startTitleBgm();
+    }
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
     }
   }
 
@@ -341,4 +362,13 @@
       notes.forEach((n, i) => playTone(n, i === 3 ? 0.28 : 0.1, 'square', 0.05, i * 0.1));
     }
   };
+
+  // Eagerly initialize and preload BGM decks
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => ensureDecks(), { once: true });
+    } else {
+      ensureDecks();
+    }
+  }
 })();

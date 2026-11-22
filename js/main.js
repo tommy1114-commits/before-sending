@@ -440,57 +440,240 @@
     heldDirs.length = 0;
   });
 
+  // Prevent mobile context menu and long-press selection popups (e.g. 複製 / 查詢 / 搜尋網頁)
+  window.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    return false;
+  }, { capture: true, passive: false });
+
+  document.addEventListener('selectstart', (e) => {
+    e.preventDefault();
+    return false;
+  }, { capture: true, passive: false });
+
   function setupGBAControls() {
-    document.querySelectorAll('.dpad-btn').forEach((btn) => {
+    const dpad = document.querySelector('.dpad');
+    const dpadButtons = Array.from(document.querySelectorAll('.dpad-btn'));
+    const activePointers = new Map(); // pointerId -> currentDir
+
+    function clearAllDpadState() {
+      dpadButtons.forEach((b) => b.classList.remove('pressed'));
+      heldDirs.length = 0;
+      activePointers.clear();
+    }
+
+    function getDpadButtonAt(x, y) {
+      const el = document.elementFromPoint(x, y);
+      if (!el) return null;
+      return el.closest('.dpad-btn');
+    }
+
+    function activateDir(dir, btn) {
+      if (!dir) return;
+      if (btn) btn.classList.add('pressed');
+      const modal = window.BS.UI.getActiveModal();
+      if (isTitleVisible() && !modal) {
+        if (dir === 'up') window.BS.UI.moveTitleCursor(-1);
+        if (dir === 'down') window.BS.UI.moveTitleCursor(1);
+        return;
+      }
+      if (modal === 'pause') {
+        if (dir === 'up') window.BS.UI.movePauseCursor(-1);
+        if (dir === 'down') window.BS.UI.movePauseCursor(1);
+        return;
+      }
+      if (window.BS.UI.isOverlayOpen()) {
+        if (dir === 'up') window.BS.UI.handleDialogueKey('ArrowUp');
+        if (dir === 'down') window.BS.UI.handleDialogueKey('ArrowDown');
+        return;
+      }
+      pushDir(dir);
+    }
+
+    function deactivateDir(dir, btn) {
+      if (btn) btn.classList.remove('pressed');
+      if (dir) releaseDir(dir);
+    }
+
+    function updateDpadPointer(pointerId, x, y) {
+      const targetBtn = getDpadButtonAt(x, y);
+      const newDir = targetBtn ? targetBtn.dataset.dir : null;
+      const prevDir = activePointers.get(pointerId);
+
+      if (prevDir === newDir) return;
+
+      if (prevDir) {
+        const prevBtn = dpadButtons.find((b) => b.dataset.dir === prevDir);
+        deactivateDir(prevDir, prevBtn);
+      }
+
+      if (newDir) {
+        activePointers.set(pointerId, newDir);
+        activateDir(newDir, targetBtn);
+      } else {
+        activePointers.delete(pointerId);
+      }
+    }
+
+    function releaseDpadPointer(pointerId) {
+      const dir = activePointers.get(pointerId);
+      if (dir) {
+        const btn = dpadButtons.find((b) => b.dataset.dir === dir);
+        deactivateDir(dir, btn);
+        activePointers.delete(pointerId);
+      }
+      if (activePointers.size === 0) {
+        dpadButtons.forEach((b) => b.classList.remove('pressed'));
+        heldDirs.length = 0;
+      }
+    }
+
+    if (dpad) {
+      dpad.addEventListener('pointerdown', (ev) => {
+        ev.preventDefault();
+        try {
+          dpad.setPointerCapture(ev.pointerId);
+        } catch {}
+        updateDpadPointer(ev.pointerId, ev.clientX, ev.clientY);
+      }, { passive: false });
+
+      dpad.addEventListener('pointermove', (ev) => {
+        if (activePointers.has(ev.pointerId)) {
+          ev.preventDefault();
+          updateDpadPointer(ev.pointerId, ev.clientX, ev.clientY);
+        }
+      }, { passive: false });
+
+      const onDpadEnd = (ev) => {
+        ev.preventDefault();
+        releaseDpadPointer(ev.pointerId);
+        try {
+          dpad.releasePointerCapture(ev.pointerId);
+        } catch {}
+      };
+
+      dpad.addEventListener('pointerup', onDpadEnd, { passive: false });
+      dpad.addEventListener('pointercancel', onDpadEnd, { passive: false });
+      dpad.addEventListener('lostpointercapture', (ev) => {
+        releaseDpadPointer(ev.pointerId);
+      });
+    }
+
+    // Direct touch and contextmenu safety on individual buttons
+    dpadButtons.forEach((btn) => {
       const dir = btn.dataset.dir;
+      btn.addEventListener('contextmenu', (ev) => {
+        ev.preventDefault();
+        return false;
+      }, { capture: true, passive: false });
+
+      // Fallback for touches without PointerEvents
+      btn.addEventListener('touchstart', (ev) => {
+        ev.preventDefault();
+        activateDir(dir, btn);
+      }, { passive: false });
+
+      btn.addEventListener('touchend', (ev) => {
+        ev.preventDefault();
+        deactivateDir(dir, btn);
+      }, { passive: false });
+
+      btn.addEventListener('touchcancel', (ev) => {
+        ev.preventDefault();
+        deactivateDir(dir, btn);
+      }, { passive: false });
+    });
+
+    // Action button binder with pointer capture
+    function bindActionButton(id, triggerFn) {
+      const btn = $(id);
+      if (!btn) return;
+
       const start = (ev) => {
         ev.preventDefault();
         btn.classList.add('pressed');
-        const modal = window.BS.UI.getActiveModal();
-        if (isTitleVisible() && !modal) {
-          if (dir === 'up') window.BS.UI.moveTitleCursor(-1);
-          if (dir === 'down') window.BS.UI.moveTitleCursor(1);
-          return;
-        }
-        if (modal === 'pause') {
-          if (dir === 'up') window.BS.UI.movePauseCursor(-1);
-          if (dir === 'down') window.BS.UI.movePauseCursor(1);
-          return;
-        }
-        if (window.BS.UI.isOverlayOpen()) {
-          if (dir === 'up') window.BS.UI.handleDialogueKey('ArrowUp');
-          if (dir === 'down') window.BS.UI.handleDialogueKey('ArrowDown');
-          return;
-        }
-        pushDir(dir);
+        try {
+          btn.setPointerCapture(ev.pointerId);
+        } catch {}
+        triggerFn();
       };
+
       const end = (ev) => {
         ev.preventDefault();
         btn.classList.remove('pressed');
-        releaseDir(dir);
+        try {
+          btn.releasePointerCapture(ev.pointerId);
+        } catch {}
       };
-      btn.addEventListener('pointerdown', start);
-      btn.addEventListener('pointerup', end);
-      btn.addEventListener('pointerleave', end);
-      btn.addEventListener('pointercancel', end);
-    });
 
-    $('touch-a').addEventListener('pointerdown', (ev) => {
-      ev.preventDefault();
-      triggerA();
-    });
+      btn.addEventListener('pointerdown', start, { passive: false });
+      btn.addEventListener('pointerup', end, { passive: false });
+      btn.addEventListener('pointercancel', end, { passive: false });
+      btn.addEventListener('lostpointercapture', end);
+      btn.addEventListener('contextmenu', (ev) => {
+        ev.preventDefault();
+        return false;
+      }, { capture: true, passive: false });
+    }
 
-    $('touch-b').addEventListener('pointerdown', (ev) => {
-      ev.preventDefault();
-      triggerB();
-    });
+    bindActionButton('touch-a', triggerA);
+    bindActionButton('touch-b', triggerB);
 
-    $('btn-start-gba').addEventListener('click', () => {
-      togglePauseMenu();
-    });
+    function bindPillButton(id, triggerFn) {
+      const btn = $(id);
+      if (!btn) return;
 
-    $('btn-select-gba').addEventListener('click', () => {
-      toggleSelectNotes();
+      const start = (ev) => {
+        ev.preventDefault();
+        btn.classList.add('pressed');
+        try {
+          btn.setPointerCapture(ev.pointerId);
+        } catch {}
+        triggerFn();
+      };
+
+      const end = (ev) => {
+        ev.preventDefault();
+        btn.classList.remove('pressed');
+        try {
+          btn.releasePointerCapture(ev.pointerId);
+        } catch {}
+      };
+
+      btn.addEventListener('pointerdown', start, { passive: false });
+      btn.addEventListener('pointerup', end, { passive: false });
+      btn.addEventListener('pointercancel', end, { passive: false });
+      btn.addEventListener('lostpointercapture', end);
+      btn.addEventListener('click', (ev) => {
+        ev.preventDefault();
+      });
+      btn.addEventListener('contextmenu', (ev) => {
+        ev.preventDefault();
+        return false;
+      }, { capture: true, passive: false });
+    }
+
+    bindPillButton('btn-start-gba', togglePauseMenu);
+    bindPillButton('btn-select-gba', toggleSelectNotes);
+
+    // Global Safety Net: clear all pressed states when all fingers leave the screen or blur occurs
+    const safetyClear = (ev) => {
+      if (!ev.touches || ev.touches.length === 0) {
+        clearAllDpadState();
+        document.querySelectorAll('.ab-btn, .gba-pill-btn').forEach((b) => b.classList.remove('pressed'));
+      }
+    };
+    window.addEventListener('touchend', safetyClear, { passive: true });
+    window.addEventListener('touchcancel', safetyClear, { passive: true });
+    window.addEventListener('pointerup', (ev) => {
+      if (ev.pointerType === 'touch' || !ev.buttons) {
+        safetyClear(ev);
+      }
+    }, { passive: true });
+    window.addEventListener('pointercancel', safetyClear, { passive: true });
+    window.addEventListener('blur', clearAllDpadState);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) clearAllDpadState();
     });
   }
 
@@ -879,21 +1062,27 @@
   };
 
   function setupTitleBgm() {
-    // Always play Title Screen BGM automatically (with seamless gesture unlock if browser policy initially defers autoplay)
-    const tryUnlock = (ev) => {
+    // Attempt Title Screen BGM playback immediately, with seamless unlock on any user gesture
+    const tryUnlock = () => {
       if (!isTitleVisible()) return;
-      if (ev.target && ev.target.closest && ev.target.closest('.cursor-menu-item')) return;
       window.BS.Audio.unlockTitleBgmIfNeeded();
     };
-    window.addEventListener('pointerdown', tryUnlock, { capture: true });
-    window.addEventListener('click', tryUnlock, { capture: true });
-    window.addEventListener('touchstart', tryUnlock, { capture: true, passive: true });
-    window.addEventListener('keydown', (ev) => {
-      if (!isTitleVisible()) return;
-      if (ev.key === 'Enter' || ev.key === ' ') return;
-      window.BS.Audio.unlockTitleBgmIfNeeded();
-    }, { capture: true });
 
+    ['pointerdown', 'touchstart', 'mousedown', 'keydown', 'click'].forEach((evt) => {
+      window.addEventListener(evt, tryUnlock, { capture: true, passive: true });
+    });
+
+    const hint = $('bgm-autoplay-hint');
+    if (hint) {
+      hint.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        window.BS.Audio.unlockTitleBgmIfNeeded();
+        hint.classList.add('hidden');
+      });
+    }
+
+    // Try starting playback immediately upon loading
     window.BS.Audio.startTitleBgm();
   }
 

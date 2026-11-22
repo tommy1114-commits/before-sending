@@ -7,6 +7,9 @@
   <link rel="stylesheet" href="css/style.css?v=3.2">
 </head>
 <body>
+  <!-- Preloaded Dual BGM Decks for Immediate Playback -->
+  <audio id="bgm-deck-0" src="audio/homepage-bgm.m4a?v=3.2" preload="auto" playsinline></audio>
+  <audio id="bgm-deck-1" src="audio/homepage-bgm.m4a?v=3.2" preload="auto" playsinline></audio>
   <div class="app-shell">
     <!-- Main GBA Viewport Stage -->
     <main class="stage-wrap">
@@ -68,6 +71,7 @@
                 </button>
               </div>
               <div class="title-menu-footer">↑↓ 移動游標 · A / Enter 確認 · 四章皆可直接進入</div>
+              <div class="bgm-autoplay-hint hidden" id="bgm-autoplay-hint" role="button" tabindex="0" aria-label="點擊播放首頁音樂">🔊 點擊畫面任意處或按鍵立即播放首頁音樂 🎵</div>
             </div>
           </div>
         </section>
