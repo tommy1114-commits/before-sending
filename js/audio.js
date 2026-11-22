@@ -5,10 +5,10 @@
   let muted = false;
 
   // ===== Title Screen Dual-Deck Crossfade BGM Engine =====
-  const BGM_SRC = 'audio/homepage-bgm.mp3?v=3.1';
-  const BGM_BASE_VOL = 0.42;
-  const BGM_START_OFFSET = 0.05;   // Skip 51ms MP3 encoder padding
-  const BGM_CROSSFADE_SEC = 2.0;   // Smooth 2.0s equal-power crossfade overlap
+  const BGM_SRC = 'audio/homepage-bgm.m4a?v=3.2';
+  const BGM_BASE_VOL = 0.36;
+  const BGM_START_OFFSET = 0.25;   // Skip 272ms leading silence cleanly
+  const BGM_CROSSFADE_SEC = 2.8;   // Smooth 2.8s equal-power crossfade before loud tail
   const BGM_FADE_IN_MS = 950;
   const BGM_FADE_OUT_MS = 750;
 
@@ -31,7 +31,6 @@
     if (!bgmStateListener) return;
     let status = 'stopped';
     if (bgmLoadError) status = 'error';
-    else if (muted) status = 'muted';
     else if (bgmPlaying) status = 'playing';
     else if (bgmWanted && bgmNeedsGesture) status = 'locked';
     bgmStateListener(status);
@@ -52,7 +51,7 @@
     });
     a.addEventListener('ended', () => {
       // Fallback if browser throttled timers in background tab
-      if (!bgmWanted || muted || crossfading || idx !== activeIdx) return;
+      if (!bgmWanted || crossfading || idx !== activeIdx) return;
       const nextIdx = 1 - activeIdx;
       const nextDeck = decks[nextIdx];
       activeIdx = nextIdx;
@@ -101,7 +100,7 @@
   }
 
   function tickBgmLoop() {
-    if (!bgmWanted || muted || !decks) {
+    if (!bgmWanted || !decks) {
       hardStopDecks();
       return;
     }
@@ -130,7 +129,7 @@
     }
 
     const activeDeck = decks[activeIdx];
-    const dur = Number.isFinite(activeDeck.duration) && activeDeck.duration > 4 ? activeDeck.duration : 17.986;
+    const dur = Number.isFinite(activeDeck.duration) && activeDeck.duration > 4 ? activeDeck.duration : 28.565;
 
     // Initial smooth fade-in
     if (fadeInStartMs > 0) {
@@ -165,10 +164,6 @@
 
   function startTitleBgm() {
     bgmWanted = true;
-    if (muted) {
-      emitBgmState();
-      return;
-    }
     if (bgmPlaying && !fadeOutTicker) {
       emitBgmState();
       return;
@@ -191,7 +186,7 @@
     if (playPromise && typeof playPromise.then === 'function') {
       playPromise
         .then(() => {
-          if (!bgmWanted || muted) {
+          if (!bgmWanted) {
             hardStopDecks();
             return;
           }
@@ -250,7 +245,7 @@
   }
 
   function unlockTitleBgmIfNeeded() {
-    if (bgmWanted && !muted && !bgmPlaying) {
+    if (bgmWanted && !bgmPlaying) {
       startTitleBgm();
     }
   }
@@ -292,13 +287,6 @@
     },
     toggleMute() {
       muted = !muted;
-      if (muted) {
-        hardStopDecks();
-      } else if (bgmWanted) {
-        startTitleBgm();
-      } else {
-        emitBgmState();
-      }
       return muted;
     },
     startTitleBgm,
@@ -306,7 +294,6 @@
     unlockTitleBgmIfNeeded,
     getTitleBgmStatus() {
       if (bgmLoadError) return 'error';
-      if (muted) return 'muted';
       if (bgmPlaying) return 'playing';
       if (bgmWanted && bgmNeedsGesture) return 'locked';
       return 'stopped';

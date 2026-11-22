@@ -879,46 +879,18 @@
   };
 
   function setupTitleBgm() {
-    const bgmBtn = $('btn-title-bgm');
-    if (bgmBtn) {
-      window.BS.Audio.onBgmStateChange((status) => {
-        bgmBtn.classList.remove('locked', 'muted');
-        if (status === 'error') {
-          bgmBtn.textContent = '⚠ 找不到音樂檔';
-          bgmBtn.classList.add('muted');
-        } else if (status === 'muted') {
-          bgmBtn.textContent = '🔇 音樂：關';
-          bgmBtn.classList.add('muted');
-        } else if (status === 'playing') {
-          bgmBtn.textContent = '🔊 音樂：開';
-        } else {
-          bgmBtn.textContent = '🎵 點擊開啟音樂';
-          bgmBtn.classList.add('locked');
-        }
-      });
-
-      bgmBtn.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        const status = window.BS.Audio.getTitleBgmStatus();
-        if (status === 'locked' || status === 'stopped') {
-          window.BS.Audio.startTitleBgm();
-        } else {
-          window.BS.Audio.toggleMute();
-        }
-      });
-    }
-
-    // Unlock autoplay gracefully on the user's very first interaction on Title Screen
+    // Always play Title Screen BGM automatically (with seamless gesture unlock if browser policy initially defers autoplay)
     const tryUnlock = (ev) => {
       if (!isTitleVisible()) return;
-      if (bgmBtn && ev.target === bgmBtn) return;
       if (ev.target && ev.target.closest && ev.target.closest('.cursor-menu-item')) return;
       window.BS.Audio.unlockTitleBgmIfNeeded();
     };
     window.addEventListener('pointerdown', tryUnlock, { capture: true });
+    window.addEventListener('click', tryUnlock, { capture: true });
+    window.addEventListener('touchstart', tryUnlock, { capture: true, passive: true });
     window.addEventListener('keydown', (ev) => {
       if (!isTitleVisible()) return;
-      if (ev.key === 'Enter' || ev.key === ' ') return; // confirming chapter enters game immediately
+      if (ev.key === 'Enter' || ev.key === ' ') return;
       window.BS.Audio.unlockTitleBgmIfNeeded();
     }, { capture: true });
 

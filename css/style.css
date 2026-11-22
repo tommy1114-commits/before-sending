@@ -193,60 +193,6 @@ html, body {
   background: linear-gradient(180deg, rgba(5, 21, 34, 0.42) 0%, rgba(5, 21, 34, 0.08) 42%, rgba(5, 21, 34, 0.25) 100%);
 }
 
-.title-bgm-btn {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  z-index: 6;
-  background: rgba(8, 28, 48, 0.84);
-  color: #e6f4ff;
-  border: 1.5px solid rgba(125, 200, 248, 0.7);
-  border-radius: 999px;
-  padding: 4px 11px;
-  font-size: 11px;
-  font-weight: 800;
-  font-family: inherit;
-  cursor: pointer;
-  letter-spacing: 0.04em;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
-  transition: transform 0.12s, background 0.15s, border-color 0.15s;
-}
-
-.title-bgm-btn:hover {
-  background: rgba(18, 55, 92, 0.94);
-  border-color: #ffd166;
-  color: #ffffff;
-}
-
-.title-bgm-btn.locked {
-  border-color: #ffd166;
-  color: #ffe9a8;
-  animation: bgmPulse 1.8s ease-in-out infinite;
-}
-
-.title-bgm-btn.muted {
-  opacity: 0.76;
-  border-color: rgba(148, 163, 184, 0.55);
-  color: #cbd5e1;
-}
-
-@keyframes bgmPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 209, 102, 0.45); }
-  50% { box-shadow: 0 0 0 6px rgba(255, 209, 102, 0); }
-}
-
-@media (max-width: 640px) {
-  .title-content {
-    padding-top: 38px;
-  }
-  .title-bgm-btn {
-    top: 8px;
-    right: 10px;
-    padding: 3px 9px;
-    font-size: 10.5px;
-  }
-}
-
 .title-header-block {
   text-align: center;
   margin-top: 2px;
@@ -1855,7 +1801,7 @@ html, body {
     height: 36px;
   }
   .title-content {
-    padding: 38px 10px 8px;
+    padding: 8px 10px;
   }
   .title-menu-box {
     padding: 7px 8px 6px;
