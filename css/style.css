@@ -333,7 +333,8 @@ html, body {
   text-overflow: ellipsis;
 }
 
-/* Chapter Menu Difficulty Badge & Stars */
+/* Chapter Menu Play Time Badge */
+.cursor-menu-item .menu-time,
 .cursor-menu-item .menu-difficulty {
   display: inline-flex;
   align-items: center;
@@ -341,8 +342,9 @@ html, body {
   flex-shrink: 0;
 }
 
+.cursor-menu-item .time-tag,
 .cursor-menu-item .diff-tag {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 700;
   color: #94a3b8;
   background: rgba(255, 255, 255, 0.08);
@@ -352,10 +354,24 @@ html, body {
   letter-spacing: 0.5px;
 }
 
+.cursor-menu-item.selected .time-tag,
 .cursor-menu-item.selected .diff-tag {
   color: #bae6fd;
   border-color: rgba(186, 230, 253, 0.4);
   background: rgba(186, 230, 253, 0.15);
+}
+
+.cursor-menu-item .time-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: #cbd5e1;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.cursor-menu-item.selected .time-val {
+  color: #fde047;
+  text-shadow: 0 0 6px rgba(253, 224, 71, 0.45);
 }
 
 .cursor-menu-item .diff-stars {
@@ -1955,12 +1971,17 @@ html, body {
   .cursor-menu-item .menu-main {
     font-size: 13px;
   }
+  .cursor-menu-item .menu-time,
   .cursor-menu-item .menu-difficulty {
     gap: 4px;
   }
+  .cursor-menu-item .time-tag,
   .cursor-menu-item .diff-tag {
     font-size: 9px;
     padding: 0px 3px;
+  }
+  .cursor-menu-item .time-val {
+    font-size: 11px;
   }
   .cursor-menu-item .diff-stars {
     font-size: 12px;
