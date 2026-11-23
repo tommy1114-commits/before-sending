@@ -251,14 +251,14 @@
     if (chapter === 2) {
       return [
         { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 2, x: 8, y: 17, dir: 'up' },
-        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 10, y: 4, dir: 'left' }
+        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 5, y: 9, dir: 'down' }
       ];
     }
     if (chapter === 5) {
       // Menu Ch3: 這份文件要怎麼標？ (internal 5)
       return [
-        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 10, y: 4, dir: 'left' },
-        { id: 'npc_qing', sprite: 'qing', label: '接手同事 小晴', label_en: 'Colleague: Xiao-Qing', floor: 2, x: 5, y: 11, dir: 'left' },
+        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 5, y: 9, dir: 'down' },
+        { id: 'npc_qing', sprite: 'qing', label: '接手同事 小晴', label_en: 'Colleague: Xiao-Qing', floor: 2, x: 8, y: 10, dir: 'left' },
         { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 2, x: 8, y: 17, dir: 'up' }
       ];
     }
@@ -266,8 +266,8 @@
       // Menu Ch5: 阿文的最後一天 (internal 3)
       return [
         { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 1, x: 4, y: 10, dir: 'right' },
-        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 10, y: 4, dir: 'left' },
-        { id: 'npc_qing', sprite: 'qing', label: '接手同事 小晴', label_en: 'Colleague: Xiao-Qing', floor: 2, x: 5, y: 11, dir: 'left' }
+        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 5, y: 9, dir: 'down' },
+        { id: 'npc_qing', sprite: 'qing', label: '接手同事 小晴', label_en: 'Colleague: Xiao-Qing', floor: 2, x: 7, y: 5, dir: 'right' }
       ];
     }
     if (chapter === 4) {

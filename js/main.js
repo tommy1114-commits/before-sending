@@ -221,8 +221,6 @@
 
     if (currentChapter === 4) {
       resetPlayer(1, 9, 7, 'up');
-    } else if (currentChapter === 2 || currentChapter === 3) {
-      resetPlayer(2, 3, 10, 'up');
     } else {
       resetPlayer(2, 5, 10, 'up');
     }
@@ -383,8 +381,10 @@
           const dy = player.y - npc.y;
           if (Math.abs(dx) > Math.abs(dy)) {
             npc.dir = dx > 0 ? 'right' : 'left';
+            player.dir = dx > 0 ? 'left' : 'right';
           } else {
             npc.dir = dy > 0 ? 'down' : 'up';
+            player.dir = dy > 0 ? 'up' : 'down';
           }
         }
       }
