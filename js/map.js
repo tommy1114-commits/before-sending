@@ -373,10 +373,10 @@
     // Direction sign on wall (y=2)
     const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
     const label = isEn ? (floor === 1 ? '▲ to 2F' : '▼ to 1F') : (floor === 1 ? '▲ 往2F' : '▼ 往1F');
-    px(ctx, 1 * TILE + 4, 2 * TILE + 2, 40, 9, '#1e293b');
+    px(ctx, 1 * TILE + 3, 2 * TILE + 2, 44, 9, '#1e293b');
     ctx.fillStyle = floor === 1 ? '#7dd3fc' : '#fde68a';
     ctx.font = 'bold 7px sans-serif';
-    ctx.fillText(label, 1 * TILE + 7, 2 * TILE + 9);
+    ctx.fillText(label, 1 * TILE + 6, 2 * TILE + 9);
   }
 
   // ===== Render Floor 1 (16 x 20) =====

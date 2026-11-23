@@ -378,6 +378,7 @@ html, body {
 .title-lang-btn-group {
   display: flex;
   gap: 5px;
+  flex-shrink: 0;
 }
 
 .title-lang-btn {
@@ -394,6 +395,8 @@ html, body {
   cursor: pointer;
   transition: all 0.15s ease;
   user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .title-lang-btn:hover {
@@ -485,14 +488,16 @@ html, body {
   justify-content: space-between;
   gap: 8px;
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .cursor-menu-item .menu-title-text {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.25;
 }
 
 /* Chapter Menu Play Time Badge */
@@ -1421,18 +1426,19 @@ html, body {
 }
 
 .nearby-strip {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
   color: #8ee0cf;
   text-align: center;
-  background: rgba(11, 17, 27, 0.72);
+  background: rgba(11, 17, 27, 0.75);
   border: 1px solid #354461;
   border-radius: 999px;
   padding: 3px 12px;
   max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.25;
 }
 
 .gba-mid-btns {
@@ -2100,13 +2106,14 @@ html, body {
     margin-left: 4px;
   }
   .nearby-strip {
-    font-size: 10.5px;
-    padding: 2px 10px;
-    max-width: 96%;
-    margin-bottom: 1px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: clamp(9px, 2.6vw, 10.5px);
+    padding: 2px 8px;
+    max-width: 98%;
+    margin-bottom: 2px;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.2;
     letter-spacing: -0.01em;
   }
   .gba-mid-btns {
@@ -2141,32 +2148,101 @@ html, body {
     height: 36px;
   }
   .title-content {
-    padding: 8px 8px;
+    padding: 6px 8px 4px;
+    justify-content: space-evenly;
   }
-  .title-menu-box {
-    padding: 6px 7px 5px;
+  .title-header-block {
+    margin-top: 0;
   }
-  .cursor-menu-item {
-    padding: 6px 8px;
+  .title-kicker {
+    font-size: 10px;
+    padding: 1px 8px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    letter-spacing: 0.08em;
   }
-  .cursor-menu-item .menu-main {
-    font-size: 13px;
+  .pixel-hero-title {
+    font-size: clamp(22px, 5.5vw, 32px);
+    line-height: 1.1;
+    letter-spacing: 0.1em;
+    text-indent: 0.1em;
+    margin: 1px 0;
   }
-  .cursor-menu-item .menu-time,
-  .cursor-menu-item .menu-difficulty {
+  .title-sub-en {
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    text-indent: 0.18em;
+    margin-top: 1px;
+  }
+  .title-lang-bar {
+    margin-bottom: 4px;
+    padding: 2px 6px;
     gap: 4px;
   }
-  .cursor-menu-item .time-tag,
-  .cursor-menu-item .diff-tag {
-    font-size: 9px;
-    padding: 0px 3px;
+  .title-lang-label {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+  .title-lang-btn {
+    padding: 2px 6px;
+    font-size: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .title-menu-box {
+    padding: 5px 6px 4px;
+    border-width: 2px;
+  }
+  .title-menu-list {
+    gap: 2.5px;
+  }
+  .cursor-menu-item {
+    padding: 4px 6px;
+    border-radius: 6px;
+  }
+  .cursor-menu-item .menu-cursor {
+    font-size: 11px;
+    width: 10px;
+  }
+  .cursor-menu-item .menu-main {
+    font-size: clamp(10.5px, 2.8vw, 12px);
+    gap: 3px;
+    flex-wrap: wrap;
+  }
+  .cursor-menu-item .menu-title-text {
+    line-height: 1.2;
+    font-size: inherit;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    flex: 1 1 auto;
+  }
+  .cursor-menu-item .menu-time {
+    margin-left: auto;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  .cursor-menu-item .time-tag {
+    display: none;
   }
   .cursor-menu-item .time-val {
-    font-size: 11px;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 4px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    white-space: nowrap;
   }
   .cursor-menu-item .diff-stars {
-    font-size: 12px;
+    font-size: 11px;
     letter-spacing: 1px;
+  }
+  .title-menu-footer {
+    font-size: 9.5px;
+    margin-top: 2px;
+    letter-spacing: 0.02em;
+    padding: 0 4px;
   }
   .modal-body {
     padding: 10px 11px;

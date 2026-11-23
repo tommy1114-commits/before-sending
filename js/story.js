@@ -488,8 +488,8 @@
 
       if (state.visitor.status === 'done_lab_leaked') {
         choices.push({
-          label: '回報：剛才訪客在實驗區拍照時拍進了敏感資訊…',
-          label_en: 'Report: The visitor captured sensitive information while taking photos in the lab...',
+          label: '回報：剛才訪客在實驗區拍照時拍進了敏感資訊',
+          label_en: 'Report: The visitor captured sensitive information while taking photos in the lab',
           onSelect: () => {
             window.BS.UI.startDialogue([
               {
@@ -1973,10 +1973,10 @@
           const pending = window.BS.State.getCh3PendingItems(state);
           let pendingZh = pending.length === 0
             ? '全部交接項目都完成得滴水不漏！上 2F 辦公區值班桌填寫交班紀錄就能下班囉。'
-            : `目前還有 ${pending.length} 項待處理：\n• ${pending.slice(0, 3).join('\n• ')}${pending.length > 3 ? '\n……（可按 SELECT 查看完整清單）' : ''}`;
+            : `目前還有 ${pending.length} 項待處理：\n• ${pending.join('\n• ')}`;
           let pendingEn = pending.length === 0
             ? 'All handover items completed flawlessly! Go to the 2F Duty Desk to fill in handover notes and clock out.'
-            : `Currently ${pending.length} items pending:\n• ${pending.slice(0, 3).join('\n• ')}${pending.length > 3 ? '\n... (Press SELECT for full list)' : ''}`;
+            : `Currently ${pending.length} items pending:\n• ${pending.join('\n• ')}`;
           window.BS.UI.startDialogue([
             {
               speaker: '負責人 阿明組長（1F 大廳）',

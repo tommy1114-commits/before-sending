@@ -202,7 +202,7 @@
   "再次確認星海科技 NDA-CS-2026 的重點": "Review key points of Starlight Tech NDA-CS-2026",
   "再給我一分鐘整理現場": "Give me one minute to clear sensitive data from the room",
   "回 2F 值班桌交班": "Return to 2F Duty Desk for handover",
-  "回報：剛才訪客在實驗區拍照時拍進了敏感資訊…": "Report: Visitor captured sensitive lab data in photo earlier...",
+  "回報：剛才訪客在實驗區拍照時拍進了敏感資訊": "Report: Visitor captured sensitive lab data in photo earlier",
   "完整交代四要素：發現時間、涉及檔案範圍、使用的雲端系統與已停權現況（含轉傳待確認）": "Report all 4 incident elements: Time discovered, scope of files, cloud system used, and revocation status (including resharing risk)",
   "我再看一下周圍": "Look around a bit more",
   "改帶陳先生回 1F 大門形象牆指定角度拍攝": "Redirect Mr. Chen to approved photo angle at 1F Logo Wall",
