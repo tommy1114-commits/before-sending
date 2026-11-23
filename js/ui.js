@@ -18,7 +18,12 @@
 
   function showToast(msg, isAlert = false, duration = 3600) {
     const el = $('toast-banner');
-    el.textContent = msg;
+    const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
+    let text = msg;
+    if (isEn && window.BS.I18n && window.BS.I18n.translateToast) {
+      text = window.BS.I18n.translateToast(msg);
+    }
+    el.textContent = text;
     el.classList.toggle('alert', isAlert);
     el.classList.remove('hidden');
     if (toastTimer) clearTimeout(toastTimer);

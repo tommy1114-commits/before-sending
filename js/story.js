@@ -186,12 +186,14 @@
             {
               speaker: '值班電腦',
               portrait: 'pc',
-              text: '已回覆蘇小姐：「收到！正在確認會議用核准版本與保密約定範圍，核對完馬上提供給您。」'
+              text: '已回覆蘇小姐：「收到！正在確認會議用核准版本與保密約定範圍，核對完馬上提供給您。」',
+            text_en: 'Replied to Ms. Su: "Received! Verifying the approved meeting version and NDA scope. Will provide right after checking."'
             },
             {
               speaker: '小安',
               portrait: 'player',
-              text: '先讓對方知道進度，就不用倉促寄出。接下來去問問實驗區的阿文（確認版本）和阿明組長（確認保密約定）吧！'
+              text: '先讓對方知道進度，就不用倉促寄出。接下來去問問實驗區的阿文（確認版本）和阿明組長（確認保密約定）吧！',
+            text_en: 'Keeping the partner informed avoids rushed mistakes. Next, I will check with A-Wen in 2F lab (for versions) and Team Lead A-Ming (for NDA scope)!'
             }
           ]);
         },
@@ -216,14 +218,20 @@
                 portrait: 'alert',
                 text: payload === 'full_folder'
                   ? '剛寄出沒兩分鐘，蘇小姐立刻回信了：\n「小安您好，我點開連結發現裡面還有原始量測數據和製程筆記！我們等等有外部協力廠商會加入，請問這個連結可以直接轉給他們一起看嗎？」'
-                  : '剛寄出沒兩分鐘，蘇小姐立刻回信了：\n「小安您好，這個連結免登入誰都能開好方便！我們等等有外部協力廠商會加入，我就直接把連結轉給他們一起看囉？」'
+                  : '剛寄出沒兩分鐘，蘇小姐立刻回信了：\n「小安您好，這個連結免登入誰都能開好方便！我們等等有外部協力廠商會加入，我就直接把連結轉給他們一起看囉？」',
+            text_en: payload === 'full_folder'
+                  ? 'Just two minutes after sending, Ms. Su replied:\n"Hi Xiao-An, I opened the link and found raw measurements and process notes inside! External subcontractors will join shortly—can we forward this link to them directly?"'
+                  : 'Just two minutes after sending, Ms. Su replied:\n"Hi Xiao-An, this link requires no login and is so convenient! External subcontractors will join shortly, so I will forward this link directly to them, okay?"'
               },
               {
                 speaker: '小安',
                 portrait: 'player',
                 text: payload === 'full_folder'
                   ? '糟了！！裡面夾帶了未核准對外的資料，而且合作方還想轉傳給協力廠商！\n得趕快回電腦限制／停用連結存取，再找阿明組長通報才行！'
-                  : '糟了！！設成「持連結者皆可存取」，對方隨時可能轉傳給不在保密約定內的協力廠商！\n得趕快回電腦停用公開連結，再找阿明組長通報才行！'
+                  : '糟了！！設成「持連結者皆可存取」，對方隨時可能轉傳給不在保密約定內的協力廠商！\n得趕快回電腦停用公開連結，再找阿明組長通報才行！',
+            text_en: payload === 'full_folder'
+                  ? 'Oh no! Unapproved sensitive data was included, and the partner wants to forward it to subcontractors!\nI must immediately return to the PC to revoke access, then report to Team Lead A-Ming!'
+                  : 'Oh no! Setting it to "Anyone with the link can view" means it could be forwarded to unauthorized subcontractors at any time!\nI must immediately revoke the public link, then report to Team Lead A-Ming!'
               }
             ]);
             return;
@@ -526,22 +534,26 @@
           {
             speaker: '同事 阿文',
             portrait: 'colleague',
-            text: '嗨小安！你是在找星海科技四點開會要用的圖嗎？'
+            text: '嗨小安！你是在找星海科技四點開會要用的圖嗎？',
+            text_en: 'Hi Xiao-An! Are you looking for the charts for the 4:00 PM meeting with Starlight Tech?'
           },
           {
             speaker: '同事 阿文',
             portrait: 'colleague',
-            text: '幸好你有先來問！原本的 StarSky_TestData 資料夾裡還塞著原始量測數據（RAW）和我寫到一半的製程筆記草稿，千萬別整個資料夾直接丟出去！'
+            text: '幸好你有先來問！原本的 StarSky_TestData 資料夾裡還塞著原始量測數據（RAW）和我寫到一半的製程筆記草稿，千萬別整個資料夾直接丟出去！',
+            text_en: 'Good thing you asked first! The original StarSky_TestData folder contains raw measurements (RAW) and my draft process notes. Never send that entire folder out!'
           },
           {
             speaker: '同事 阿文',
             portrait: 'colleague',
-            text: '我剛剛已經把核准可以對外給的兩張圖獨立整理成「StarSky_會議用摘要圖_v2」放在系統裡了。你回電腦重看就會看到這個選項！'
+            text: '我剛剛已經把核准可以對外給的兩張圖獨立整理成「StarSky_會議用摘要圖_v2」放在系統裡了。你回電腦重看就會看到這個選項！',
+            text_en: 'I have compiled the two approved charts into "StarSky_MeetingSummary_v2" in the system. Check your PC again and you will see this option!'
           },
           {
             speaker: '同事 阿文',
             portrait: 'colleague',
-            text: '對了，如果等一下有訪客要進實驗區拍照，白板上我剛寫的配方參數跟那台量測螢幕都還沒關，記得先處理一下喔！'
+            text: '對了，如果等一下有訪客要進實驗區拍照，白板上我剛寫的配方參數跟那台量測螢幕都還沒關，記得先處理一下喔！',
+            text_en: 'By the way, if visitors come into the lab to take photos, the formula parameters on the whiteboard and the measurement screen are still exposed. Remember to clear them first!'
           }
         ], () => {
           state.clues.meetingVersion = true;
@@ -558,7 +570,10 @@
             portrait: 'colleague',
             text: exposed.length > 0
               ? `會議用兩張圖已經放好在電腦裡了（StarSky_會議用摘要圖_v2）。對了，實驗區裡還有「${exposed.join('、')}」露在外面，有訪客進來拍照記得先遮蔽或收妥！`
-              : '會議用兩張圖已經放好在電腦裡了，實驗區的白板、螢幕和樣品也都收得很乾淨，專業喔！'
+              : '會議用兩張圖已經放好在電腦裡了，實驗區的白板、螢幕和樣品也都收得很乾淨，專業喔！',
+            text_en: exposed.length > 0
+              ? `The 2 meeting charts are ready on the PC (StarSky_MeetingSummary_v2). By the way, "${exposed.map(item => item === '白板配方參數' ? 'Whiteboard Formula Parameters' : item === '螢幕原始數據' ? 'Screen Raw Measurements' : item === '樣品代碼標籤' ? 'Sample Batch Code Labels' : item).join(', ')}" are still exposed in the lab—be sure to shield or store them before visitors shoot photos!`
+              : 'The 2 meeting charts are ready on the PC, and the whiteboard, screens, and samples are all cleared—very professional!'
           }
         ]);
       }
@@ -570,7 +585,8 @@
           {
             speaker: '實驗白板',
             portrait: 'whiteboard',
-            text: '白板已經擦拭乾淨並確認重要參數已另存於電子實驗紀錄，就算拍照也不會外洩機密。'
+            text: '白板已經擦拭乾淨並確認重要參數已另存於電子實驗紀錄，就算拍照也不會外洩機密。',
+            text_en: 'The whiteboard is wiped clean and critical parameters are saved in electronic lab records. Taking photos here will not leak secrets.'
           }
         ]);
         return;
@@ -581,9 +597,11 @@
           speaker: '實驗白板',
           portrait: 'whiteboard',
           text: '白板上寫著星空計畫最新的「配方比例 14.2%、退火溫度 380°C/4h」和結構草圖。若訪客在實驗區拍照，這些資訊會清清楚楚入鏡。',
+          text_en: 'The whiteboard shows the StarSky Project\'s latest "Formula ratio 14.2%, annealing temp 380°C/4h" and structural sketches. If visitors take photos in the lab, this sensitive data will be captured clearly.',
           choices: [
             {
               label: '確認阿文已留存紀錄後，擦拭／遮蔽白板上的機密參數',
+              label_en: 'Verify A-Wen recorded data, then erase/shield secret parameters on whiteboard',
               onSelect: () => {
                 state.labItems.whiteboard = true;
                 ctx.advanceTime(1);
@@ -593,12 +611,17 @@
                   {
                     speaker: '小安',
                     portrait: 'player',
-                    text: '跟阿文點頭確認數據都進紀錄簿了，我把白板擦乾淨。這樣就不怕被拍到了！'
+                    text: '跟阿文點頭確認數據都進紀錄簿了，我把白板擦乾淨。這樣就不怕被拍到了！',
+                    text_en: 'A-Wen nodded to confirm the data is logged in the notebook. I wiped the whiteboard clean—no worries about photos now!'
                   }
                 ]);
               }
             },
-            { label: '先保持原樣', onSelect: () => {} }
+            {
+              label: '先保持原樣',
+              label_en: 'Keep as is',
+              onSelect: () => {}
+            }
           ]
         }
       ]);
@@ -610,7 +633,8 @@
           {
             speaker: '實驗室螢幕',
             portrait: 'monitor',
-            text: '螢幕已鎖定為保護畫面，看不到任何量測曲線與檔名。'
+            text: '螢幕已鎖定為保護畫面，看不到任何量測曲線與檔名。',
+            text_en: 'The screen is locked with a screensaver; no measurement curves or filenames are visible.'
           }
         ]);
         return;
@@ -621,9 +645,11 @@
           speaker: '實驗室螢幕',
           portrait: 'monitor',
           text: '量測電腦的螢幕正開著未去識別化的「RAW_DATA.csv」原始量測曲線，視窗標題還顯示著計畫代號。',
+          text_en: 'The measurement PC monitor displays unmasked "RAW_DATA.csv" raw curves, with the project code visible in the window title.',
           choices: [
             {
               label: '鎖定電腦螢幕（Win+L / 切換待機畫面）',
+              label_en: 'Lock computer screen (Win+L / standby)',
               onSelect: () => {
                 state.labItems.monitor = true;
                 ctx.advanceTime(1);
@@ -633,12 +659,17 @@
                   {
                     speaker: '小安',
                     portrait: 'player',
-                    text: '先把量測螢幕鎖定畫面，既不會中斷背景紀錄，也不怕鏡頭掃到原始數據。'
+                    text: '先把量測螢幕鎖定畫面，既不會中斷背景紀錄，也不怕鏡頭掃到原始數據。',
+                    text_en: 'Locked the screen so background logging continues safely without exposing raw curves to any camera.'
                   }
                 ]);
               }
             },
-            { label: '先不操作', onSelect: () => {} }
+            {
+              label: '先不操作',
+              label_en: 'Cancel',
+              onSelect: () => {}
+            }
           ]
         }
       ]);
@@ -650,7 +681,8 @@
           {
             speaker: '樣品架與標籤',
             portrait: 'samples',
-            text: '樣品已經整齊收進不透明的防塵保管箱中，外部看不到任何配方代碼標籤。'
+            text: '樣品已經整齊收進不透明的防塵保管箱中，外部看不到任何配方代碼標籤。',
+            text_en: 'Samples are stored neatly in opaque dustproof boxes; no formula code labels are visible externally.'
           }
         ]);
         return;
@@ -661,9 +693,11 @@
           speaker: '樣品架與標籤',
           portrait: 'samples',
           text: '實驗桌上排著三支未收妥的樣品管，白色標籤朝外清楚寫著批次與配方代號（CS-B4 / CS-B5 / CS-B6）。',
+          text_en: 'Three uncollected sample tubes sit on the lab bench, their white labels clearly displaying batch and formula codes (CS-B4 / CS-B5 / CS-B6).',
           choices: [
             {
               label: '將樣品收妥至不透明樣品盒／遮蔽標籤',
+              label_en: 'Store samples in opaque box / shield labels',
               onSelect: () => {
                 state.labItems.samples = true;
                 ctx.advanceTime(1);
@@ -673,12 +707,17 @@
                   {
                     speaker: '小安',
                     portrait: 'player',
-                    text: '把樣品收進專屬的不透明保管盒蓋好。標籤細節最容易被忽略，幸好有檢查到！'
+                    text: '把樣品收進專屬的不透明保管盒蓋好。標籤細節最容易被忽略，幸好有檢查到！',
+                    text_en: 'Stored samples in the dedicated opaque box with the lid closed. Label details are easily overlooked—glad I caught it!'
                   }
                 ]);
               }
             },
-            { label: '先放著不管', onSelect: () => {} }
+            {
+              label: '先放著不管',
+              label_en: 'Leave it for now',
+              onSelect: () => {}
+            }
           ]
         }
       ]);
@@ -709,7 +748,10 @@
             portrait: 'visitor',
             text: v.status === 'done_lab_leaked'
               ? '照片拍得很清楚，連後面螢幕跟白板都很有實驗室氣氛！謝謝你的招待，我準備回去整理報告了。'
-              : '剛剛那張照片構圖很棒，謝謝你這麼細心引導！不打擾你們下班，我先離開囉。'
+              : '剛剛那張照片構圖很棒，謝謝你這麼細心引導！不打擾你們下班，我先離開囉。',
+            text_en: v.status === 'done_lab_leaked'
+              ? 'The photo came out so sharp—the background screens and whiteboards add great lab atmosphere! Thank you, I am heading back to compile my report.'
+              : 'The photo framing earlier was fantastic, thank you for guiding me so thoughtfully! I will not hold you up from clocking out—heading out now.'
           }
         ]);
         return;
@@ -724,20 +766,25 @@
             text: exposed.length > 0
               ? '我準備好隨時可以拍了，不過好像還有一些資料沒收好？要再看一下取景預覽，還是改回入口拍呢？'
               : '看你都整理得乾乾淨淨了！那我們現在來看看相機取景畫面、按下快門吧？',
+            text_en: exposed.length > 0
+              ? 'I am ready to shoot anytime, but it looks like some materials are still exposed? Would you like to check the viewfinder preview again, or switch back to the entrance?'
+              : 'Everything is cleaned up so neatly! Shall we look at the viewfinder framing now and press the shutter?',
             choices: [
               {
                 label: '查看實驗區相機取景預覽',
+                label_en: 'Check 2F lab camera framing preview',
                 onSelect: () => launchCh1Camera(state, 'lab')
               },
               {
                 label: '改帶陳先生回 1F 大門形象牆指定角度拍攝',
+                label_en: 'Redirect Mr. Chen to approved photo angle at 1F Logo Wall',
                 onSelect: () => {
                   v.pausedAndFixed = true;
                   ctx.moveNpcTo('npc_visitor', 1, 7, 11, 'up');
                   ctx.transitionToFloor(1, 7, 12, 'up', () => launchCh1Camera(state, 'entrance'));
                 }
               },
-              { label: '再給我一分鐘整理現場', onSelect: () => {} }
+              { label: '再給我一分鐘整理現場', label_en: 'Give me one minute to clear sensitive data from the room', onSelect: () => {} }
             ]
           }
         ]);
@@ -748,6 +795,7 @@
       if (!state.clues.visitorPurpose) {
         choices.push({
           label: '先問清楚拍照用途與預計公開範圍',
+          label_en: 'Inquire photography purpose and intended public scope first',
           onSelect: () => {
             state.clues.visitorPurpose = true;
             ctx.advanceTime(1);
@@ -756,12 +804,14 @@
               {
                 speaker: '訪客 陳先生',
                 portrait: 'visitor',
-                text: '喔，這張照片是要放進我們單位這次的參訪紀錄報告，報告之後會貼在系上網頁公開分享喔！'
+                text: '喔，這張照片是要放進我們單位這次的參訪紀錄報告，報告之後會貼在系上網頁公開分享喔！',
+            text_en: 'Oh, this photo will be included in our visit summary report, which will be published on our department website!'
               },
               {
                 speaker: '小安',
                 portrait: 'player',
-                text: '（會公開放在網頁上！那更不能讓 2F 實驗區裡還沒收好的研究資料入鏡。）'
+                text: '（會公開放在網頁上！那更不能讓 2F 實驗區裡還沒收好的研究資料入鏡。）',
+            text_en: '(It will be published publicly on the web! All the more reason not to let unshielded 2F lab research appear in the frame.)'
               }
             ], () => handleCh1Visitor(state));
           }
@@ -770,11 +820,13 @@
 
       choices.push({
         label: '引導在「1F 大廳形象牆指定角度」拍照（核准範圍）',
+        label_en: 'Guide to photo at 1F Lobby Logo Wall (Approved spot)',
         onSelect: () => launchCh1Camera(state, 'entrance')
       });
 
       choices.push({
         label: '陪同上「2F 實驗區」查看取景畫面並拍攝',
+        label_en: 'Escort to 2F Lab, inspect camera framing preview and shoot',
         onSelect: () => {
           v.status = 'in_lab';
           ctx.advanceTime(2);
@@ -783,7 +835,8 @@
             {
               speaker: '小安',
               portrait: 'player',
-              text: '好的，請您跟我一起搭電梯上 2F、刷卡進入實驗區，並請先讓我確認一下相機的取景預覽畫面。'
+              text: '好的，請您跟我一起搭電梯上 2F、刷卡進入實驗區，並請先讓我確認一下相機的取景預覽畫面。',
+            text_en: 'Sure, please take the elevator with me to 2F and badge into the lab. Let me verify the camera viewfinder preview first.'
             }
           ], () => {
             ctx.moveNpcTo('npc_visitor', 2, 9, 5, 'up');
@@ -792,7 +845,11 @@
         }
       });
 
-      choices.push({ label: '請陳先生在一樓櫃台稍等（先看登記簿或上樓巡視）', onSelect: () => {} });
+      choices.push({
+        label: '請陳先生在一樓櫃台稍等（先看登記簿或上樓巡視）',
+        label_en: 'Ask Mr. Chen to wait at 1F reception (check logbook / inspect upstairs)',
+        onSelect: () => {}
+      });
 
       window.BS.UI.startDialogue([
         {
@@ -801,6 +858,9 @@
           text: state.clues.visitorPurpose
             ? '照片會放進公開參訪報告裡。請問我們要在一樓大廳形象牆拍，還是可以上二樓實驗區拍一張呢？'
             : '你好！我是預約三點半參訪的陳先生，剛在一樓大門櫃台報到，想拍一張實驗室的照片當參訪紀錄，請問可以上二樓實驗區拍嗎？',
+            text_en: state.clues.visitorPurpose
+            ? 'The photo will be included in a public visit report. Should we shoot at the 1F Lobby Logo Wall, or may we take one upstairs in the 2F lab?'
+            : 'Hello! I am Mr. Chen, scheduled for a 3:30 PM visit. I just checked in at 1F reception and would like a photo for our visit record. May we go to the 2F lab to take one?',
           choices
         }
       ]);
@@ -816,12 +876,14 @@
             {
               speaker: '小安',
               portrait: 'player',
-              text: '陳先生不好意思，先暫停一下下！背景拍到正在進行中的研究資料，我先去把 2F 實驗區的白板、螢幕跟樣品標籤收妥，整理好馬上幫您拍！'
+              text: '陳先生不好意思，先暫停一下下！背景拍到正在進行中的研究資料，我先去把 2F 實驗區的白板、螢幕跟樣品標籤收妥，整理好馬上幫您拍！',
+            text_en: 'Excuse me Mr. Chen, let\'s pause for a moment! Ongoing research data was captured in the background. Let me clear the whiteboard, screens, and sample labels in 2F lab, and I\'ll photograph you right after!'
             },
             {
               speaker: '訪客 陳先生',
               portrait: 'visitor',
-              text: '沒問題，保密最重要！我在 2F 實驗區門口這裡等您，整理好再叫我。'
+              text: '沒問題，保密最重要！我在 2F 實驗區門口這裡等您，整理好再叫我。',
+            text_en: 'No problem at all—confidentiality comes first! I\'ll wait here by the 2F lab door, let me know once it\'s ready.'
             }
           ]);
         },
@@ -833,7 +895,8 @@
             {
               speaker: '小安',
               portrait: 'player',
-              text: '陳先生，2F 實驗區裡面目前還有未收妥的研究資料，我們改回 1F 大廳的形象牆指定角度拍，光線跟招牌也更好看喔！'
+              text: '陳先生，2F 實驗區裡面目前還有未收妥的研究資料，我們改回 1F 大廳的形象牆指定角度拍，光線跟招牌也更好看喔！',
+            text_en: 'Mr. Chen, sensitive research data in the 2F lab is currently being handled. Let\'s take photos at the approved angle by the 1F Lobby Logo Wall instead—the lighting and logo look much better there too!'
             }
           ], () => {
             ctx.moveNpcTo('npc_visitor', 1, 7, 11, 'up');
@@ -854,7 +917,8 @@
               {
                 speaker: '訪客 陳先生',
                 portrait: 'visitor',
-                text: '喀嚓！這張 1F 大廳形象牆拍起來很專業耶，完全符合我們的參訪紀錄需求，謝謝你！'
+                text: '喀嚓！這張 1F 大廳形象牆拍起來很專業耶，完全符合我們的參訪紀錄需求，謝謝你！',
+            text_en: 'Snap! This shot at the 1F Lobby Logo Wall looks very professional and fits our visit documentation perfectly. Thank you!'
               }
             ]);
           } else if (leakedItems.length === 0) {
@@ -868,7 +932,8 @@
               {
                 speaker: '訪客 陳先生',
                 portrait: 'visitor',
-                text: '喀嚓！畫面既看得出實驗室環境，又完全保護了研究機密。謝謝你細心陪同，我先搭電梯回 1F 大廳準備離開囉！'
+                text: '喀嚓！畫面既看得出實驗室環境，又完全保護了研究機密。謝謝你細心陪同，我先搭電梯回 1F 大廳準備離開囉！',
+            text_en: 'Snap! The shot captures the lab environment while completely safeguarding research secrets. Thank you for your careful escort—I will take the elevator back to 1F to depart!'
               }
             ]);
           } else {
@@ -899,9 +964,11 @@
             speaker: '值班桌（交班紀錄簿）',
             portrait: 'desk',
             text: '第一章已經完成交班！要重新檢視交班紀錄，還是再玩一次嘗試不同路線呢？',
+            text_en: 'Chapter 1 Handover Complete! Would you like to review the Handover Notes or replay to try different routes?',
             choices: [
               {
                 label: '🏆 重新檢視通關畫面與交班紀錄',
+                label_en: '🏆 Review Clear Screen & Handover Notes',
                 onSelect: () => {
                   const result = window.BS.State.evaluateHandover(state);
                   window.BS.UI.openClearScreen(result, {
@@ -913,13 +980,15 @@
               },
               {
                 label: '🔄 再玩一次第一章（挑戰其他結局）',
+                label_en: '🔄 Replay Chapter 1 (Try other endings)',
                 onSelect: () => ctx.restartChapter()
               },
               {
                 label: '🏠 返回章節選單',
+                label_en: '🏠 Return to Title Menu',
                 onSelect: () => ctx.returnToMenu()
               },
-              { label: '先取消', onSelect: () => {} }
+              { label: '先取消', label_en: 'Cancel', onSelect: () => {} }
             ]
           }
         ]);
@@ -955,9 +1024,13 @@
           text: urgentPending
             ? '⚠ 警告：合作方誤分享事件還沒完成停權與通報！確定現在就要直接交班下班嗎？'
             : '兩件值班任務都處理完畢了！要現在填寫交班紀錄、查看今日結果並下班嗎？',
+          text_en: urgentPending
+            ? '⚠ Warning: The partner mis-share incident has not been revoked or reported! Are you sure you want to hand over and clock out now?'
+            : 'Both duty tasks have been resolved! Would you like to fill out handover notes, view results, and clock out now?',
           choices: [
             {
               label: urgentPending ? '不管了，直接交班下班（將觸發風險結局）' : '✍ 填寫交班紀錄並下班',
+              label_en: urgentPending ? 'Never mind, hand over directly (Triggers Risk Ending)' : '✍ Fill in handover log & clock out',
               onSelect: () => {
                 state.handoverDone = true;
                 state.timeMinutes = Math.max(state.timeMinutes, 16 * 60);
@@ -980,6 +1053,7 @@
             },
             {
               label: urgentPending ? '先回去把公開連結停權並通報阿明組長' : '再在實驗室繞一下',
+              label_en: urgentPending ? 'Go back to revoke public link and report to A-Ming first' : 'Look around the lab a bit more',
               onSelect: () => {}
             }
           ]
@@ -1039,7 +1113,8 @@
             {
               speaker: '實驗白板',
               portrait: 'whiteboard',
-              text: '今晚的白板已經擦乾淨了。目前最重要的是確認辦公區電腦裡那份研討會海報草稿，別把不該公開的圖片交出去！'
+              text: '今晚的白板已經擦乾淨了。目前最重要的是確認辦公區電腦裡那份研討會海報草稿，別把不該公開的圖片交出去！',
+              text_en: 'Tonight\'s whiteboard is wiped clean. The priority is reviewing the symposium poster draft on the office PC—ensure no unapproved figures are shared!'
             }
           ]);
           break;
@@ -1048,7 +1123,8 @@
             {
               speaker: '實驗室螢幕',
               portrait: 'monitor',
-              text: '實驗室的量測電腦處於待機鎖定狀態。海報草稿檔案放在辦公區的電腦上，阿文人也在實驗區旁邊。'
+              text: '實驗室的量測電腦處於待機鎖定狀態。海報草稿檔案放在辦公區的電腦上，阿文人也在實驗區旁邊。',
+              text_en: 'The lab measurement PC is locked on standby. The poster draft file is on the office PC, and A-Wen is next to the lab.'
             }
           ]);
           break;
@@ -1057,7 +1133,8 @@
             {
               speaker: '樣品保管箱',
               portrait: 'samples',
-              text: '樣品都已經收進不透明保管箱了。今晚的任務重點是審閱研討會海報草稿（辦公區電腦）、找阿文與阿明組長核對。'
+              text: '樣品都已經收進不透明保管箱了。今晚的任務重點是審閱研討會海報草稿（辦公區電腦）、找阿文與阿明組長核對。',
+              text_en: 'Samples are stored in opaque boxes. Tonight\'s focus is reviewing the poster draft (office PC) and consulting A-Wen and Team Lead A-Ming.'
             }
           ]);
           break;
@@ -1066,7 +1143,8 @@
             {
               speaker: '訪客接待處',
               portrait: 'reception',
-              text: '晚上六點已過訪客時段，今日沒有外部訪客。回辦公區與實驗區處理研討會海報投稿吧！'
+              text: '晚上六點已過訪客時段，今日沒有外部訪客。回辦公區與實驗區處理研討會海報投稿吧！',
+              text_en: '6:00 PM is past visiting hours; there are no external visitors today. Head to the office and lab to handle the poster submission!'
             }
           ]);
           break;
@@ -1228,22 +1306,26 @@
           {
             speaker: '同事 阿文',
             portrait: 'colleague',
-            text: '小安，你看到海報草稿裡的圖二「合作方量測圖」了嗎？老實說，那張圖原本是上次跟星海科技開合作進度會議時用的比較圖。'
+            text: '小安，你看到海報草稿裡的圖二「合作方量測圖」了嗎？老實說，那張圖原本是上次跟星海科技開合作進度會議時用的比較圖。',
+            text_en: 'Xiao-An, did you see Figure 2 "Partner Measurement Plot" in the poster draft? Honestly, that plot was a comparison figure from our last progress meeting with Starlight Tech.'
           },
           {
             speaker: '同事 阿文',
             portrait: 'colleague',
-            text: '我剛剛越想越不對勁——合作會議能看，不代表能直接放到對外公開的研討會海報上！'
+            text: '我剛剛越想越不對勁——合作會議能看，不代表能直接放到對外公開的研討會海報上！',
+            text_en: 'The more I thought about it, the more uneasy I felt—being suitable for a private partner meeting does NOT mean it can be published on a public symposium poster!'
           },
           {
             speaker: '同事 阿文',
             portrait: 'colleague',
-            text: '所以我趕快另外畫了一張不含合作方數據的「自研校準趨勢示意圖（替代圖）」，已經同步放到辦公區電腦的圖庫裡了！你現在回電腦就能替換圖二。'
+            text: '所以我趕快另外畫了一張不含合作方數據的「自研校準趨勢示意圖（替代圖）」，已經同步放到辦公區電腦的圖庫裡了！你現在回電腦就能替換圖二。',
+            text_en: 'So I quickly drew an alternative "Self-Calibrated Trend Diagram (Replacement)" without partner data and placed it in the office PC gallery! You can replace Figure 2 there now.'
           },
           {
             speaker: '同事 阿文',
             portrait: 'colleague',
-            text: '不過這張替代圖還是要連同整份海報一起給阿明組長確認喔！另外圖三「測試條件與結果摘要」好像牽涉到專利申請，建議你順便問一下辦公區的阿明組長！'
+            text: '不過這張替代圖還是要連同整份海報一起給阿明組長確認喔！另外圖三「測試條件與結果摘要」好像牽涉到專利申請，建議你順便問一下辦公區的阿明組長！',
+            text_en: 'However, this replacement figure and the poster draft still require Team Lead A-Ming\'s approval! Also, Figure 3 involves patent filings—ask Team Lead A-Ming about it too!'
           }
         ], () => {
           c.clues.wenExplainedFig2 = true;
@@ -1258,21 +1340,27 @@
 
       const wv = window.BS.State.getWorkingVersion(state);
       let tip = '替代圖已經放進辦公區電腦了！換完圖二、也確認好圖三怎麼處理後，記得送交辦公區的阿明組長確認版本喔。';
+      let tipEn = 'The replacement figure is in the office PC! After swapping Figure 2 and deciding on Figure 3, submit it to Team Lead A-Ming for version approval.';
       if (c.misuploaded) {
         tip = '聽說不小心傳錯舊版了！別緊張，先在電腦聯絡主辦方申請撤換，再趕快跟阿明組長回報，我們一起追蹤處理。';
+        tipEn = 'I heard the old version was mistakenly submitted! Don\'t panic—contact the organizer from the PC to request a replacement, then report to Team Lead A-Ming so we can track it.';
       } else if (c.outcome === 'submitted_approved') {
         tip = '太感謝你幫忙把關了！核准版送出後，記得回值班桌寫一下交班紀錄就可以下班囉。';
+        tipEn = 'Thank you so much for guarding our research! Once the approved version is sent, fill out the handover log at the duty desk to clock out.';
       } else if (c.outcome === 'deferred') {
         tip = '先暫緩投稿也完全沒問題，安全第一！明天我們再一起把合作約定和專利時程確認清楚。';
+        tipEn = 'Postponing the submission is completely fine—safety first! Tomorrow we will clarify the partner agreements and patent timelines together.';
       } else if (wv.slots.fig2 === 'alt' && wv.slots.fig3 === 'removed') {
         tip = '我看你已經把圖二換成替代圖、圖三也移除了！接下來把這個版本送審給阿明組長確認，提交時記得核對檔名喔。';
+        tipEn = 'I see you replaced Figure 2 with the alternative and removed Figure 3! Next, submit this version to Team Lead A-Ming for review, and verify the filename when submitting.';
       }
 
       window.BS.UI.startDialogue([
         {
           speaker: '同事 阿文',
           portrait: 'colleague',
-          text: tip
+          text: tip,
+          text_en: tipEn
         }
       ]);
     }
@@ -1431,9 +1519,11 @@
             speaker: '值班桌（交班紀錄簿）',
             portrait: 'desk',
             text: '第二章已經完成交班！要重新檢視交班紀錄，還是再試一次其他路線呢？',
+            text_en: 'Chapter 2 Handover Complete! Would you like to review the Handover Notes or try different routes?',
             choices: [
               {
                 label: '🏆 重新檢視通關畫面與交班紀錄',
+                label_en: '🏆 Review Clear Screen & Handover Notes',
                 onSelect: () => {
                   const result = window.BS.State.evaluateChapter2Handover(state);
                   window.BS.UI.openClearScreen(result, {
@@ -1445,13 +1535,15 @@
               },
               {
                 label: '🔄 再玩一次第二章',
+                label_en: '🔄 Replay Chapter 2',
                 onSelect: () => ctx.restartChapter()
               },
               {
                 label: '🏠 返回章節選單',
+                label_en: '🏠 Return to Title Menu',
                 onSelect: () => ctx.returnToMenu()
               },
-              { label: '先取消', onSelect: () => {} }
+              { label: '先取消', label_en: 'Cancel', onSelect: () => {} }
             ]
           }
         ]);
@@ -1485,6 +1577,7 @@
           choices: [
             {
               label: unfinishedRemedy ? '✍ 仍先填寫交班紀錄（列出尚待處理事項）' : '✍ 填寫交班紀錄並檢視結果',
+              label_en: unfinishedRemedy ? '✍ Fill in handover log first (Lists pending items)' : '✍ Fill in handover log & view results',
               onSelect: () => {
                 state.handoverDone = true;
                 state.timeMinutes = Math.max(state.timeMinutes, 18 * 60 + 25);
@@ -1507,6 +1600,7 @@
             },
             {
               label: unfinishedRemedy ? '先回去補救（電腦聯絡主辦方／找阿明組長）' : '再在實驗室走走',
+              label_en: unfinishedRemedy ? 'Go back to take remedy actions (Contact organizer / Report to A-Ming)' : 'Walk around the lab a bit more',
               onSelect: () => {}
             }
           ]
@@ -1574,7 +1668,8 @@
             {
               speaker: '實驗白板',
               portrait: 'whiteboard',
-              text: '白板已經整理乾淨。今天重點是把阿文個人區裡的原始量測紀錄移交給小晴，並完成 1F 門禁收回與權限終止！'
+              text: '白板已經整理乾淨。今天重點是把阿文個人區裡的原始量測紀錄移交給小晴，並完成 1F 門禁收回與權限終止！',
+              text_en: 'The whiteboard is tidy. Today\'s focus is transferring raw records in A-Wen\'s workspace to Xiao-Qing, returning 1F access badge, and terminating permissions!'
             }
           ]);
           break;
@@ -1583,7 +1678,8 @@
             {
               speaker: '樣品保管箱',
               portrait: 'samples',
-              text: '阿文已經把實體樣品清點收進樣品盒交給小晴了。接下來要確認電子原始紀錄的移交、存取權限與 1F 門禁卡回收！'
+              text: '阿文已經把實體樣品清點收進樣品盒交給小晴了。接下來要確認電子原始紀錄的移交、存取權限與 1F 門禁卡回收！',
+              text_en: 'A-Wen has inventoried physical samples and handed them to Xiao-Qing. Next is confirming digital record transfer, access revocation, and 1F badge return!'
             }
           ]);
           break;
@@ -1689,6 +1785,7 @@
       if (!c.ndaRemindedToAwen) {
         choices.push({
           label: '確認保密約定，並提醒阿文離開後的保密義務與資料攜出限制',
+          label_en: 'Confirm NDA and remind A-Wen of post-employment trade secret obligations & zero data removal',
           onSelect: () => {
             c.ndaRemindedToAwen = true;
             ctx.advanceTime(2);
@@ -1699,12 +1796,14 @@
               {
                 speaker: '小安',
                 portrait: 'player',
-                text: '阿文，離職前跟你再次確認一下：我們簽署的保密約定在離開實驗室後依然有效，未經核准的研究資料、原始數據跟製程筆記都不能自行備份攜出；下個月改論文也只限在核准的兩張圖與期限內使用喔！'
+                text: '阿文，離職前跟你再次確認一下：我們簽署的保密約定在離開實驗室後依然有效，未經核准的研究資料、原始數據跟製程筆記都不能自行備份攜出；下個月改論文也只限在核准的兩張圖與期限內使用喔！',
+            text_en: 'A-Wen, confirming with you before departure: the NDA remains in effect after leaving the lab. Unapproved research files, raw data, and process notes cannot be backed up or taken. Next month\'s thesis revisions are strictly limited to the 2 approved figures and timeframe!'
               },
               {
                 speaker: '同事 阿文',
                 portrait: 'colleague',
-                text: '瞭解，我完全同意也會確實遵守！個人電腦跟隨身碟我都已經清查過、沒有留存實驗室機密檔案，交接清單可以放心幫我打勾。'
+                text: '瞭解，我完全同意也會確實遵守！個人電腦跟隨身碟我都已經清查過、沒有留存實驗室機密檔案，交接清單可以放心幫我打勾。',
+            text_en: 'Understood, I completely agree and will strictly comply! I have cleared my personal PC and USB drives with no confidential lab files remaining. Feel free to check that off on the handover list.'
               }
             ]);
           }
@@ -1715,6 +1814,7 @@
       if (!c.badgeReturned && !c.awenGaveBadge) {
         choices.push({
           label: '請阿文先交出實驗室實體門禁卡（準備拿到 1F 櫃台收回登記）',
+          label_en: 'Ask A-Wen to hand over physical access badge (for 1F reception return)',
           onSelect: () => {
             c.awenGaveBadge = true;
             ctx.advanceTime(1);
@@ -1725,14 +1825,19 @@
               {
                 speaker: '同事 阿文',
                 portrait: 'colleague',
-                text: '給妳，這是我的門禁卡！麻煩拿到 1F 大門接待櫃台幫我辦理收回登記喔。'
+                text: '給妳，這是我的門禁卡！麻煩拿到 1F 大門接待櫃台幫我辦理收回登記喔。',
+            text_en: 'Here is my access badge! Please take it to the 1F Main Reception Desk to register the badge return.'
               }
             ]);
           }
         });
       }
 
-      choices.push({ label: '先處理其他交接項目', onSelect: () => {} });
+      choices.push({
+        label: '先處理其他交接項目',
+        label_en: 'Handle other handover items first',
+        onSelect: () => {}
+      });
 
       let introMsg = `小安，我有一份原始量測紀錄「${c.rawLogName}」目前還在我的個人工作區（${c.rawLogOrigPath}），還沒移到專案資料夾。`;
       let introMsgEn = `Xiao-An, I have a raw measurement log "${c.rawLogName}" currently still in my personal workspace (${c.rawLogOrigPath}), not yet moved to the project folder.`;

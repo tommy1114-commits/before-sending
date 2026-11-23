@@ -225,6 +225,26 @@
   "離開電腦": "Step away from computer"
 };
   const DIALOGUES_MAP = {
+  "照片拍得很清楚，連後面螢幕跟白板都很有實驗室氣氛！謝謝你的招待，我準備回去整理報告了。": "The photo came out so sharp—the background screens and whiteboards add great lab atmosphere! Thank you, I am heading back to compile my report.",
+  "剛剛那張照片構圖很棒，謝謝你這麼細心引導！不打擾你們下班，我先離開囉。": "The photo framing earlier was fantastic, thank you for guiding me so thoughtfully! I will not hold you up from clocking out—heading out now.",
+  "照片會放進公開參訪報告裡。請問我們要在一樓大廳形象牆拍，還是可以上二樓實驗區拍一張呢？": "The photo will be included in a public visit report. Should we shoot at the 1F Lobby Logo Wall, or may we take one upstairs in the 2F lab?",
+  "你好！我是預約三點半參訪的陳先生，剛在一樓大門櫃台報到，想拍一張實驗室的照片當參訪紀錄，請問可以上二樓實驗區拍嗎？": "Hello! I am Mr. Chen, scheduled for a 3:30 PM visit. I just checked in at 1F reception and would like a photo for our visit record. May we go to the 2F lab to take one?",
+  "【實驗室營業秘密三提醒】\\n① 對外給廠商資料：先確認有效 NDA、最小範圍與連結效期。\\n② 訪客接待與拍照：一樓登記、全程陪同、拍前巡視白板螢幕樣品。\\n③ 論文與海報公開：確認合作授權與專利安排，核准綁定版本。": "【Three Lab Trade Secret Reminders】\\n① Sharing data with vendors: verify active NDA, minimal scope, and link expiry.\\n② Visitor escort & photos: 1F sign-in, continuous escort, inspect whiteboards & screens before shooting.\\n③ Papers & posters: verify partner consent and patent status; bind approval to exact version.",
+  "下午 3:40，下班前還有兩件事要處理：\\n① 2F 辦公區電腦有合作方急著要會議資料的來信。\\n② 1F 大門櫃台有預約來賓陳先生等候拍照（可由左側樓梯／電梯下樓）。": "3:40 PM. Two tasks before clocking out:\\n① An urgent email from partner requesting meeting slides on 2F duty PC.\\n② Scheduled visitor Mr. Chen waiting at 1F reception for photography (take stairs/elevator on left).",
+  "蘇小姐回覆「收到了，圖表很清楚，感謝！」\\n我也把實際提供的版本、收件對象和權限順手記下來，交班時才好追溯。": "Ms. Su replied: \"Received! The charts are very clear, thank you!\"\\nI also recorded the version sent, recipient, and permissions so they can be traced during handover.",
+  "連結先鎖住了，但還不能就此算了——不知道對方或協力廠商剛剛有沒有先下載。\\n馬上找辦公區的負責人阿明組長完成異常通報！": "The link is locked down, but we cannot stop here—we do not know if the partner or subcontractors downloaded it already.\\nI must report the incident to Team Lead A-Ming in the office immediately!",
+  "問得好！跟外部廠商交流研究資料前，第一步一定要先確認「對方到底有沒有簽署有效的 NDA」。\\n先考考你：如果今天來要測試資料的廠商「還沒簽 NDA」或「NDA 已經到期」，我們該怎麼做？": "Great question! Before sharing research data with external partners, the first step is always verifying whether they have signed an active Non-Disclosure Agreement (NDA).\\nLet me quiz you: If a partner requesting test data hasn\\",
+  "完全正確！沒簽有效 NDA 就把機密交出去，事後很難主張合理保密措施。\\n我幫你查過了：星海科技已簽署「NDA-CS-2026」（效期 2026/01/01～2027/12/31），目前在效期內。": "Spot on! Disclosing confidential data without an active NDA makes it very difficult to assert reasonable secrecy safeguards later.\\nI checked for you: Starlight Tech has signed \"NDA-CS-2026\" (valid 2026/01/01–2027/12/31), currently active.",
+  "【今日預約登記】\\n來訪人員：陳先生（外校參訪來賓）｜時間：15:30\\n核准活動範圍：1F 大門大廳形象牆拍照留念；若須上 2F 實驗區參觀拍照，須由值班人員全程陪同，且拍攝前須確認畫面無未遮蔽之研究資訊。": "[Today\\",
+  "小安，太好了你還沒走！我正在趕明天研討會要用的海報。\\n「我把上次合作會議的圖放進海報了。今晚要交，你可以幫我看一下嗎？」": "Xiao-An, so glad you are still here! I am rushing tomorrow\\",
+  "糟了！！不小心選成還沒核准的版本上傳給主辦方了！\\n現在馬上回電腦聯絡研討會主辦方提出撤換請求，並且立刻找辦公區的阿明組長回報！": "Oh no!! I mistakenly picked an unapproved version to upload to the organizer!\\nI must immediately return to the PC to submit a retraction request, and report to Team Lead A-Ming in the office!",
+  "我逐張跟你說明喔：\\n① 圖一「設備配置示意」：已經確認可以公開，直接保留沒問題。\\n② 圖二「合作方量測圖」：那上次是合作會議用的，還沒確認合作約定是否涵蓋公開海報，不能直接放上去！你可以找實驗區的阿文拿可送審的替代圖。": "Let me explain each figure:\\n① Figure 1 \"Equipment Layout\": Confirmed safe for public release; keeping it as-is is fine.\\n② Figure 2 \"Partner Measurement Chart\": Used in a previous partner meeting; we have not confirmed if the agreement allows public symposium use, so it cannot be published directly! Ask A-Wen in the lab for an alternative chart.",
+  "研討會海報還沒做出決定喔！\\n請先到辦公區電腦檢視海報草稿，並向實驗區的阿文與辦公區的阿明組長確認後，再決定「核准後提交」或「暫緩上傳」。": "A decision on the symposium poster has not been reached!\\nPlease inspect the draft at the office PC, verify with A-Wen in the lab and Team Lead A-Ming in the office, and then choose \"Submit Approved Version\" or \"Defer Submission\".",
+  "下午五點了，今天就是我在實驗室的最後一天。\\n「上次那批資料已經有清冊，我們從那裡找。我把交接清單放在電腦裡了。對了，下個月改論文還要用之前開會那兩張圖。我原本的資料夾權限可以先留著嗎？」": "5:00 PM. Today is my last day in the lab.\\n\"The previous records are already inventoried; we can check there. I left the handover checklist on the PC. By the way, I need 2 figures to revise my thesis next month. Can I keep my folder access?\"",
+  "阿文在 1F 實驗區拿出同一個虛構量測計畫（星空計畫）的三組資料，對小安說：\\n「這三組資料都是同一個計畫做的。小晴明天要盤點，你幫我看看哪些需要列進研發成果清單？她要知道去哪裡找，還有該找誰問。」": "In 1F lab, A-Wen presents 3 data sets from the StarSky Project and says:\\n\"These are all from the same project. Xiao-Qing will inventory them tomorrow. Which ones should go into the R&D Records Inventory? She needs to know where to find them and who to ask.\"",
+  "電腦畫面上顯示星空計畫研發成果清單草稿。\\n※ 請先在 1F 實驗區找同事阿文查看三組資料卡，完成辨識後再來確認清單！": "The screen displays the Project StarSky R&D Records Inventory draft.\\n* Please visit colleague A-Wen in 1F Lab first to examine the three data cards before reviewing the inventory!",
+  "小安，文件標示是營業秘密合理保密措施非常關鍵的一環！\\n\\n": "Xiao-An, document labeling is a crucial cornerstone of Reasonable Confidentiality Measures for trade secrets!\\n\\n",
+  "總結來說：\\n「標示讓接手人知道怎麼處理，分享前仍要確認對象及權限。」": "In summary:\\n\"Labels inform handlers how to treat materials; always verify recipient and permissions before sharing.\"",
   "中研院RCCI實驗室一樓大廳形象牆。這裡是訪客核准拍照區，構圖專業且完全不會拍到管制實驗區內部資訊。": "Academia Sinica RCCI Lab 1F Lobby Logo Wall. This is the designated visitor photo spot—framed safely so no restricted lab information is visible.",
   "透過大面玻璃觀測窗可看到一樓管制實驗區的機台運作。門禁告示寫著：「未經授權人員禁止入內，訪客參觀須事前申請並全程陪同。」": "Equipment operates behind the glass window. Notice: \"Authorized personnel only. Visitors require prior registration and continuous escort.\"",
   "【實驗室營業秘密三提醒】\\n① 對外給廠商資料：先確認有效 NDA、最小範圍與連結效期。\\n② 訪客接待與拍照：一樓登記、全程陪同、拍前巡視白板螢幕樣品。\\n③ 論文與海報公開：確認合作授權與專利安排，核准綁定版本。": "【Three Lab Trade Secret Reminders】\\n① Sharing data with vendors: verify active NDA, minimal scope, and link expiry.\\n② Visitor escort & photos: 1F sign-in, continuous escort, inspect whiteboards & screens before shooting.\\n③ Papers & posters: verify partner consent and patent status; bind approval to exact version.",
@@ -441,6 +461,50 @@
     return res;
   }
 
+  const TOASTS_MAP = {
+    '✅ 已確認星海科技簽署有效 NDA-CS-2026（限蘇小姐・僅摘要圖）': '✅ Verified Starlight Tech active NDA-CS-2026 (Ms. Su only · Summary charts only)',
+    '🚨 叮咚！合作方蘇小姐立刻回信了，請查看值班電腦！': '🚨 Ding! Partner Ms. Su replied immediately. Check duty PC!',
+    '✅ 已解鎖新選項：電腦可選擇「僅會議用兩張圖（已核准版）」': '✅ Unlocked option: PC can select "2 Meeting Summary Charts Only (Approved)"',
+    '📨 已向主辦方提出撤換請求，公開狀態待確認！': '📨 Replacement request sent to organizer; public status pending confirmation!',
+    '✅ 已掌握圖二來源（合作會議用），並於電腦解鎖「替換替代圖」！': '✅ Fig 2 origin identified (meeting use only); unlocked "Replace with Alternative" on PC!',
+    '⚠ 原始紀錄尚未移交就停權了！可找 2F 小晴確認，再下樓請 1F 阿明組長安排管理員移交！': '⚠ Access revoked before transfer! Check with Xiao-Qing on 2F, then ask Lead A-Ming on 1F for admin transfer!',
+    '⚠ 已暫時保留阿文原權限！請看「阿文視角」確認是否授權過廣。': '⚠ A-Wen original permissions kept temporarily! Check "A-Wen View" to see if access is over-granted.',
+    '✅ 阿文已將原始紀錄移交至專案指定位置！': '✅ A-Wen transferred raw records to designated project folder!',
+    '✅ 已記錄：完成阿文離職保密義務提醒！': '✅ Logged: Post-employment Non-Disclosure reminder given to A-Wen!',
+    '🪪 已取得阿文門禁卡！請下樓至 1F 大門接待櫃台完成收回登記。': '🪪 Obtained A-Wen\'s badge! Take it to 1F reception to log return.',
+    '✅ 小晴已實測開啟原始紀錄並確認接收！交接清單已更新！': '✅ Xiao-Qing verified opening raw records and confirmed receipt! Checklist updated!',
+    '🚒 管理員已單獨移交指定原始紀錄（未恢復阿文整包權限）！': '🚒 Admin transferred specific raw record (without restoring A-Wen\'s full access)!',
+    '✅ 已由 1F 阿明組長核定：僅兩張圖・論文修訂・離開後 30 天！': '✅ Approved by Lead A-Ming: 2 charts only · thesis revisions · expires in 30 days!',
+    '✅ 已於 1F 大門接待櫃台完成阿文門禁卡收回登記！': '✅ Completed A-Wen\'s badge return & cancellation at 1F reception!',
+    '🎉 三份文件標示已完成！請找 2F 辦公區的小晴接手文件。': '🎉 All 3 documents labeled! Hand them over to Xiao-Qing in 2F office.',
+    '🎉 文件標示與交接已核對完成！向小晴或回值班桌完成交班。': '🎉 Document labels verified! Hand over to Xiao-Qing or at desk.',
+    '🎉 研發成果清單已核對完成！向小晴或回值班桌完成交班。': '🎉 Inventory verified! Hand over to Xiao-Qing or at desk.',
+    '🎉 任務已處理完成！請回到 2F 辦公區值班桌（綠勾 ✓）完成交班與通關！': '🎉 Task completed! Return to 2F duty desk (✓) to finish!',
+    '✅ 清單更新儲存完成！請找 2F 辦公區的盤點同事小晴核對。': '✅ Inventory update saved! Please verify with inventory colleague Xiao-Qing at 2F Office.'
+  };
+
+  function translateToast(msg) {
+    if (currentLang !== 'en' || !msg) return msg;
+    if (TOASTS_MAP[msg]) return TOASTS_MAP[msg];
+    if (msg.includes('照片已拍入')) {
+      let items = msg.replace(/^.*?「(.*?)」.*?$/, '$1');
+      items = items.replace(/白板配方參數/g, 'Whiteboard Formula Parameters')
+                   .replace(/螢幕原始數據/g, 'Screen Raw Measurements')
+                   .replace(/樣品代碼標籤/g, 'Sample Batch Code Labels')
+                   .replace(/、/g, ', ');
+      return `⚠ Warning: Photo captured "${items}"!`;
+    }
+    if (msg.includes('已建立新版本')) {
+      const fn = msg.replace(/^.*?新版本\s*(\S+)\s*（.*$/, '$1');
+      return `⚠ Created new version ${fn} (pending re-verification); original approved record preserved!`;
+    }
+    if (msg.includes('誤傳了未核准檔案')) {
+      const fn = msg.replace(/^.*?「(.*?)」.*?$/, '$1');
+      return `🚨 Oh no! Mistakenly uploaded unapproved file "${fn}"! Remediate immediately!`;
+    }
+    return msg;
+  }
+
   window.BS.I18n = {
     getLang,
     setLang,
@@ -451,6 +515,7 @@
     translateSpeaker,
     translateChoice,
     translateDialogue,
+    translateToast,
     DICTIONARY,
     SPEAKERS_MAP,
     CHOICES_MAP,

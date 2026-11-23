@@ -198,6 +198,11 @@
     $('micro-clock').textContent = `🕒 ${window.BS.State.formatClock(state.timeMinutes)}`;
     $('micro-zone').textContent = window.BS.Map.getZoneName(player.floor, player.x, player.y);
 
+    const microHint = $('micro-hint') || document.querySelector('.micro-pill.hint');
+    if (microHint) {
+      microHint.textContent = isEn ? 'START Menu · SELECT Notes' : 'START 選單 · SELECT 筆記';
+    }
+
     const statusPill = $('micro-status');
     statusPill.className = 'micro-pill task hidden';
 
@@ -927,6 +932,7 @@
       'record-title': isEn ? '📋 2F Duty PC — R&D Records Inventory' : '📋 2F 值班電腦 — 研發成果清單管理系統',
       'cards-title': isEn ? '🔍 1F Lab — R&D Data Cards Review' : '🔍 1F 實驗區 — 星空計畫三組研發成果資料卡',
       'lookup-title': isEn ? '📁 2F Lab — Lab Record Computer' : '📁 2F 實驗區 — 實驗紀錄路徑對照',
+      'cam-title': isEn ? '📸 1F Lab — Visitor Photography Framing' : '📸 1F 管制實驗區 — 訪客相機取景預覽',
       'camera-title': isEn ? '📸 1F Lab — Visitor Photography Framing' : '📸 1F 管制實驗區 — 訪客相機取景預覽',
       'offboard-title': isEn ? '📋 2F Duty PC — Offboarding Handover' : '📋 2F 值班電腦 — 離職交接與存取權限系統',
       'clues-title': isEn ? '📋 Duty Notes & Progress (SELECT)' : '📋 值班筆記與任務進度（SELECT）',
@@ -938,6 +944,11 @@
       const el = $(id);
       if (el) el.textContent = text;
     });
+
+    const microHint = $('micro-hint') || document.querySelector('.micro-pill.hint');
+    if (microHint) {
+      microHint.textContent = isEn ? 'START Menu · SELECT Notes' : 'START 選單 · SELECT 筆記';
+    }
   }
 
   function setupButtons() {
