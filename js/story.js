@@ -237,8 +237,8 @@
               {
                 speaker: '值班電腦',
                 portrait: 'pc',
-                text: `已寄出「ClearSky_會議用摘要圖_v2（僅圖A、圖B）」給星海科技蘇小姐。\n權限：指定收件人唯讀${permission === 'restricted_7d' ? '、7 天後自動到期' : '（未設定到期日）'}。`,
-                text_en: `Sent "ClearSky_Meeting_Summary_Figs_v2 (Fig A & Fig B only)" to Ms. Su of Starlight Tech.\nPermission: Designated recipient read-only${permission === 'restricted_7d' ? ', expires automatically in 7 days' : ' (no expiration set)'}.`
+                text: `已寄出「StarSky_會議用摘要圖_v2（僅圖A、圖B）」給星海科技蘇小姐。\n權限：指定收件人唯讀${permission === 'restricted_7d' ? '、7 天後自動到期' : '（未設定到期日）'}。`,
+                text_en: `Sent "StarSky_Meeting_Summary_Figs_v2 (Fig A & Fig B only)" to Ms. Su of Starlight Tech.\nPermission: Designated recipient read-only${permission === 'restricted_7d' ? ', expires automatically in 7 days' : ' (no expiration set)'}.`
               },
               {
                 speaker: '小安',
@@ -291,8 +291,8 @@
             {
               speaker: '值班電腦',
               portrait: 'pc',
-              text: '已補寄核准的「ClearSky_會議用摘要圖_v2（僅圖A、圖B）」，限定星海科技蘇小姐唯讀且 7 天自動到期。',
-              text_en: 'Resent the approved "ClearSky_Meeting_Summary_Figs_v2 (Fig A & Fig B only)", restricted to Ms. Su of Starlight Tech with a 7-day automatic expiration.'
+              text: '已補寄核准的「StarSky_會議用摘要圖_v2（僅圖A、圖B）」，限定星海科技蘇小姐唯讀且 7 天自動到期。',
+              text_en: 'Resent the approved "StarSky_Meeting_Summary_Figs_v2 (Fig A & Fig B only)", restricted to Ms. Su of Starlight Tech with a 7-day automatic expiration.'
             }
           ]);
         }
@@ -314,8 +314,8 @@
             {
               speaker: '小安',
               portrait: 'player',
-              text: '組長，我剛才不小心把晴空計畫的測試資料設成公開連結寄給合作方，對方還問能不能轉給協力廠商……',
-              text_en: 'Team Lead, I accidentally sent ClearSky test data as a public link to the partner, and they just asked if they can forward it to subcontractors...'
+              text: '組長，我剛才不小心把星空計畫的測試資料設成公開連結寄給合作方，對方還問能不能轉給協力廠商……',
+              text_en: 'Team Lead, I accidentally sent StarSky test data as a public link to the partner, and they just asked if they can forward it to subcontractors...'
             },
             {
               speaker: '負責人 阿明組長',
@@ -349,8 +349,8 @@
                     {
                       speaker: '小安',
                       portrait: 'player',
-                      text: `阿明組長，我整理好了：\n① 發現時間：約 ${e.misshareTimeStr || '15:46'} 收到蘇小姐回信時發現。\n② 涉及資料：ClearSky_TestData 內含原始量測數據與未審製程筆記。\n③ 使用系統：實驗室雲端分享連結（原誤設為持連結者皆可存取）。\n④ 目前情況：已停用公開連結並請對方勿轉傳，但協力廠商是否已取得檔案仍待追蹤確認。`,
-                      text_en: `Team Lead A-Ming, I have assembled the report:\n① Discovery Time: Around ${e.misshareTimeStr || '15:46'} upon receiving Ms. Su's reply.\n② Data Involved: ClearSky_TestData contains raw measurement data and unreviewed process notes.\n③ System Used: Lab Cloud Share Link (initially misconfigured as Anyone with Link).\n④ Current Status: Public link revoked and recipient asked not to forward; following up on whether subcontractors retrieved files.`
+                      text: `阿明組長，我整理好了：\n① 發現時間：約 ${e.misshareTimeStr || '15:46'} 收到蘇小姐回信時發現。\n② 涉及資料：StarSky_TestData 內含原始量測數據與未審製程筆記。\n③ 使用系統：實驗室雲端分享連結（原誤設為持連結者皆可存取）。\n④ 目前情況：已停用公開連結並請對方勿轉傳，但協力廠商是否已取得檔案仍待追蹤確認。`,
+                      text_en: `Team Lead A-Ming, I have assembled the report:\n① Discovery Time: Around ${e.misshareTimeStr || '15:46'} upon receiving Ms. Su's reply.\n② Data Involved: StarSky_TestData contains raw measurement data and unreviewed process notes.\n③ System Used: Lab Cloud Share Link (initially misconfigured as Anyone with Link).\n④ Current Status: Public link revoked and recipient asked not to forward; following up on whether subcontractors retrieved files.`
                     },
                     {
                       speaker: '負責人 阿明組長',
@@ -531,12 +531,12 @@
           {
             speaker: '同事 阿文',
             portrait: 'colleague',
-            text: '幸好你有先來問！原本的 ClearSky_TestData 資料夾裡還塞著原始量測數據（RAW）和我寫到一半的製程筆記草稿，千萬別整個資料夾直接丟出去！'
+            text: '幸好你有先來問！原本的 StarSky_TestData 資料夾裡還塞著原始量測數據（RAW）和我寫到一半的製程筆記草稿，千萬別整個資料夾直接丟出去！'
           },
           {
             speaker: '同事 阿文',
             portrait: 'colleague',
-            text: '我剛剛已經把核准可以對外給的兩張圖獨立整理成「ClearSky_會議用摘要圖_v2」放在系統裡了。你回電腦重看就會看到這個選項！'
+            text: '我剛剛已經把核准可以對外給的兩張圖獨立整理成「StarSky_會議用摘要圖_v2」放在系統裡了。你回電腦重看就會看到這個選項！'
           },
           {
             speaker: '同事 阿文',
@@ -557,7 +557,7 @@
             speaker: '同事 阿文',
             portrait: 'colleague',
             text: exposed.length > 0
-              ? `會議用兩張圖已經放好在電腦裡了（ClearSky_會議用摘要圖_v2）。對了，實驗區裡還有「${exposed.join('、')}」露在外面，有訪客進來拍照記得先遮蔽或收妥！`
+              ? `會議用兩張圖已經放好在電腦裡了（StarSky_會議用摘要圖_v2）。對了，實驗區裡還有「${exposed.join('、')}」露在外面，有訪客進來拍照記得先遮蔽或收妥！`
               : '會議用兩張圖已經放好在電腦裡了，實驗區的白板、螢幕和樣品也都收得很乾淨，專業喔！'
           }
         ]);
@@ -580,7 +580,7 @@
         {
           speaker: '實驗白板',
           portrait: 'whiteboard',
-          text: '白板上寫著晴空計畫最新的「配方比例 14.2%、退火溫度 380°C/4h」和結構草圖。若訪客在實驗區拍照，這些資訊會清清楚楚入鏡。',
+          text: '白板上寫著星空計畫最新的「配方比例 14.2%、退火溫度 380°C/4h」和結構草圖。若訪客在實驗區拍照，這些資訊會清清楚楚入鏡。',
           choices: [
             {
               label: '確認阿文已留存紀錄後，擦拭／遮蔽白板上的機密參數',
@@ -1777,8 +1777,8 @@
             {
               speaker: '接手同事 小晴（2F 實驗區）',
               portrait: 'qing',
-              text: `小安！我接手晴空計畫最需要「${c.rawLogName}」這份原始量測紀錄，但專案指定位置（${c.rawLogTargetPath}）裡是空的！`,
-              text_en: `Xiao-An! To take over Project ClearSky, I urgently need the raw measurement log "${c.rawLogName}", but the project destination (${c.rawLogTargetPath}) is empty!`
+              text: `小安！我接手星空計畫最需要「${c.rawLogName}」這份原始量測紀錄，但專案指定位置（${c.rawLogTargetPath}）裡是空的！`,
+              text_en: `Xiao-An! To take over Project StarSky, I urgently need the raw measurement log "${c.rawLogName}", but the project destination (${c.rawLogTargetPath}) is empty!`
             },
             {
               speaker: '接手同事 小晴',
@@ -1792,8 +1792,8 @@
             {
               speaker: '接手同事 小晴（2F 實驗區）',
               portrait: 'qing',
-              text: `嗨小安！我接手阿文的晴空計畫，最關鍵的是要確認能找到並開啟「${c.rawLogName}」這份原始量測紀錄。`,
-              text_en: `Hi Xiao-An! In taking over Project ClearSky from A-Wen, the most critical step is confirming we can find and open the raw measurement log "${c.rawLogName}".`
+              text: `嗨小安！我接手阿文的星空計畫，最關鍵的是要確認能找到並開啟「${c.rawLogName}」這份原始量測紀錄。`,
+              text_en: `Hi Xiao-An! In taking over Project StarSky from A-Wen, the most critical step is confirming we can find and open the raw measurement log "${c.rawLogName}".`
             },
             {
               speaker: '接手同事 小晴',
@@ -1953,8 +1953,8 @@
             {
               speaker: '負責人 阿明組長',
               portrait: 'lead',
-              text: '我核准另行開立獨立的限期授權：\n• 內容：僅限會議用兩張摘要圖（ClearSky_會議用摘要圖_v2：圖A、圖B）\n• 用途：後續論文修訂\n• 期限：離開後 30 天自動到期',
-              text_en: "I approve creating a separate time-limited authorization:\n• Scope: Only the two meeting summary figures (ClearSky_Meeting_Summary_v2: Fig A, Fig B)\n• Purpose: Subsequent thesis revision\n• Expiration: Automatically expires 30 days after departure"
+              text: '我核准另行開立獨立的限期授權：\n• 內容：僅限會議用兩張摘要圖（StarSky_會議用摘要圖_v2：圖A、圖B）\n• 用途：後續論文修訂\n• 期限：離開後 30 天自動到期',
+              text_en: "I approve creating a separate time-limited authorization:\n• Scope: Only the two meeting summary figures (StarSky_Meeting_Summary_v2: Fig A, Fig B)\n• Purpose: Subsequent thesis revision\n• Expiration: Automatically expires 30 days after departure"
             },
             {
               speaker: '負責人 阿明組長',
@@ -2170,8 +2170,8 @@
           speaker: '同事 阿文（1F 實驗區）',
           speaker_en: 'Colleague: A-Wen (1F Lab)',
           portrait: 'colleague',
-          text: '阿文在 1F 實驗區拿出同一個虛構量測計畫（晴空計畫）的三組資料，對小安說：\n「這三組資料都是同一個計畫做的。小晴明天要盤點，你幫我看看哪些需要列進研發成果清單？她要知道去哪裡找，還有該找誰問。」',
-          text_en: 'In 1F lab, A-Wen presents 3 data sets from the ClearSky Project and says:\n"These are all from the same project. Xiao-Qing will inventory them tomorrow. Which ones should go into the R&D Records Inventory? She needs to know where to find them and who to ask."'
+          text: '阿文在 1F 實驗區拿出同一個虛構量測計畫（星空計畫）的三組資料，對小安說：\n「這三組資料都是同一個計畫做的。小晴明天要盤點，你幫我看看哪些需要列進研發成果清單？她要知道去哪裡找，還有該找誰問。」',
+          text_en: 'In 1F lab, A-Wen presents 3 data sets from the StarSky Project and says:\n"These are all from the same project. Xiao-Qing will inventory them tomorrow. Which ones should go into the R&D Records Inventory? She needs to know where to find them and who to ask."'
         },
         {
           speaker: '小安',
@@ -2227,8 +2227,8 @@
             {
               speaker: '1F 管制實驗區觀測窗',
               portrait: 'monitor',
-              text: '透過觀測窗可看見晴空計畫量測機台。機密技術參數與原始數據均保存在專案受控資料夾，不抄入清單中。',
-              text_en: 'Looking through the observation window, the ClearSky measurement equipment is visible. Confidential technical parameters and raw data are kept in access-controlled project folders, not copied directly into the inventory.'
+              text: '透過觀測窗可看見星空計畫量測機台。機密技術參數與原始數據均保存在專案受控資料夾，不抄入清單中。',
+              text_en: 'Looking through the observation window, the StarSky measurement equipment is visible. Confidential technical parameters and raw data are kept in access-controlled project folders, not copied directly into the inventory.'
             }
           ]);
           break;
@@ -2244,8 +2244,8 @@
           {
             speaker: '同事 阿文（1F 實驗區）',
             portrait: 'colleague',
-            text: '來，這是晴空計畫的三張資料卡。我們逐張看看：哪些只要留作一般紀錄、哪些要以資料群組列入清單受控保護！',
-            text_en: "Here are the three data cards for Project ClearSky. Let's examine each: which are kept as general records, and which should be inventoried as data groups for controlled protection!",
+            text: '來，這是星空計畫的三張資料卡。我們逐張看看：哪些只要留作一般紀錄、哪些要以資料群組列入清單受控保護！',
+            text_en: "Here are the three data cards for Project StarSky. Let's examine each: which are kept as general records, and which should be inventoried as data groups for controlled protection!",
             choices: [
               {
                 label: '🗂️ 查看三張資料卡並完成判斷',
@@ -2296,8 +2296,8 @@
           {
             speaker: '2F 值班電腦（研發成果清單）',
             portrait: 'monitor',
-            text: '電腦畫面上顯示晴空計畫研發成果清單草稿。\n※ 請先在 1F 實驗區找同事阿文查看三組資料卡，完成辨識後再來確認清單！',
-            text_en: 'The screen displays the Project ClearSky R&D Records Inventory draft.\n* Please visit colleague A-Wen in 1F Lab first to examine the three data cards before reviewing the inventory!'
+            text: '電腦畫面上顯示星空計畫研發成果清單草稿。\n※ 請先在 1F 實驗區找同事阿文查看三組資料卡，完成辨識後再來確認清單！',
+            text_en: 'The screen displays the Project StarSky R&D Records Inventory draft.\n* Please visit colleague A-Wen in 1F Lab first to examine the three data cards before reviewing the inventory!'
           }
         ]);
         return;
@@ -2318,8 +2318,8 @@
           {
             speaker: '盤點同事 小晴（2F 辦公區）',
             portrait: 'qing',
-            text: '嗨小安！明天我要盤點晴空計畫的研發成果資料。你先去 1F 實驗區幫阿文看看資料卡，確認好哪些要列入清單再來找我喔！',
-            text_en: "Hi Xiao-An! I'm conducting an inventory of Project ClearSky R&D records tomorrow. Help A-Wen check the data cards in 1F Lab first, and come back once you've determined what to include!"
+            text: '嗨小安！明天我要盤點星空計畫的研發成果資料。你先去 1F 實驗區幫阿文看看資料卡，確認好哪些要列入清單再來找我喔！',
+            text_en: "Hi Xiao-An! I'm conducting an inventory of Project StarSky R&D records tomorrow. Help A-Wen check the data cards in 1F Lab first, and come back once you've determined what to include!"
           }
         ]);
         return;
@@ -2363,7 +2363,7 @@
           portrait: 'qing',
           text:
             '小安，清單整理得太清楚了！我來跟你核對明天的盤點重點：\n\n' +
-            '1. **需要盤點的資料**：晴空計畫量測相關研發成果，依資料群組管理，清楚明瞭！\n' +
+            '1. **需要盤點的資料**：星空計畫量測相關研發成果，依資料群組管理，清楚明瞭！\n' +
             '2. **存放位置與負責人**：各資料群組分別指引至受控資料夾，負責人皆為阿文，明天找資料與詢問完全沒問題。\n' +
             '3. **公開與保護界線**：\n' +
             '   • 量測裝置申請資料已標記公開，並註明僅涵蓋公開文件內容；\n' +
@@ -2372,7 +2372,7 @@
             '今天的研發成果清單任務大成功！',
           text_en:
             'Xiao-An, the inventory is organized so clearly! Let me review tomorrow\'s inventory focus with you:\n\n' +
-            '1. **Records to Inventory**: ClearSky measurement-related R&D records managed by data groups, crystal clear!\n' +
+            '1. **Records to Inventory**: StarSky measurement-related R&D records managed by data groups, crystal clear!\n' +
             '2. **Storage Locations & Persons Responsible**: Each data group points to access-controlled folders with A-Wen as Person Responsible; locating files or asking questions tomorrow will be completely seamless.\n' +
             '3. **Public vs. Protected Boundaries**:\n' +
             '   • Measurement device application docs marked public, explicitly noting coverage only of published documents;\n' +
@@ -2468,8 +2468,8 @@
           {
             speaker: '2F 值班桌（第三章交班）',
             portrait: 'desk',
-            text: '請先至 2F 值班電腦確認晴空計畫研發成果清單，並依專利公開通知完成更新，再向小晴核對完成交班。',
-            text_en: 'Please review the ClearSky R&D Records Inventory at 2F Duty PC and update it per the patent publication notice before verifying with Xiao-Qing for handover.'
+            text: '請先至 2F 值班電腦確認星空計畫研發成果清單，並依專利公開通知完成更新，再向小晴核對完成交班。',
+            text_en: 'Please review the StarSky R&D Records Inventory at 2F Duty PC and update it per the patent publication notice before verifying with Xiao-Qing for handover.'
           }
         ]);
         return;

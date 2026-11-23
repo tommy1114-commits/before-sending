@@ -855,7 +855,7 @@
       'poster-title': isEn ? '💻 2F Office PC — Symposium Poster System' : '💻 2F 辦公區電腦 — 研討會海報編輯與投稿系統',
       'marking-title': isEn ? '🏷️ 2F Office — Document Confidentiality Marking' : '🏷️ 2F 辦公區 — 文件機密標示與版面預覽工作台',
       'record-title': isEn ? '📋 2F Duty PC — R&D Records Inventory' : '📋 2F 值班電腦 — 研發成果清單管理系統',
-      'cards-title': isEn ? '🔍 1F Lab — R&D Data Cards Review' : '🔍 1F 實驗區 — 晴空計畫三組研發成果資料卡',
+      'cards-title': isEn ? '🔍 1F Lab — R&D Data Cards Review' : '🔍 1F 實驗區 — 星空計畫三組研發成果資料卡',
       'lookup-title': isEn ? '📁 2F Lab — Lab Record Computer' : '📁 2F 實驗區 — 實驗紀錄路徑對照',
       'camera-title': isEn ? '📸 1F Lab — Visitor Photography Framing' : '📸 1F 管制實驗區 — 訪客相機取景預覽',
       'offboard-title': isEn ? '📋 2F Duty PC — Offboarding Handover' : '📋 2F 值班電腦 — 離職交接與存取權限系統',

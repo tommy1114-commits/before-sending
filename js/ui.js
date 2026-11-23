@@ -704,7 +704,7 @@
             <p style="margin:6px 0; font-size:13px;">
               <strong>${isEn ? 'Current Cloud Share Status:' : '目前雲端分享狀態：'}</strong>
               <span class="file-tag secret">${e.sentPermission === 'public_link' ? (isEn ? '⚠ Anyone with link can access (Public link active)' : '⚠ 持連結者皆可存取（公開連結啟用中）') : (isEn ? '⚠ Files exceeding authorized scope shared' : '⚠ 超出授權範圍之檔案分享中')}</span><br>
-              ${isEn ? 'Files Included: ' : '涵蓋檔案：'}${isFull ? (isEn ? 'ClearSky_TestData full folder (contains RAW data & unreviewed process notes)' : 'ClearSky_TestData 全資料夾（含 RAW 原始數據與未審製程筆記）') : (isEn ? 'ClearSky_Meeting_Summary_Figs_v2 (access unrestricted)' : 'ClearSky_會議用摘要圖_v2（但連結未限制存取對象）')}
+              ${isEn ? 'Files Included: ' : '涵蓋檔案：'}${isFull ? (isEn ? 'StarSky_TestData full folder (contains RAW data & unreviewed process notes)' : 'StarSky_TestData 全資料夾（含 RAW 原始數據與未審製程筆記）') : (isEn ? 'StarSky_Meeting_Summary_Figs_v2 (access unrestricted)' : 'StarSky_會議用摘要圖_v2（但連結未限制存取對象）')}
             </p>
             <div class="pc-actions">
               <button class="pixel-btn danger" id="pc-revoke-btn" type="button">${isEn ? '🔒 Revoke / Restrict Link Access Now' : '🔒 立即停用／限制連結存取'}</button>
@@ -740,12 +740,12 @@
             ${
               e.misshared
                 ? `<div class="email-content urgent">
-                    <strong>${isEn ? 'Remediation Executed:' : '已執行止血：'}</strong>${isEn ? ' The misconfigured public link for <code>ClearSky_TestData</code> has been revoked.' : '原本誤設為公開存取的 <code>ClearSky_TestData</code> 連結已停用。'}<br>
+                    <strong>${isEn ? 'Remediation Executed:' : '已執行止血：'}</strong>${isEn ? ' The misconfigured public link for <code>StarSky_TestData</code> has been revoked.' : '原本誤設為公開存取的 <code>StarSky_TestData</code> 連結已停用。'}<br>
                     <strong>${isEn ? 'Report Status:' : '通報狀態：'}</strong>${e.reportedToLead ? (isEn ? '✅ Incident reported to Team Lead A-Ming (including 4 essential elements)' : '✅ 已向阿明組長完成異常通報（含四要素）') : (isEn ? '⚠ Not yet reported to Team Lead A-Ming! Please report to him immediately.' : '⚠ 尚未向負責人阿明組長通報！請盡快找阿明組長回報。')}
                     ${e.sentSafeAfterFix ? (isEn ? '<br><strong>Follow-up Resend:</strong> ✅ Approved 2 meeting figures resent (restricted recipient, 7-day expiration).' : '<br><strong>後續補寄：</strong>✅ 已改寄核准的會議用兩張圖（限定收件人、7天效期）。') : ''}
                   </div>`
                 : `<div class="email-content">
-                    <strong>${isEn ? 'Files Sent:' : '已寄出檔案：'}</strong>${isEn ? 'ClearSky_Meeting_Summary_Figs_v2 (Fig A & Fig B only)' : 'ClearSky_會議用摘要圖_v2（僅圖A、圖B）'}<br>
+                    <strong>${isEn ? 'Files Sent:' : '已寄出檔案：'}</strong>${isEn ? 'StarSky_Meeting_Summary_Figs_v2 (Fig A & Fig B only)' : 'StarSky_會議用摘要圖_v2（僅圖A、圖B）'}<br>
                     <strong>${isEn ? 'Permission Setting:' : '權限設定：'}</strong>${permLabel}<br>
                     <strong>${isEn ? 'NDA Verification:' : '保密約定核對：'}</strong>${e.sentWithNdaCheck ? (isEn ? '✅ Verified NDA-CS-2026 scope with Team Lead A-Ming' : '✅ 已由阿明組長確認 NDA-CS-2026 涵蓋範圍') : (isEn ? '⚠ Sent without verifying NDA scope' : '⚠ 寄出前未確認 NDA 涵蓋範圍')}
                   </div>`
@@ -797,7 +797,7 @@
                   <td>${isEn ? 'No NDA signed. Prohibited from disclosing any confidential or undisclosed test data.' : '尚未簽署保密協議，禁止提供任何機密或未公開測試資料。'}</td>
                 </tr>
                 <tr style="background:#f3fbf7;">
-                  <td><strong>${isEn ? 'Starlight Tech' : '星海科技'}</strong><br><span style="font-size:11px;color:#475569;">${isEn ? 'ClearSky Project' : '晴空計畫'}</span></td>
+                  <td><strong>${isEn ? 'Starlight Tech' : '星海科技'}</strong><br><span style="font-size:11px;color:#475569;">${isEn ? 'StarSky Project' : '星空計畫'}</span></td>
                   <td><span class="status-badge ok">${isEn ? 'Signed & Active' : '已簽署有效'}</span><br><code>NDA-CS-2026</code><br>2026/01/01～2027/12/31</td>
                   <td>${isEn ? 'Restricted to Starlight Tech contact (Ms. Su) for progress meeting using "Approved Summary Charts"; <strong>excludes raw data, process notes, and subcontractor forwarding</strong>.' : '限星海科技專案窗口（蘇小姐）於階段進度會議使用「核准摘要圖表」；<strong>不含原始量測數據、製程筆記，且未授權轉傳協力廠商</strong>。'}</td>
                 </tr>
@@ -924,12 +924,12 @@
         <div class="pc-grid">
           <div class="pc-card">
             <h3>${isEn ? '✉ Partner Email (4:00 PM Meeting Urgent)' : '✉ 合作方來信（四點會議急件）'}</h3>
-            <div class="email-meta">${isEn ? 'From: Ms. Su, Starlight Tech | Subject: ClearSky Project 16:00 Meeting Materials' : '寄件者：星海科技 蘇小姐 ｜ 主旨：晴空計畫 16:00 會議資料'}</div>
+            <div class="email-meta">${isEn ? 'From: Ms. Su, Starlight Tech | Subject: StarSky Project 16:00 Meeting Materials' : '寄件者：星海科技 蘇小姐 ｜ 主旨：星空計畫 16:00 會議資料'}</div>
             <div class="email-content">
-              ${isEn ? '“Hello Xiao-An, our progress meeting is at 4:00 PM! Please share a link for the entire <strong>ClearSky_TestData folder</strong>. We only need to view the <strong>two result figures</strong> for the meeting, thanks!”' : '「小安您好，四點就要開進度會議了！麻煩把 <strong>ClearSky_TestData 整個測試資料夾</strong>設成連結寄給我，我們開會只需要看裡面<strong>兩張結果圖</strong>，謝謝！」'}
+              ${isEn ? '“Hello Xiao-An, our progress meeting is at 4:00 PM! Please share a link for the entire <strong>StarSky_TestData folder</strong>. We only need to view the <strong>two result figures</strong> for the meeting, thanks!”' : '「小安您好，四點就要開進度會議了！麻煩把 <strong>StarSky_TestData 整個測試資料夾</strong>設成連結寄給我，我們開會只需要看裡面<strong>兩張結果圖</strong>，謝謝！」'}
             </div>
             ${e.usedHoldingReply ? `<div style="font-size:12px;color:#1d6b58;margin-bottom:6px;">${isEn ? '✅ You replied "Verifying NDA and approved version"; Ms. Su acknowledged.' : '✅ 你已先回覆「正在確認 NDA 與核准版本」，蘇小姐表示沒問題。'}</div>` : ''}
-            <div style="font-size:12px;font-weight:700;color:#39465e;margin-bottom:4px;">${isEn ? '📂 ClearSky_TestData Folder Contents:' : '📂 ClearSky_TestData 資料夾內容：'}</div>
+            <div style="font-size:12px;font-weight:700;color:#39465e;margin-bottom:4px;">${isEn ? '📂 StarSky_TestData Folder Contents:' : '📂 StarSky_TestData 資料夾內容：'}</div>
             <div class="file-list">
               <div class="file-item"><span>${isEn ? '01_Meeting_Summary_FigA.png / 02_Summary_FigB.png' : '01_會議摘要圖A.png / 02_摘要圖B.png'}</span><span class="file-tag safe">${state.clues.meetingVersion ? (isEn ? 'Approved Version' : '已核准版本') : (isEn ? 'Pending Verification' : '待確認版本')}</span></div>
               <div class="file-item"><span>${isEn ? '03_Raw_Measurements_RAW.csv' : '03_原始量測數據_RAW.csv'}</span><span class="file-tag secret">${isEn ? 'Internal Confidential' : '內部機密'}</span></div>
@@ -955,7 +955,7 @@
               <div class="radio-row">
                 <label class="radio-pill ${selectedPayload === 'full_folder' ? 'active' : ''}">
                   <input type="radio" name="pc-payload" value="full_folder" ${selectedPayload === 'full_folder' ? 'checked' : ''}>
-                  <span><strong>${isEn ? 'Entire ClearSky_TestData folder' : '整個 ClearSky_TestData 資料夾'}</strong>${isEn ? ' (4 files)' : '（含 4 個檔案）'}</span>
+                  <span><strong>${isEn ? 'Entire StarSky_TestData folder' : '整個 StarSky_TestData 資料夾'}</strong>${isEn ? ' (4 files)' : '（含 4 個檔案）'}</span>
                 </label>
                 <label class="radio-pill ${!state.clues.meetingVersion ? 'locked' : selectedPayload === 'charts_only' ? 'active' : ''}">
                   <input type="radio" name="pc-payload" value="charts_only" ${!state.clues.meetingVersion ? 'disabled' : ''} ${selectedPayload === 'charts_only' ? 'checked' : ''}>
@@ -1317,7 +1317,7 @@
 
           <div class="poster-sheet">
             <div class="poster-sheet-header">
-              <span class="poster-sheet-title">${isEn ? '2026 Materials Symposium Poster — ClearSky Thin Film Process Progress' : '2026 材料研討會海報 — 晴空薄膜製程進度'}</span>
+              <span class="poster-sheet-title">${isEn ? '2026 Materials Symposium Poster — StarSky Thin Film Process Progress' : '2026 材料研討會海報 — 星空薄膜製程進度'}</span>
               <span class="poster-sheet-meta">${isViewingOrig ? (isEn ? 'View Mode: Original Draft (Read-only compare)' : '檢視模式：原始草稿（唯讀對照）') : (isEn ? 'View Mode: Current Editing Version' : '檢視模式：目前編輯版本')}</span>
             </div>
             <div class="poster-fig-grid">
@@ -1756,7 +1756,7 @@
         ctx.fillStyle = '#2b6cb0';
         ctx.fillText(isEn ? 'Anneal 380°C/4h' : '退火 380°C/4h', 26, 50);
         ctx.fillStyle = '#d97706';
-        ctx.fillText(isEn ? 'ClearSky B4' : '晴空計畫 B4', 26, 62);
+        ctx.fillText(isEn ? 'StarSky B4' : '星空計畫 B4', 26, 62);
         ctx.strokeStyle = '#ef4444';
         ctx.lineWidth = 2;
         ctx.strokeRect(16, 18, 92, 60);
@@ -1911,7 +1911,7 @@
           </div>
 
           <div class="pc-card" style="margin-bottom:10px;">
-            <h3>📋 ${isEn ? 'A-Wen Offboarding Handover Checklist (ClearSky Project)' : '阿文離職交接清單（晴空計畫）'}</h3>
+            <h3>📋 ${isEn ? 'A-Wen Offboarding Handover Checklist (StarSky Project)' : '阿文離職交接清單（星空計畫）'}</h3>
             <table class="checklist-table">
               <tbody>
                 <tr>
@@ -1984,7 +1984,7 @@
             <div class="ch3-action-box">
               <div style="font-size:12.5px;">
                 <strong>${isEn ? '1. Successor (Xiao-Qing) Project Access' : '1. 接手人（小晴）專案權限'}</strong><br>
-                <span style="color:#4c586e;">${isEn ? 'Confirm Xiao-Qing has access to the ClearSky Project folder so she can open transferred raw logs.' : '確認小晴具備晴空計畫指定資料夾存取權限，才能開啟移交的原始紀錄。'}</span>
+                <span style="color:#4c586e;">${isEn ? 'Confirm Xiao-Qing has access to the StarSky Project folder so she can open transferred raw logs.' : '確認小晴具備星空計畫指定資料夾存取權限，才能開啟移交的原始紀錄。'}</span>
               </div>
               <button class="pixel-btn ${c.qingHasProjectAccess ? '' : 'primary'}" id="btn-ch3-grant-qing" type="button" ${c.qingHasProjectAccess ? 'disabled' : ''}>
                 ${c.qingHasProjectAccess ? (isEn ? '✅ Xiao-Qing Access Activated' : '✅ 小晴專案權限已開通') : (isEn ? '🔑 Confirm Project Access for Xiao-Qing' : '🔑 為小晴確認專案存取權限')}
@@ -2105,8 +2105,8 @@
           $('btn-ch3-grant-qing').onclick = () => {
             callbacks.onGrantQing();
             inlineNotice = isEn
-              ? '✅ ClearSky Project access activated for Xiao-Qing! Inspect in "Access Preview", and visit 2F Lab to have Xiao-Qing confirm opening.'
-              : '✅ 已為小晴開通晴空計畫存取權限！可到「存取預覽」檢查，並請 2F 實驗區小晴親自確認開啟。';
+              ? '✅ StarSky Project access activated for Xiao-Qing! Inspect in "Access Preview", and visit 2F Lab to have Xiao-Qing confirm opening.'
+              : '✅ 已為小晴開通星空計畫存取權限！可到「存取預覽」檢查，並請 2F 實驗區小晴親自確認開啟。';
             window.BS.Audio.success();
             render();
           };
@@ -2412,7 +2412,7 @@
         body.innerHTML = `
           <div class="pc-card" style="margin-bottom:8px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-              <h3 style="margin:0;">📋 ${isEn ? 'Research Project: ClearSky Project R&D Records Inventory Draft' : '研究計畫：晴空計畫（ClearSky Project）研發成果清單草稿'}</h3>
+              <h3 style="margin:0;">📋 ${isEn ? 'Research Project: StarSky Project R&D Records Inventory Draft' : '研究計畫：星空計畫（StarSky Project）研發成果清單草稿'}</h3>
               <span class="status-badge warn">${isEn ? 'Pending Scope Confirmation' : '待確認納入範圍'}</span>
             </div>
             <p style="font-size:12px; color:#475569; margin:6px 0 0; line-height:1.5;">
@@ -2434,30 +2434,30 @@
             <!-- Group Item 1: 量測條件優化紀錄 -->
             <div class="lookup-step-card ${c.draft.optimization ? 'ok' : ''}">
               <div class="access-card-top">
-                <strong>1. ${isEn ? 'ClearSky Project | Measurement Condition Optimization Log' : '晴空計畫｜量測條件優化紀錄'}</strong>
+                <strong>1. ${isEn ? 'StarSky Project | Measurement Condition Optimization Log' : '星空計畫｜量測條件優化紀錄'}</strong>
                 <button class="pixel-btn ${c.draft.optimization ? 'primary' : ''}" id="btn-toggle-opt" type="button" style="padding:3px 8px; font-size:11.5px;">
                   ${c.draft.optimization ? (isEn ? '✓ In Inventory' : '✓ 納入清單') : (isEn ? 'Excluded' : '未納入')}
                 </button>
               </div>
-              <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'ClearSky Project | Measurement Condition Optimization Log' : '晴空計畫｜量測條件優化紀錄'}</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'StarSky Project | Measurement Condition Optimization Log' : '星空計畫｜量測條件優化紀錄'}</span></div>
               <div class="rec-field-row"><span class="rec-field-label">${lblType}</span><span class="rec-field-val">${isEn ? 'Undisclosed Know-how' : '自研 know-how'}</span></div>
               <div class="rec-field-row"><span class="rec-field-label">${lblReason}</span><span class="rec-field-val">${isEn ? 'Proprietary method not yet published (stabilizing measurement parameters)' : '自研方法尚未公開（讓量測更穩定之參數）'}</span></div>
-              <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/02_ConditionOpt/</code></span></div>
+              <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/StarSky_Project/02_ConditionOpt/</code></span></div>
               <div class="rec-field-row"><span class="rec-field-label">${lblPerson}</span><span class="rec-field-val">${isEn ? 'A-Wen' : '阿文'}</span></div>
             </div>
 
             <!-- Group Item 2: 量測裝置申請資料 -->
             <div class="lookup-step-card ${c.draft.patentDevice ? 'ok' : ''}">
               <div class="access-card-top">
-                <strong>2. ${isEn ? 'ClearSky Project | Measurement Device Application Data' : '晴空計畫｜量測裝置申請資料'}</strong>
+                <strong>2. ${isEn ? 'StarSky Project | Measurement Device Application Data' : '星空計畫｜量測裝置申請資料'}</strong>
                 <button class="pixel-btn ${c.draft.patentDevice ? 'primary' : ''}" id="btn-toggle-patent" type="button" style="padding:3px 8px; font-size:11.5px;">
                   ${c.draft.patentDevice ? (isEn ? '✓ In Inventory' : '✓ 納入清單') : (isEn ? 'Excluded' : '未納入')}
                 </button>
               </div>
-              <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'ClearSky Project | Measurement Device Application Data' : '晴空計畫｜量測裝置申請資料'}</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'StarSky Project | Measurement Device Application Data' : '星空計畫｜量測裝置申請資料'}</span></div>
               <div class="rec-field-row"><span class="rec-field-label">${lblType}</span><span class="rec-field-val">${isEn ? 'Patent Application Related Records' : '專利申請相關資料'}</span></div>
               <div class="rec-field-row"><span class="rec-field-label">${lblReason}</span><span class="rec-field-val">${isEn ? 'Application content not yet published (Patent Application Filed, Not Yet Published)' : '本情境的申請內容尚未公開（已送件，尚未公開）'}</span></div>
-              <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/01_PatentDrafts/</code></span></div>
+              <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/StarSky_Project/01_PatentDrafts/</code></span></div>
               <div class="rec-field-row"><span class="rec-field-label">${lblPerson}</span><span class="rec-field-val">${isEn ? 'A-Wen (Project Contact)' : '阿文（專案窗口）'}</span></div>
               <div style="font-size:11.5px; color:#2563eb; margin-top:4px;">📌 ${isEn ? 'Status: Patent application filed, App No. TW115-XXXXX (Not yet published)' : '狀態標記：已送件申請專利，專利案號 TW115-XXXXX（尚未公開）'}</div>
             </div>
@@ -2465,15 +2465,15 @@
             <!-- Group Item 3: 量測裝置調校紀錄 -->
             <div class="lookup-step-card ${c.draft.tuning ? 'ok' : ''}">
               <div class="access-card-top">
-                <strong>3. ${isEn ? 'ClearSky Project | Measurement Device Tuning Log' : '晴空計畫｜量測裝置調校紀錄'}</strong>
+                <strong>3. ${isEn ? 'StarSky Project | Measurement Device Tuning Log' : '星空計畫｜量測裝置調校紀錄'}</strong>
                 <button class="pixel-btn ${c.draft.tuning ? 'primary' : ''}" id="btn-toggle-tuning" type="button" style="padding:3px 8px; font-size:11.5px;">
                   ${c.draft.tuning ? (isEn ? '✓ In Inventory' : '✓ 納入清單') : (isEn ? 'Excluded' : '未納入')}
                 </button>
               </div>
-              <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'ClearSky Project | Measurement Device Tuning Log' : '晴空計畫｜量測裝置調校紀錄'}</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'StarSky Project | Measurement Device Tuning Log' : '星空計畫｜量測裝置調校紀錄'}</span></div>
               <div class="rec-field-row"><span class="rec-field-label">${lblType}</span><span class="rec-field-val">${isEn ? 'Undisclosed Know-how' : '自研 know-how'}</span></div>
               <div class="rec-field-row"><span class="rec-field-label">${lblReason}</span><span class="rec-field-val">${isEn ? 'Tuning methods unpublished and not included in patent filing' : '調校方法尚未公開，且未納入該專利申請'}</span></div>
-              <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/03_DeviceTuning/</code></span></div>
+              <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/StarSky_Project/03_DeviceTuning/</code></span></div>
               <div class="rec-field-row"><span class="rec-field-label">${lblPerson}</span><span class="rec-field-val">${isEn ? 'A-Wen' : '阿文'}</span></div>
               <div style="font-size:11.5px; color:#6b7280; margin-top:4px;">📌 ${isEn ? 'Note: Excluded from patent claims; managed independently as Undisclosed Know-how' : '備註：未納入專利申請範圍，獨立作為自研 know-how 管理'}</div>
             </div>
@@ -2481,15 +2481,15 @@
             <!-- Candidate Item 4: 公開方法重現紀錄 -->
             <div class="lookup-step-card ${c.draft.reproduce ? 'warn' : ''}">
               <div class="access-card-top">
-                <strong>4. ${isEn ? 'ClearSky Project | Public Method Reproduction Log (Candidate)' : '晴空計畫｜公開方法重現紀錄（候選項）'}</strong>
+                <strong>4. ${isEn ? 'StarSky Project | Public Method Reproduction Log (Candidate)' : '星空計畫｜公開方法重現紀錄（候選項）'}</strong>
                 <button class="pixel-btn ${c.draft.reproduce ? 'danger' : ''}" id="btn-toggle-reproduce" type="button" style="padding:3px 8px; font-size:11.5px;">
                   ${c.draft.reproduce ? (isEn ? 'Included (Click to cancel)' : '已納入（點擊取消）') : (isEn ? 'Excluded (Keep as routine record)' : '不納入（留作一般紀錄）')}
                 </button>
               </div>
-              <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'ClearSky Project | Public Method Reproduction Log' : '晴空計畫｜公開方法重現紀錄'}</span></div>
+              <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'StarSky Project | Public Method Reproduction Log' : '星空計畫｜公開方法重現紀錄'}</span></div>
               <div class="rec-field-row"><span class="rec-field-label">${lblType}</span><span class="rec-field-val">${isEn ? 'Routine Lab Operational Log' : '一般實驗操作紀錄'}</span></div>
               <div class="rec-field-row"><span class="rec-field-label">${lblReason}</span><span class="rec-field-val">${isEn ? 'Replicating public tutorial only; no proprietary improvements or secret results' : '僅重現公開教學，無自家改良與未公開結果'}</span></div>
-              <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/00_GeneralLogs/</code></span></div>
+              <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/StarSky_Project/00_GeneralLogs/</code></span></div>
               <div class="rec-field-row"><span class="rec-field-label">${lblPerson}</span><span class="rec-field-val">${isEn ? 'A-Wen' : '阿文'}</span></div>
               <div style="font-size:11.5px; color:#9a3412; margin-top:4px;">
                 ${
@@ -2605,7 +2605,7 @@
               </button>
               <button class="pixel-btn ${c.updateChoice === 'whole_project' ? 'danger' : ''}" id="btn-upd-whole-proj" type="button" style="text-align:left; padding:8px 10px; font-size:12.5px;">
                 ⚠ <strong>${isEn ? 'Mark Entire Project as Disclosed' : '將整個計畫標為已公開'}</strong><br>
-                <small style="color:#b91c1c;">${isEn ? 'Mark all measurement data in ClearSky Project as publicly disclosed.' : '將晴空計畫所有量測資料全部標記為已公開。'}</small>
+                <small style="color:#b91c1c;">${isEn ? 'Mark all measurement data in StarSky Project as publicly disclosed.' : '將星空計畫所有量測資料全部標記為已公開。'}</small>
               </button>
             </div>
           </div>
@@ -2646,46 +2646,46 @@
       // Stage 3: Saved & Updated List View
       body.innerHTML = `
         <div class="inline-ok-box" style="margin-bottom:10px;">
-          ✅ <strong>${isEn ? 'ClearSky Project R&D Records Inventory (Latest Version — Saved)' : '晴空計畫研發成果清單（最新版本 — 已儲存）'}</strong><br>
+          ✅ <strong>${isEn ? 'StarSky Project R&D Records Inventory (Latest Version — Saved)' : '星空計畫研發成果清單（最新版本 — 已儲存）'}</strong><br>
           ${isEn ? 'Patent publication status updated in-place with complete audit trail; no redundant records created.' : '已完成專利公開狀態更新，同一筆記錄完整留痕，無重複登記。'}
         </div>
 
         <div style="display:flex; flex-direction:column; gap:8px;">
           <div class="lookup-step-card ok">
             <div class="access-card-top">
-              <strong>1. ${isEn ? 'ClearSky Project | Measurement Device Application Data' : '晴空計畫｜量測裝置申請資料'}</strong>
+              <strong>1. ${isEn ? 'StarSky Project | Measurement Device Application Data' : '星空計畫｜量測裝置申請資料'}</strong>
               <span class="status-badge ok">${isEn ? '✅ Published (Device Structure & Principle)' : '✅ 已公開（裝置結構原理）'}</span>
             </div>
-            <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'ClearSky Project | Measurement Device Application Data' : '晴空計畫｜量測裝置申請資料'}</span></div>
+            <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'StarSky Project | Measurement Device Application Data' : '星空計畫｜量測裝置申請資料'}</span></div>
             <div class="rec-field-row"><span class="rec-field-label">${lblType}</span><span class="rec-field-val">${isEn ? 'Patent Application Related Records' : '專利申請相關資料'}</span></div>
             <div class="rec-field-row"><span class="rec-field-label">${lblReason}</span><span class="rec-field-val">${isEn ? 'Disclosed in published patent documents; application files retained for reference' : '已公開專利文件所載內容已公開；申請文件留存備查'}</span></div>
-            <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/01_PatentDrafts/</code></span></div>
+            <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/StarSky_Project/01_PatentDrafts/</code></span></div>
             <div class="rec-field-row"><span class="rec-field-label">${lblPerson}</span><span class="rec-field-val">${isEn ? 'A-Wen (Project Contact)' : '阿文（專案窗口）'}</span></div>
             <div style="font-size:11.5px; color:#15803d; margin-top:4px;">${isEn ? 'Update Date: Today (2026-11-22) | Scope: Device structure & principle only' : '更新日期：今日（2026-11-22）｜範圍：僅限裝置結構與原理'}</div>
           </div>
 
           <div class="lookup-step-card ok">
             <div class="access-card-top">
-              <strong>2. ${isEn ? 'ClearSky Project | Measurement Device Tuning Log' : '晴空計畫｜量測裝置調校紀錄'}</strong>
+              <strong>2. ${isEn ? 'StarSky Project | Measurement Device Tuning Log' : '星空計畫｜量測裝置調校紀錄'}</strong>
               <span class="status-badge ok">${isEn ? '🔒 Undisclosed Proprietary Know-how' : '🔒 未公開自研 know-how'}</span>
             </div>
-            <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'ClearSky Project | Measurement Device Tuning Log' : '晴空計畫｜量測裝置調校紀錄'}</span></div>
+            <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'StarSky Project | Measurement Device Tuning Log' : '星空計畫｜量測裝置調校紀錄'}</span></div>
             <div class="rec-field-row"><span class="rec-field-label">${lblType}</span><span class="rec-field-val">${isEn ? 'Undisclosed Know-how' : '自研 know-how'}</span></div>
             <div class="rec-field-row"><span class="rec-field-label">${lblReason}</span><span class="rec-field-val">${isEn ? 'Tuning methods unpublished and not included in patent filing' : '調校方法尚未公開，且未納入該專利申請'}</span></div>
-            <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/03_DeviceTuning/</code></span></div>
+            <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/StarSky_Project/03_DeviceTuning/</code></span></div>
             <div class="rec-field-row"><span class="rec-field-label">${lblPerson}</span><span class="rec-field-val">${isEn ? 'A-Wen' : '阿文'}</span></div>
             <div style="font-size:11.5px; color:#2563eb; margin-top:4px;">${isEn ? 'Status: Excluded from filing; continuously protected under original scope' : '狀態：未納入申請，繼續按原範圍受控保護'}</div>
           </div>
 
           <div class="lookup-step-card ok">
             <div class="access-card-top">
-              <strong>3. ${isEn ? 'ClearSky Project | Measurement Condition Optimization Log' : '晴空計畫｜量測條件優化紀錄'}</strong>
+              <strong>3. ${isEn ? 'StarSky Project | Measurement Condition Optimization Log' : '星空計畫｜量測條件優化紀錄'}</strong>
               <span class="status-badge ok">${isEn ? '🔒 Undisclosed Proprietary Know-how' : '🔒 未公開自研 know-how'}</span>
             </div>
-            <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'ClearSky Project | Measurement Condition Optimization Log' : '晴空計畫｜量測條件優化紀錄'}</span></div>
+            <div class="rec-field-row"><span class="rec-field-label">${lblName}</span><span class="rec-field-val">${isEn ? 'StarSky Project | Measurement Condition Optimization Log' : '星空計畫｜量測條件優化紀錄'}</span></div>
             <div class="rec-field-row"><span class="rec-field-label">${lblType}</span><span class="rec-field-val">${isEn ? 'Undisclosed Know-how' : '自研 know-how'}</span></div>
             <div class="rec-field-row"><span class="rec-field-label">${lblReason}</span><span class="rec-field-val">${isEn ? 'Proprietary method not yet published (stabilizing measurement parameters)' : '自研方法尚未公開（量測穩定度提升參數）'}</span></div>
-            <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/ClearSky_Project/02_ConditionOpt/</code></span></div>
+            <div class="rec-field-row"><span class="rec-field-label">${lblLocation}</span><span class="rec-field-val"><code>/TeamDrive/StarSky_Project/02_ConditionOpt/</code></span></div>
             <div class="rec-field-row"><span class="rec-field-label">${lblPerson}</span><span class="rec-field-val">${isEn ? 'A-Wen' : '阿文'}</span></div>
           </div>
         </div>
@@ -3167,7 +3167,7 @@
       <div class="section-card">
         <h3>🔍 ${isEn ? 'Verified Information' : '已掌握的核對資訊'}</h3>
         <ul style="margin:6px 0 0; padding-left:18px;">
-          <li>${c.meetingVersion ? '✅' : '⬜'} <strong>${isEn ? 'Approved Meeting Version' : '會議用核准版本'}</strong>：${c.meetingVersion ? (isEn ? 'A-Wen prepared a 2-figure meeting edition (ClearSky_Conference_Summary_Fig_v2).' : '阿文已整理只含兩張圖的會議版（ClearSky_會議用摘要圖_v2）。') : (isEn ? 'Unconfirmed (ask colleague A-Wen at Lab).' : '尚未確認（可到實驗區問同事阿文）。')}</li>
+          <li>${c.meetingVersion ? '✅' : '⬜'} <strong>${isEn ? 'Approved Meeting Version' : '會議用核准版本'}</strong>：${c.meetingVersion ? (isEn ? 'A-Wen prepared a 2-figure meeting edition (StarSky_Conference_Summary_Fig_v2).' : '阿文已整理只含兩張圖的會議版（StarSky_會議用摘要圖_v2）。') : (isEn ? 'Unconfirmed (ask colleague A-Wen at Lab).' : '尚未確認（可到實驗區問同事阿文）。')}</li>
           <li>${c.ndaScope ? '✅' : '⬜'} <strong>${isEn ? 'Vendor NDA Verification (NDA-CS-2026)' : '廠商 NDA 簽署查核（NDA-CS-2026）'}</strong>：${c.ndaScope ? (isEn ? 'Confirmed StarSea Tech signed valid NDA; covers 2 summary figures for Ms. Su\'s meeting only; excludes raw logs, process notes, and subcontractors.' : '已確認星海科技已簽署有效 NDA（效期內），僅涵蓋兩張摘要圖供蘇小姐開會用，不含原始數據、製程筆記與協力廠商。') : (isEn ? 'Unconfirmed whether valid NDA exists (check NDA registry on PC or consult Team Lead A-Ming).' : '尚未確認是否已簽署有效 NDA（可於電腦查詢 NDA 合約清單或詢問辦公區阿明組長）。')}</li>
           <li>${c.visitorLog ? '✅' : '⬜'} <strong>${isEn ? 'Visitor Logbook' : '訪客接待登記'}</strong>：${c.visitorLog ? (isEn ? 'Checked logbook: Approved photo at logo wall; entering lab requires full escort and no sensitive data in frame.' : '已核對登記簿：核准入口形象牆拍照；若進實驗區須全程陪同且不得拍入敏感資訊。') : (isEn ? 'Unconfirmed (inspect 1F Reception Desk).' : '尚未確認（可調查訪客入口接待處）。')}</li>
           <li>${c.visitorPurpose ? '✅' : '⬜'} <strong>${isEn ? 'Photo Purpose' : '訪客拍攝用途'}</strong>：${c.visitorPurpose ? (isEn ? 'Mr. Chen confirmed photos are for a public outreach visit report.' : '陳先生表示照片將放進對外公開的參訪紀錄報告。') : (isEn ? 'Ask visitor Mr. Chen.' : '尚未詢問訪客陳先生。')}</li>

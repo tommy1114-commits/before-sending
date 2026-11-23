@@ -171,7 +171,7 @@
         },
         rawLogName: 'CS_2026_RawLog_Full.csv',
         rawLogOrigPath: '/Users/Awen/Personal_Workspace/CS_2026_RawLog_Full.csv',
-        rawLogTargetPath: '/Projects/ClearSky/01_RawData/CS_2026_RawLog_Full.csv',
+        rawLogTargetPath: '/Projects/StarSky/01_RawData/CS_2026_RawLog_Full.csv',
         rawLogLocation: 'personal',    // 'personal' | 'project'
         transferredBy: null,           // 'awen' | 'admin'
         interruptedByEarlyRevoke: false,
@@ -200,10 +200,10 @@
   const CH4_STORAGE_KEY = 'before_sending_ch4_endings_v1';
 
   const CH4_PATHS = {
-    optimization: '/TeamDrive/ClearSky_Project/02_ConditionOpt/',
-    patentDrafts: '/TeamDrive/ClearSky_Project/01_PatentDrafts/',
-    deviceTuning: '/TeamDrive/ClearSky_Project/03_DeviceTuning/',
-    generalLogs: '/TeamDrive/ClearSky_Project/00_GeneralLogs/'
+    optimization: '/TeamDrive/StarSky_Project/02_ConditionOpt/',
+    patentDrafts: '/TeamDrive/StarSky_Project/01_PatentDrafts/',
+    deviceTuning: '/TeamDrive/StarSky_Project/03_DeviceTuning/',
+    generalLogs: '/TeamDrive/StarSky_Project/00_GeneralLogs/'
   };
 
   function createChapter4State() {
@@ -278,8 +278,8 @@
             typeTag_en: 'Promotional / Event Poster',
             source: '實驗室推廣小組',
             source_en: 'Lab Outreach Committee',
-            content: '標題「清空計畫研發成果發表交流會」，內含活動時間、地點、議程、講者陣容與公開報名連結。無任何未公開之自研技術細節或機密參數。',
-            content_en: 'Title "ClearSky Project Presentation Symposium". Contains schedule, venue, agenda, speakers, and public registration link. No undisclosed technical know-how or secret parameters.',
+            content: '標題「星空計畫研發成果發表交流會」，內含活動時間、地點、議程、講者陣容與公開報名連結。無任何未公開之自研技術細節或機密參數。',
+            content_en: 'Title "StarSky Project Presentation Symposium". Contains schedule, venue, agenda, speakers, and public registration link. No undisclosed technical know-how or secret parameters.',
             purpose: '預計張貼於 1F 大廳形象區宣傳，並透過公開社群廣發邀請外部產學界參加。',
             purpose_en: 'Scheduled to be posted in 1F lobby and shared publicly on social channels to invite industry and academic partners.',
             isConfidential: false,
@@ -289,14 +289,14 @@
             placementHint: '維持乾淨宣傳版面，右下角標註一般／公開版',
             placementHint_en: 'Keep promotional layout clean; note General / Public in bottom corner',
             previewDetails: {
-              heading: '清空計畫研發成果發表交流會',
+              heading: '星空計畫研發成果發表交流會',
               sub: '時間：11月30日 14:00 ｜ 地點：1F 演講廳',
               badge: '公開宣傳版',
               badgeCls: 'public',
               summary: '版面清爽完整，無機密浮水印，可自由印刷與對外發布。'
             },
             previewDetails_en: {
-              heading: 'ClearSky Project Presentation Symposium',
+              heading: 'StarSky Project Presentation Symposium',
               sub: 'Date: Nov 30, 14:00 | Venue: 1F Auditorium',
               badge: 'Public Edition',
               badgeCls: 'public',
@@ -309,10 +309,10 @@
             title_en: 'Doc 2: Electronic Presentation with Undisclosed Tuning Methods',
             typeTag: '電子簡報（.pptx）',
             typeTag_en: 'Electronic Presentation (.pptx)',
-            source: 'ClearSky 研發團隊',
-            source_en: 'ClearSky R&D Team',
-            content: '檔案名稱「ClearSky_儀器調校與最佳化參數流程.pptx」，共 24 頁。詳細記載團隊摸索數月的調校參數、避坑經驗與最佳量測條件（屬未公開自研 know-how）。',
-            content_en: 'File "ClearSky_Instrument_Tuning_and_Parameters.pptx" (24 pages). Documents months of trial parameters, tuning know-how, and optimal measurement conditions (undisclosed know-how).',
+            source: 'StarSky 研發團隊',
+            source_en: 'StarSky R&D Team',
+            content: '檔案名稱「StarSky_儀器調校與最佳化參數流程.pptx」，共 24 頁。詳細記載團隊摸索數月的調校參數、避坑經驗與最佳量測條件（屬未公開自研 know-how）。',
+            content_en: 'File "StarSky_Instrument_Tuning_and_Parameters.pptx" (24 pages). Documents months of trial parameters, tuning know-how, and optimal measurement conditions (undisclosed know-how).',
             purpose: '供本週專案內部技術檢討會使用，僅限團隊內部成員與核准研究員討論。',
             purpose_en: 'For this week\'s internal technical review only; restricted to team members and approved researchers.',
             isConfidential: true,
@@ -322,7 +322,7 @@
             placementHint: '簡報首頁封面右上角 ＆ 每頁投影片頁腳（Footer）顯著標記',
             placementHint_en: 'Top-right corner of title slide & conspicuous footer on every slide',
             previewDetails: {
-              heading: 'ClearSky 儀器調校與最佳化參數流程',
+              heading: 'StarSky 儀器調校與最佳化參數流程',
               sub: '報告人：研發團隊 ｜ 專案內部研討',
               badge: '機密 CONFIDENTIAL',
               badgeCls: 'confidential',
@@ -330,7 +330,7 @@
               summary: '封面顯著載明機密標籤，每頁頁腳皆有防漏標記，投影或閱讀時皆能明確警示。'
             },
             previewDetails_en: {
-              heading: 'ClearSky Instrument Tuning & Parameter Optimization Flow',
+              heading: 'StarSky Instrument Tuning & Parameter Optimization Flow',
               sub: 'Presenter: R&D Team | Internal Project Review',
               badge: 'CONFIDENTIAL',
               badgeCls: 'confidential',
@@ -685,8 +685,8 @@
       if (e.linkRevoked && e.reportedToLead) {
         emailBadge = isEn ? { text: 'Mis-share Remediated & Reported', cls: 'warn' } : { text: '誤分享已止血並通報', cls: 'warn' };
         emailDetail = isEn
-          ? `Entire ClearSky_TestData folder (including raw measurements and process notes) was originally set to public access and sent to Ms. Su at Starlight Tech. Upon receiving inquiry about forwarding to subcontractors, the public link was immediately revoked and reported to Team Lead A-Ming (with discovery time ${e.misshareTimeStr || '15:50'}, files involved, system, and actions taken).` + (e.sentSafeAfterFix ? ' The approved 2 meeting figures were subsequently resent.' : '')
-          : `原本將整個 ClearSky_TestData 資料夾（含原始量測數據與製程筆記）設為「持連結者皆可存取」寄給星海科技蘇小姐。發現對方詢問是否轉傳協力廠商後，已於電腦停用公開連結，並向阿明組長完成通報（含發現時間 ${e.misshareTimeStr || '15:50'}、涉及檔案、雲端連結系統與目前處置）。` + (e.sentSafeAfterFix ? ' 後續亦已改寄核准的會議用兩張圖。' : '');
+          ? `Entire StarSky_TestData folder (including raw measurements and process notes) was originally set to public access and sent to Ms. Su at Starlight Tech. Upon receiving inquiry about forwarding to subcontractors, the public link was immediately revoked and reported to Team Lead A-Ming (with discovery time ${e.misshareTimeStr || '15:50'}, files involved, system, and actions taken).` + (e.sentSafeAfterFix ? ' The approved 2 meeting figures were subsequently resent.' : '')
+          : `原本將整個 StarSky_TestData 資料夾（含原始量測數據與製程筆記）設為「持連結者皆可存取」寄給星海科技蘇小姐。發現對方詢問是否轉傳協力廠商後，已於電腦停用公開連結，並向阿明組長完成通報（含發現時間 ${e.misshareTimeStr || '15:50'}、涉及檔案、雲端連結系統與目前處置）。` + (e.sentSafeAfterFix ? ' 後續亦已改寄核准的會議用兩張圖。' : '');
         emailReminder = isEn
           ? '“When discovering a misconfigured public link, revoke access immediately to stop exposure, then report the 4 essential elements to Team Lead A-Ming: time, data, system, and current status.”'
           : '「發現誤設公開權限時，第一時間先停權止血，再清楚向阿明組長通報四要素：時間、資料、系統與現況。」';
@@ -962,8 +962,8 @@
         },
         {
           title: isEn
-            ? '2. Two Conference Figures Needed for Manuscript (ClearSky_Conference_Summary_Fig_v2)'
-            : '2. 後續論文需要的兩張會議用圖（ClearSky_會議用摘要圖_v2）',
+            ? '2. Two Conference Figures Needed for Manuscript (StarSky_Conference_Summary_Fig_v2)'
+            : '2. 後續論文需要的兩張會議用圖（StarSky_會議用摘要圖_v2）',
           canOpen: c.awenPaperGrant || origOpen,
           cls: c.awenPaperGrant && !origOpen ? 'ok' : origOpen ? 'warn' : 'warn',
           badge:
@@ -1040,8 +1040,8 @@
       },
       {
         title: isEn
-          ? '2. Two Conference Figures Needed for Manuscript (ClearSky_Conference_Summary_Fig_v2)'
-          : '2. 後續論文需要的兩張會議用圖（ClearSky_會議用摘要圖_v2）',
+          ? '2. Two Conference Figures Needed for Manuscript (StarSky_Conference_Summary_Fig_v2)'
+          : '2. 後續論文需要的兩張會議用圖（StarSky_會議用摘要圖_v2）',
         canOpen: c.qingHasProjectAccess,
         cls: c.qingHasProjectAccess ? 'ok' : 'warn',
         badge: c.qingHasProjectAccess
@@ -1049,22 +1049,22 @@
           : (isEn ? '⚠ Project Access Unconfirmed' : '⚠ 尚未確認專案權限'),
         detail: c.qingHasProjectAccess
           ? (isEn
-              ? 'Xiao-Qing has project folder access to ClearSky Project and can cross-check figures with A-Wen for manuscript revision at any time.'
-              : '小晴已具備晴空計畫專案資料夾權限，可隨時對照會議用兩張圖與阿文合作修改論文。')
+              ? 'Xiao-Qing has project folder access to StarSky Project and can cross-check figures with A-Wen for manuscript revision at any time.'
+              : '小晴已具備星空計畫專案資料夾權限，可隨時對照會議用兩張圖與阿文合作修改論文。')
           : (isEn
-              ? 'Can view after confirming Xiao-Qing\'s required access permissions for ClearSky Project.'
-              : '為小晴確認晴空計畫工作所需存取權限後即可檢視。')
+              ? 'Can view after confirming Xiao-Qing\'s required access permissions for StarSky Project.'
+              : '為小晴確認星空計畫工作所需存取權限後即可檢視。')
       },
       {
         title: isEn
-          ? '3. Other Lab Project Records Unrelated to ClearSky Project'
-          : '3. 與晴空計畫無關的其他實驗室專案資料',
+          ? '3. Other Lab Project Records Unrelated to StarSky Project'
+          : '3. 與星空計畫無關的其他實驗室專案資料',
         canOpen: false,
         cls: 'ok',
         badge: isEn ? '🔒 Inaccessible (Principle of Least Privilege)' : '🔒 無法存取（符合最小權限原則）',
         detail: isEn
-          ? 'Per operational need, granted access to ClearSky Project only; no access to unrelated lab project folders.'
-          : '依工作需要僅開放晴空計畫存取權限，不開放無關專案資料夾。'
+          ? 'Per operational need, granted access to StarSky Project only; no access to unrelated lab project folders.'
+          : '依工作需要僅開放星空計畫存取權限，不開放無關專案資料夾。'
       }
     ];
   }
