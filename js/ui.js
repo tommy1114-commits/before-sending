@@ -194,6 +194,7 @@
     [
       'computer-modal',
       'poster-modal',
+      'marking-modal',
       'offboard-modal',
       'record-modal',
       'lookup-modal',
@@ -254,9 +255,11 @@
     $('pause-modal').classList.remove('hidden');
     const chLabel =
       state.chapter === 3
-        ? '第四章「阿文的最後一天」'
+        ? '第五章「阿文的最後一天」'
         : state.chapter === 4
-        ? '第三章「今天的紀錄，明天找得到」'
+        ? '第四章「這批資料要列入清單嗎？」'
+        : state.chapter === 5
+        ? '第三章「這份文件要怎麼標？」'
         : state.chapter === 2
         ? '第二章「投稿前一晚」'
         : '第一章「寄出之前」';
@@ -386,21 +389,26 @@
     $('clear-screen').classList.remove('hidden');
 
     const isCh2 = result.chapter === 2;
-    const isCh3 = result.chapter === 3;
+    const isCh5 = result.chapter === 5;
     const isCh4 = result.chapter === 4;
+    const isCh3 = result.chapter === 3;
     let isWarn = false;
     let rank = 'S';
     let kicker = isCh3
-      ? '★ CHAPTER 4 CLEAR! ★'
+      ? '★ CHAPTER 5 CLEAR! ★'
       : isCh4
+      ? '★ CHAPTER 4 CLEAR! ★'
+      : isCh5
       ? '★ CHAPTER 3 CLEAR! ★'
       : isCh2
       ? '★ CHAPTER 2 CLEAR! ★'
       : '★ CHAPTER 1 CLEAR! ★';
     let headline = isCh3
-      ? '恭喜完成第四章「阿文的最後一天」！'
+      ? '恭喜完成第五章「阿文的最後一天」！'
       : isCh4
-      ? '恭喜完成第三章「這批資料要列入清單嗎？」！'
+      ? '恭喜完成第四章「這批資料要列入清單嗎？」！'
+      : isCh5
+      ? '恭喜完成第三章「這份文件要怎麼標？」！'
       : isCh2
       ? '恭喜完成第二章「投稿前一晚」！'
       : '恭喜完成第一章「寄出之前」！';
@@ -409,22 +417,33 @@
     let desc = '';
     let extraNote = '';
 
-    if (isCh4) {
+    if (isCh5) {
       icon = result.banner.icon;
       title = result.banner.title;
       desc = result.banner.desc;
       if (result.hasRisk) {
         isWarn = true;
         rank = '!';
-        kicker = '⚠ CHAPTER 3 ENDED · 隔天盤點尚有斷點';
-        headline = '第三章結束（隔天查找仍有缺口）';
-        extraNote = '交班紀錄已標示出小晴查找時卡住的環節，歡迎查看紀錄後再挑戰一次完整歸檔與原生留痕！';
-      } else if (result.isRetroOnly) {
-        rank = 'A';
-        extraNote = '清冊、檔案與連結已全數就緒，覆寫後也如實加上事後補記；下次一開始就用「新增更正筆錄」即可拿下系統原生留痕 S 評價！';
+        kicker = '⚠ CHAPTER 3 ENDED · 標示尚未完備';
+        headline = '第三章結束（尚有未標示文件）';
+        extraNote = '查看交班紀錄確認哪些文件標示有缺漏，再挑戰一次完整標示與小晴交接！';
       } else {
         rank = 'S';
-        extraNote = '實驗紀錄、團隊歸檔、盤點清冊與系統原生更正歷程全數到位，明天小晴一次就找得到！';
+        extraNote = '三份文件標示精準到位，小晴清楚保管作為，牢記「標示讓接手人知道怎麼處理，分享前仍要確認對象及權限」！';
+      }
+    } else if (isCh4) {
+      icon = result.banner.icon;
+      title = result.banner.title;
+      desc = result.banner.desc;
+      if (result.hasRisk) {
+        isWarn = true;
+        rank = '!';
+        kicker = '⚠ CHAPTER 4 ENDED · 盤點清冊尚有缺口';
+        headline = '第四章結束（盤點清冊尚有缺口）';
+        extraNote = '交班紀錄已標示出清單或更新的待補強環節，歡迎查看紀錄後再挑戰一次完整歸檔！';
+      } else {
+        rank = 'S';
+        extraNote = '精準分辨自研 know-how 與專利資料，落實清單五欄位，並在專利公開時及時精確更新！';
       }
     } else if (isCh3) {
       icon = result.banner.icon;
@@ -433,10 +452,10 @@
       if (result.hasRisk) {
         isWarn = true;
         rank = '!';
-        kicker = '⚠ CHAPTER 4 ENDED · 尚有未完成待辦';
-        headline = '第四章結束（留下權限或交接待辦）';
+        kicker = '⚠ CHAPTER 5 ENDED · 尚有未完成待辦';
+        headline = '第五章結束（留下權限或交接待辦）';
         extraNote = '交班清單已詳細列出所有未完成與權限過廣項目，歡迎查看紀錄後再挑戰一次完整交接！';
-      } else if (result.sections.transfer.badge.cls === 'warn') {
+      } else if (result.sections.transfer && result.sections.transfer.badge && result.sections.transfer.badge.cls === 'warn') {
         rank = 'A';
         extraNote = '成功透過管理員補救移交指定檔案，未恢復整包原權限，穩健完成離職交接！';
       } else {
@@ -480,13 +499,15 @@
 
     initClearFx(isWarn);
 
-    const nextChNum = isCh3 ? 1 : isCh4 ? 3 : isCh2 ? 4 : 2;
+    const nextChNum = isCh3 ? 1 : isCh4 ? 3 : isCh5 ? 4 : isCh2 ? 5 : 2;
     const nextChLabel = isCh3
       ? '▶ 重溫第一章「寄出之前」'
       : isCh4
-      ? '▶ 繼續挑戰第四章「阿文的最後一天」'
+      ? '▶ 繼續挑戰第五章「阿文的最後一天」'
+      : isCh5
+      ? '▶ 繼續挑戰第四章「這批資料要列入清單嗎？」'
       : isCh2
-      ? '▶ 繼續挑戰第三章「今天的紀錄，明天找得到」'
+      ? '▶ 繼續挑戰第三章「這份文件要怎麼標？」'
       : '▶ 繼續挑戰第二章「投稿前一晚」';
     const card = $('clear-card');
     card.className = 'clear-card' + (isWarn ? ' warn-clear' : '');
@@ -2346,21 +2367,286 @@
   const openRecordModal = openChecklistModal;
   const openLookupModal = openDataCardsModal;
 
+  // ===== Chapter 3 (Internal 5): Document Marking & Layout Preview System =====
+  function openMarkingModal(state, callbacks) {
+    activeModal = 'marking';
+    $('marking-modal').classList.remove('hidden');
+
+    const c = state.ch5;
+    let activeDocIdx = c.currentDocIdx || 0;
+
+    function render() {
+      const body = $('marking-body');
+      const doc = c.docs[activeDocIdx];
+      const allCompleted = c.markingCompleted;
+
+      const tabsHtml = c.docs
+        .map((d, idx) => {
+          const isActive = idx === activeDocIdx;
+          const statusText = d.isCorrect ? '✓ 已完成' : d.chosenMarking ? '✕ 待修正' : '未標示';
+          const badgeCls = d.isCorrect ? 'ok' : d.chosenMarking ? 'warn' : '';
+          return `
+            <button class="marking-tab-btn ${isActive ? 'active' : ''}" data-idx="${idx}" type="button">
+              <span>${d.title.split('：')[0]}</span>
+              <span class="badge-status ${badgeCls}">${statusText}</span>
+            </button>
+          `;
+        })
+        .join('');
+
+      // Preview Content Generation
+      let previewHtml = '';
+      if (doc.id === 'poster') {
+        const isConf = doc.chosenMarking === 'confidential';
+        previewHtml = `
+          <div class="poster-sim-card">
+            ${isConf ? '<div class="slide-stamp-tag">⚠ 誤標機密 CONFIDENTIAL</div>' : ''}
+            <div class="poster-sim-title">${doc.previewDetails.heading}</div>
+            <div class="poster-sim-details">
+              ${doc.previewDetails.sub}<br>
+              議程：研發成果分享、專題報告、技術諮詢與產學合作交流
+            </div>
+            <div class="poster-sim-tag">${isConf ? '已加上機密標籤（可能無法公開張貼）' : '公開宣傳版（適合對外張貼與推廣）'}</div>
+          </div>
+        `;
+      } else if (doc.id === 'slides') {
+        const isConf = doc.chosenMarking === 'confidential';
+        previewHtml = `
+          <div class="slide-sim-wrap">
+            <div class="slide-card">
+              ${isConf ? '<div class="slide-stamp-tag">機密 CONFIDENTIAL</div>' : ''}
+              <div>
+                <div style="font-size:10px; color:#38bdf8; font-weight:700;">[ 簡報首頁封面預覽 ]</div>
+                <div class="slide-title-txt">${doc.previewDetails.heading}</div>
+                <div class="slide-sub-txt">${doc.previewDetails.sub}</div>
+              </div>
+              <div style="font-size:10.5px; color:#cbd5e1;">實驗室營業秘密合理保護措施</div>
+            </div>
+            <div class="slide-card">
+              <div>
+                <div style="font-size:10px; color:#38bdf8; font-weight:700;">[ 投影片內頁與頁腳預覽 ]</div>
+                <div style="font-size:12px; margin-top:8px; color:#e2e8f0; line-height:1.4;">
+                  • 溫度補償曲線參數調整演算法<br>
+                  • 關鍵靈敏度校正數值範圍（未公開）
+                </div>
+              </div>
+              ${isConf ? `<div class="slide-footer-bar">${doc.previewDetails.footer}</div>` : '<div style="font-size:9.5px; color:#94a3b8; text-align:center;">（頁腳未標記警語）</div>'}
+            </div>
+          </div>
+        `;
+      } else if (doc.id === 'paper') {
+        const isConf = doc.chosenMarking === 'confidential';
+        previewHtml = `
+          <div class="paper-sim-card">
+            ${isConf ? `<div class="paper-red-stamp">${doc.previewDetails.stamp}</div>` : '<div style="font-size:11px; color:#71717a; margin-bottom:6px;">（未蓋機密戳印）</div>'}
+            <div class="paper-heading">${doc.previewDetails.heading}</div>
+            <div class="paper-meta-row">${doc.previewDetails.sub}</div>
+            <div class="paper-body-sketch">
+              [第 1 頁 / 原始圖譜紀錄]<br>
+              Sample CS-2026-A4: Peak=4.82V, Temp=77K, Baseline Offset=0.12<br>
+              ※ 註記：實體文件閱畢請立即收妥至 2F 防火公文櫃，落實桌面淨空。
+            </div>
+          </div>
+        `;
+      }
+
+      body.innerHTML = `
+        <div class="marking-tabs" id="marking-tabs">${tabsHtml}</div>
+
+        <div class="marking-doc-hero">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:6px;">
+            <h3 style="margin:0; font-size:14px; color:#0f172a;">${doc.title}</h3>
+            <span class="preview-badge-pill ${doc.isCorrect ? (doc.isConfidential ? 'confidential' : 'public') : ''}">
+              ${doc.typeTag}
+            </span>
+          </div>
+
+          <div class="marking-meta-grid">
+            <div class="marking-meta-item">
+              <span class="marking-meta-label">文件來源</span>
+              <span class="marking-meta-val">${doc.source}</span>
+            </div>
+            <div class="marking-meta-item">
+              <span class="marking-meta-label">建議標示位置</span>
+              <span class="marking-meta-val">${doc.placementHint}</span>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:11.5px; font-weight:700; color:#475569; margin-top:4px;">📄 文件內容檢視：</div>
+            <div class="marking-text-block">${doc.content}</div>
+          </div>
+
+          <div>
+            <div style="font-size:11.5px; font-weight:700; color:#475569; margin-top:4px;">🎯 預計用途：</div>
+            <div class="marking-text-block" style="background:#f8fafc;">${doc.purpose}</div>
+          </div>
+        </div>
+
+        <div class="marking-decision-wrap">
+          <div class="marking-decision-title">
+            <span>🤔 決策判斷：這份文件是否需要加上「機密（Confidential）」標示？</span>
+          </div>
+
+          <div class="marking-btns-row">
+            <button class="marking-opt-btn opt-public ${doc.chosenMarking === 'public' ? 'selected' : ''}" id="btn-mark-public" type="button">
+              <span>🔘 標示為【一般 / 公開 (Public)】</span>
+              <span class="marking-opt-hint">無未公開自研 know-how，無須標註機密，維持公開版面</span>
+            </button>
+            <button class="marking-opt-btn opt-confidential ${doc.chosenMarking === 'confidential' ? 'selected' : ''}" id="btn-mark-conf" type="button">
+              <span>🔒 標示為【機密 (Confidential)】</span>
+              <span class="marking-opt-hint">含未公開自研技術／原始數據，於顯著位置（封面、頁腳、首頁印記）標密</span>
+            </button>
+          </div>
+
+          ${
+            doc.feedback
+              ? `<div class="marking-feedback-box ${doc.isCorrect ? 'success' : 'error'}">${doc.feedback}</div>`
+              : '<div style="font-size:12px; color:#64748b;">請依內容與用途點選上方選項。若選錯，系統會給予具體回饋並可當場重新選擇！</div>'
+          }
+        </div>
+
+        <div class="preview-box-outer">
+          <div class="preview-box-header">
+            <span>👁️ 即時版面預覽效果</span>
+            <span style="color:#64748b;">${doc.placementHint}</span>
+          </div>
+          ${previewHtml}
+        </div>
+
+        <div class="pc-actions" style="margin-top:14px; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+          <div style="display:flex; gap:6px;">
+            <button class="pixel-btn" id="btn-prev-doc" type="button" ${activeDocIdx === 0 ? 'disabled' : ''}>◀ 上一份文件</button>
+            <button class="pixel-btn" id="btn-next-doc" type="button" ${activeDocIdx === c.docs.length - 1 ? 'disabled' : ''}>下一份文件 ▶</button>
+          </div>
+          <div>
+            ${
+              allCompleted
+                ? '<button class="pixel-btn primary" id="btn-finish-marking" type="button">🎉 三份文件標示已完成！去找小晴交接 ▶</button>'
+                : '<button class="pixel-btn" id="btn-close-marking-temp" type="button">暫時離開工作台</button>'
+            }
+          </div>
+        </div>
+      `;
+
+      // Event handlers
+      Array.from($('marking-tabs').children).forEach((btn) => {
+        btn.onclick = () => {
+          window.BS.Audio.select();
+          activeDocIdx = Number(btn.dataset.idx);
+          c.currentDocIdx = activeDocIdx;
+          render();
+        };
+      });
+
+      $('btn-mark-public').onclick = () => {
+        window.BS.Audio.confirm();
+        const res = window.BS.State.setCh5DocMarking(state, activeDocIdx, 'public');
+        if (!res.isCorrect) {
+          window.BS.Audio.alert();
+        }
+        render();
+      };
+
+      $('btn-mark-conf').onclick = () => {
+        window.BS.Audio.confirm();
+        const res = window.BS.State.setCh5DocMarking(state, activeDocIdx, 'confidential');
+        if (!res.isCorrect) {
+          window.BS.Audio.alert();
+        }
+        render();
+      };
+
+      if ($('btn-prev-doc')) {
+        $('btn-prev-doc').onclick = () => {
+          if (activeDocIdx > 0) {
+            window.BS.Audio.select();
+            activeDocIdx--;
+            c.currentDocIdx = activeDocIdx;
+            render();
+          }
+        };
+      }
+
+      if ($('btn-next-doc')) {
+        $('btn-next-doc').onclick = () => {
+          if (activeDocIdx < c.docs.length - 1) {
+            window.BS.Audio.select();
+            activeDocIdx++;
+            c.currentDocIdx = activeDocIdx;
+            render();
+          }
+        };
+      }
+
+      if ($('btn-finish-marking')) {
+        $('btn-finish-marking').onclick = () => {
+          window.BS.Audio.confirm();
+          closeAllModals();
+          if (callbacks && callbacks.onCompleted) {
+            callbacks.onCompleted();
+          }
+        };
+      }
+
+      if ($('btn-close-marking-temp')) {
+        $('btn-close-marking-temp').onclick = () => {
+          window.BS.Audio.cancel();
+          closeAllModals();
+        };
+      }
+    }
+
+    render();
+
+    $('btn-marking-close').onclick = () => {
+      window.BS.Audio.cancel();
+      closeAllModals();
+    };
+  }
+
   // ===== Field Notes / Clues Modal =====
   function openCluesModal(state) {
     activeModal = 'clues';
     $('clues-modal').classList.remove('hidden');
 
+    if (state.chapter === 5) {
+      const c = state.ch5;
+      const d = c.docs;
+      $('clues-title').textContent = '📋 第三章筆記 — 這份文件要怎麼標？（SELECT）';
+      $('clues-body').innerHTML = `
+        <div class="section-card">
+          <h3>🏢 本章任務指引</h3>
+          <ul style="margin:6px 0 0; padding-left:18px;">
+            <li><strong>2F 辦公區／值班電腦</strong>：檢視阿文交付的三份文件（活動海報、調校方法簡報、紙本量測紀錄），判定機密等級並預覽封面與頁腳／首頁印記。</li>
+            <li><strong>2F 辦公區</strong>：將標示好的文件交接給小晴，確認保管與分享授權原則（「標示讓接手人知道怎麼處理，分享前仍要確認對象及權限」）。</li>
+            <li><strong>2F 值班桌</strong>：完成第三章交班。</li>
+          </ul>
+        </div>
+
+        <div class="section-card">
+          <h3>🔍 目前標示與交接進度</h3>
+          <ul style="margin:6px 0 0; padding-left:18px;">
+            <li>${d[0].isCorrect ? '✅' : '⬜'} <strong>文件一：可公開的活動海報</strong>：${d[0].isCorrect ? '已確認標示為【一般／公開】' : '尚未確認標示'}</li>
+            <li>${d[1].isCorrect ? '✅' : '⬜'} <strong>文件二：含未公開調校方法的簡報</strong>：${d[1].isCorrect ? '已標註【機密】於封面與每頁頁腳' : '尚未確認標示'}</li>
+            <li>${d[2].isCorrect ? '✅' : '⬜'} <strong>文件三：含原始數據的紙本紀錄</strong>：${d[2].isCorrect ? '已於首頁加蓋【機密】戳印與管制編號' : '尚未確認標示'}</li>
+            <li>${c.verifiedWithQing ? '✅' : '⬜'} <strong>小晴接手確認</strong>：${c.verifiedWithQing ? '小晴已確認保管方式，可隨時交班！' : '尚未找 2F 辦公區小晴接手交接'}</li>
+          </ul>
+        </div>
+      `;
+      return;
+    }
+
     if (state.chapter === 4) {
       const c = state.ch4;
-      $('clues-title').textContent = '📋 第三章筆記 — 這批資料要列入清單嗎？（SELECT）';
+      $('clues-title').textContent = '📋 第四章筆記 — 這批資料要列入清單嗎？（SELECT）';
       $('clues-body').innerHTML = `
         <div class="section-card">
           <h3>🏢 兩層樓動線與任務指引</h3>
           <ul style="margin:6px 0 0; padding-left:18px;">
             <li><strong>1F 實驗區</strong>：找同事阿文辨識三組資料卡（公開方法重現、量測條件優化、已申請專利之裝置）。</li>
             <li><strong>2F 辦公區</strong>：到值班電腦確認研發成果清單（五欄位落實與群組管理），收到阿明組長專利公開通知後及時更新清單。</li>
-            <li><strong>2F 辦公區</strong>：找小晴核對清單並完成第三章交班。</li>
+            <li><strong>2F 辦公區</strong>：找小晴核對清單並完成第四章交班。</li>
           </ul>
         </div>
 
@@ -2380,7 +2666,7 @@
     if (state.chapter === 3) {
       const c = state.ch3;
       const pending = window.BS.State.getCh3PendingItems(state);
-      $('clues-title').textContent = '📋 第四章筆記 — 阿文的最後一天（SELECT）';
+      $('clues-title').textContent = '📋 第五章筆記 — 阿文的最後一天（SELECT）';
       $('clues-body').innerHTML = `
         <div class="section-card">
           <h3>🏢 雙樓層交接路線圖</h3>
@@ -2527,24 +2813,110 @@
     `;
   }
 
-  // ===== Handover Summary Modal (Ch1, Ch2 & Ch3) =====
+  // ===== Handover Summary Modal (Ch1, Ch2, Ch3, Ch4 & Ch5) =====
   function openHandoverModal(result, callbacks) {
     activeModal = 'handover';
     $('handover-modal').classList.remove('hidden');
 
-    if (result.chapter === 4) {
+    if (result.chapter === 5) {
       const { banner, sections } = result;
-      $('handover-title').textContent = '📑 第三章交班紀錄 — 今天的紀錄，明天找得到';
+      $('handover-title').textContent = '📑 第三章交班紀錄 — 這份文件要怎麼標？';
       $('handover-body').innerHTML = `
         <div class="ending-banner">
-          <div class="ending-label">第三章「今天的紀錄，明天找得到」盤點交班紀錄</div>
+          <div class="ending-label">第三章「這份文件要怎麼標？」交班紀錄</div>
           <h2>${banner.icon} ${banner.title}</h2>
           <p>${banner.desc}</p>
         </div>
 
         <div class="section-card">
           <h3>
-            <span>1. 隔天盤點找到的資料與存放位置</span>
+            <span>1. 文件內容檢視與機密判定</span>
+            <span class="status-badge ${sections.doc.badge.cls}">${sections.doc.badge.text}</span>
+          </h3>
+          <p style="margin:4px 0;">${sections.doc.detail}</p>
+          <div class="reminder-quote">💡 ${sections.doc.reminder}</div>
+        </div>
+
+        <div class="section-card">
+          <h3>
+            <span>2. 標示顯著度與版面預覽落實</span>
+            <span class="status-badge ${sections.visual.badge.cls}">${sections.visual.badge.text}</span>
+          </h3>
+          <p style="margin:4px 0;">${sections.visual.detail}</p>
+          <div class="reminder-quote">💡 ${sections.visual.reminder}</div>
+        </div>
+
+        <div class="section-card">
+          <h3>
+            <span>3. 接手保管與對外分享確認原則</span>
+            <span class="status-badge ${sections.handover.badge.cls}">${sections.handover.badge.text}</span>
+          </h3>
+          <p style="margin:4px 0;">${sections.handover.detail}</p>
+          <div class="reminder-quote">💡 ${sections.handover.reminder}</div>
+        </div>
+
+        <div class="section-card">
+          <h3>📘 本章情境與實驗室營業秘密自評表對照</h3>
+          <table class="checklist-table">
+            <thead>
+              <tr>
+                <th>遊戲片段</th>
+                <th>對應自評表構面</th>
+                <th>練習的關鍵行為</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>活動海報 vs 調校簡報與紙本紀錄</td>
+                <td>文件分級標示與存取管理</td>
+                <td>依文件內容是否含未公開自研 know-how 正確判定機密等級，避免不分輕重全數標密或未標密導致外流。</td>
+              </tr>
+              <tr>
+                <td>簡報封面／頁腳與紙本首頁印記</td>
+                <td>文件分級標示與存取管理</td>
+                <td>機密標示落實於顯著位置（電子簡報封面與每頁頁腳、紙本首頁加蓋印章），使閱讀與投影時皆能明確警示。</td>
+              </tr>
+              <tr>
+                <td>小晴接手保管與分享授權原則</td>
+                <td>資訊安全與對外分享管理</td>
+                <td>落實核心守則：「標示讓接手人知道怎麼處理，分享前仍要確認對象及權限」，防止逕自轉發。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pc-actions" style="justify-content:center; margin-top:14px;">
+          <button class="pixel-btn primary" id="btn-replay-game" type="button">🔄 再玩一次第三章</button>
+          <button class="pixel-btn" id="btn-handover-menu" type="button">🏠 返回章節選單</button>
+        </div>
+      `;
+
+      $('btn-replay-game').onclick = () => {
+        window.BS.Audio.confirm();
+        closeAllModals();
+        callbacks.onReplay();
+      };
+      $('btn-handover-menu').onclick = () => {
+        window.BS.Audio.select();
+        closeAllModals();
+        callbacks.onReturnMenu();
+      };
+      return;
+    }
+
+    if (result.chapter === 4) {
+      const { banner, sections } = result;
+      $('handover-title').textContent = '📑 第四章交班紀錄 — 這批資料要列入清單嗎？';
+      $('handover-body').innerHTML = `
+        <div class="ending-banner">
+          <div class="ending-label">第四章「這批資料要列入清單嗎？」盤點交班紀錄</div>
+          <h2>${banner.icon} ${banner.title}</h2>
+          <p>${banner.desc}</p>
+        </div>
+
+        <div class="section-card">
+          <h3>
+            <span>1. 資料辨識與群組整理</span>
             <span class="status-badge ${sections.data.badge.cls}">${sections.data.badge.text}</span>
           </h3>
           <p style="margin:4px 0;">${sections.data.detail}</p>
@@ -2553,7 +2925,7 @@
 
         <div class="section-card">
           <h3>
-            <span>2. 可追溯的樣品編號更正歷程</span>
+            <span>2. 清單五欄位落實</span>
             <span class="status-badge ${sections.correction.badge.cls}">${sections.correction.badge.text}</span>
           </h3>
           <p style="margin:4px 0;">${sections.correction.detail}</p>
@@ -2562,7 +2934,7 @@
 
         <div class="section-card">
           <h3>
-            <span>3. 未完成項目與後續建議</span>
+            <span>3. 動態更新與公開界線</span>
             <span class="status-badge ${sections.followup.badge.cls}">${sections.followup.badge.text}</span>
           </h3>
           <ul style="margin:4px 0; padding-left:18px;">
@@ -2583,26 +2955,26 @@
             </thead>
             <tbody>
               <tr>
-                <td>補齊當日實驗紀錄與更正比較</td>
-                <td>實驗紀錄與資訊保存管理</td>
-                <td>即時補齊日期、樣品編號、摘要與記錄人；更正錯誤時保留原內容並記錄原因、時間與更正人，避免無痕覆寫，原始檔維持原樣。</td>
-              </tr>
-              <tr>
-                <td>原始檔歸檔與連結同步</td>
-                <td>實驗紀錄與資訊保存管理／文件分級標示與存取管理</td>
-                <td>將儀器原始量測檔移至受控團隊指定資料夾，並同步更新實驗紀錄中的原始檔連結，避免資料孤島或斷鏈。</td>
-              </tr>
-              <tr>
-                <td>更新整批資料盤點清冊</td>
+                <td>分辨自研 know-how 與公開重現</td>
                 <td>文件分級標示與存取管理</td>
-                <td>以整批資料為單位建立清冊（名稱範圍、類型、保護原因、指定位置、負責人），不將機密技術細節寫入目錄清冊。</td>
+                <td>精準區分一般實驗紀錄、未公開自研 know-how 與專利申請資料；以群組建立清單，機密參數留在受控資料夾。</td>
+              </tr>
+              <tr>
+                <td>落實清單五欄位</td>
+                <td>文件分級標示與存取管理</td>
+                <td>每筆資料清楚載明名稱範圍、類型、保護原因、存放位置與負責人，資訊完整明確。</td>
+              </tr>
+              <tr>
+                <td>專利公開時動態更新</td>
+                <td>文件分級標示與存取管理</td>
+                <td>專利公開時及時精準更新申請案紀錄，並保留未納入專利的 know-how 繼續受保護，不重複建檔。</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <div class="pc-actions" style="justify-content:center; margin-top:14px;">
-          <button class="pixel-btn primary" id="btn-replay-game" type="button">🔄 再玩一次第三章（體驗不同更正／歸檔結果）</button>
+          <button class="pixel-btn primary" id="btn-replay-game" type="button">🔄 再玩一次第四章</button>
           <button class="pixel-btn" id="btn-handover-menu" type="button">🏠 返回章節選單</button>
         </div>
       `;
@@ -2622,10 +2994,10 @@
 
     if (result.chapter === 3) {
       const { banner, sections } = result;
-      $('handover-title').textContent = '📑 第四章交班紀錄 — 阿文的最後一天';
+      $('handover-title').textContent = '📑 第五章交班紀錄 — 阿文的最後一天';
       $('handover-body').innerHTML = `
         <div class="ending-banner">
-          <div class="ending-label">第四章「阿文的最後一天」離職交班紀錄</div>
+          <div class="ending-label">第五章「阿文的最後一天」離職交班紀錄</div>
           <h2>${banner.icon} ${banner.title}</h2>
           <p>${banner.desc}</p>
         </div>
@@ -2690,7 +3062,7 @@
         </div>
 
         <div class="pc-actions" style="justify-content:center; margin-top:14px;">
-          <button class="pixel-btn primary" id="btn-replay-game" type="button">🔄 再玩一次第四章（挑戰其他路線）</button>
+          <button class="pixel-btn primary" id="btn-replay-game" type="button">🔄 再玩一次第五章</button>
           <button class="pixel-btn" id="btn-handover-menu" type="button">🏠 返回章節選單</button>
         </div>
       `;
@@ -2968,6 +3340,7 @@
     openChecklistModal,
     openLookupModal,
     openCameraModal,
+    openMarkingModal,
     openCluesModal,
     openEndingsModal,
     openHandoverModal

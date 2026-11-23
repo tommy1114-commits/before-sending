@@ -242,10 +242,92 @@
     };
   }
 
+  const CH5_STORAGE_KEY = 'before_sending_ch5_endings_v1';
+
+  function createChapter5State() {
+    return {
+      chapter: 5,
+      started: false,
+      timeMinutes: 16 * 60, // 16:00
+      introShown: false,
+      ch5: {
+        currentDocIdx: 0,
+        markingCompleted: false,
+        verifiedWithQing: false,
+        docs: [
+          {
+            id: 'poster',
+            title: '文件一：可公開的活動海報',
+            typeTag: '宣傳品 / 活動海報',
+            source: '實驗室推廣小組',
+            content: '標題「清空計畫研發成果發表交流會」，內含活動時間、地點、議程、講者陣容與公開報名連結。無任何未公開之自研技術細節或機密參數。',
+            purpose: '預計張貼於 1F 大廳形象區宣傳，並透過公開社群廣發邀請外部產學界參加。',
+            isConfidential: false,
+            chosenMarking: null,
+            feedback: '',
+            isCorrect: false,
+            placementHint: '維持乾淨宣傳版面，右下角標註一般／公開版',
+            previewDetails: {
+              heading: '清空計畫研發成果發表交流會',
+              sub: '時間：11月30日 14:00 ｜ 地點：1F 演講廳',
+              badge: '公開宣傳版',
+              badgeCls: 'public',
+              summary: '版面清爽完整，無機密浮水印，可自由印刷與對外發布。'
+            }
+          },
+          {
+            id: 'slides',
+            title: '文件二：含未公開調校方法的電子簡報',
+            typeTag: '電子簡報（.pptx）',
+            source: 'ClearSky 研發團隊',
+            content: '檔案名稱「ClearSky_儀器調校與最佳化參數流程.pptx」，共 24 頁。詳細記載團隊摸索數月的調校參數、避坑經驗與最佳量測條件（屬未公開自研 know-how）。',
+            purpose: '供本週專案內部技術檢討會使用，僅限團隊內部成員與核准研究員討論。',
+            isConfidential: true,
+            chosenMarking: null,
+            feedback: '',
+            isCorrect: false,
+            placementHint: '簡報首頁封面右上角 ＆ 每頁投影片頁腳（Footer）顯著標記',
+            previewDetails: {
+              heading: 'ClearSky 儀器調校與最佳化參數流程',
+              sub: '報告人：研發團隊 ｜ 專案內部研討',
+              badge: '機密 CONFIDENTIAL',
+              badgeCls: 'confidential',
+              footer: '機密文件 · 限專案內部使用 · 未經授權禁止翻拍轉傳',
+              summary: '封面顯著載明機密標籤，每頁頁腳皆有防漏標記，投影或閱讀時皆能明確警示。'
+            }
+          },
+          {
+            id: 'paper',
+            title: '文件三：含未公開量測結果的紙本研究紀錄',
+            typeTag: '裝訂紙本實驗紀錄簿',
+            source: '阿文實驗紀錄本手稿',
+            content: '裝訂紙本手稿，封面手寫「樣品 A-04 至 C-12 關鍵低溫量測原始曲線與數據聯」，內含尚未發表之第一手量測數據與異常標記。',
+            purpose: '作為實驗室原始研發紀錄留存，供接手人小晴驗證數據並歸檔入 2F 防火公文櫃。',
+            isConfidential: true,
+            chosenMarking: null,
+            feedback: '',
+            isCorrect: false,
+            placementHint: '紙本封面與首頁正上方顯著加蓋機密紅印章與管制編號',
+            previewDetails: {
+              heading: '樣品 A-04 至 C-12 關鍵低溫量測原始曲線手稿',
+              sub: '實驗者：阿文 ｜ 存放位置：2F 公文櫃',
+              badge: '【 機 密 】CONFIDENTIAL',
+              badgeCls: 'confidential',
+              stamp: '【 機 密 】CONFIDENTIAL · 管制編號：CS-DOC-2026-03',
+              summary: '首頁加蓋醒目紅色機密印戳與管制編號，放置於桌面能第一時間辨識並落實桌面淨空。'
+            }
+          }
+        ]
+      },
+      handoverDone: false
+    };
+  }
+
   function createStateForChapter(chapter) {
     if (chapter === 2) return createChapter2State();
     if (chapter === 3) return createChapter3State();
     if (chapter === 4) return createChapter4State();
+    if (chapter === 5) return createChapter5State();
     return createChapter1State();
   }
 
@@ -453,6 +535,10 @@
       const c = state.ch4;
       return c.cardsCompleted && (c.draftSaved || c.updatedSaved || c.verifiedWithQing);
     }
+    if (state.chapter === 5) {
+      const c = state.ch5;
+      return c.markingCompleted || c.verifiedWithQing;
+    }
     const emailTouched =
       state.email.status !== 'unread' &&
       state.email.status !== 'read' &&
@@ -480,6 +566,12 @@
     return c.cardsCompleted && c.draftSaved && c.updatedSaved && c.verifiedWithQing;
   }
 
+  function isCh5FullyComplete(state) {
+    if (state.chapter !== 5 || !state.ch5) return false;
+    const c = state.ch5;
+    return c.markingCompleted && c.verifiedWithQing;
+  }
+
   // ===== Chapter 1 Handover Evaluation =====
   function evaluateHandover(state) {
     if (state.chapter === 2) {
@@ -490,6 +582,9 @@
     }
     if (state.chapter === 4) {
       return evaluateChapter4Handover(state);
+    }
+    if (state.chapter === 5) {
+      return evaluateChapter5Handover(state);
     }
 
     const e = state.email;
@@ -1062,6 +1157,107 @@
     };
   }
 
+  // ===== Chapter 3 (Internal 5): Document Marking Validation & Handover =====
+  function setCh5DocMarking(state, docIdx, markingChoice) {
+    const c = state.ch5;
+    const doc = c.docs[docIdx];
+    if (!doc) return null;
+
+    doc.chosenMarking = markingChoice;
+
+    if (doc.id === 'poster') {
+      if (markingChoice === 'confidential') {
+        doc.isCorrect = false;
+        doc.feedback = '⚠️ 這是要對外張貼宣傳的公開活動海報，若誤標機密會導致無法公開宣傳張貼；內容無未公開技術，確認為公開資訊即可不標機密。';
+      } else {
+        doc.isCorrect = true;
+        doc.feedback = '✅ 判定正確！活動海報用途是對外公開宣傳，內容亦無未公開自研技術，維持公開版面即可。';
+      }
+    } else if (doc.id === 'slides') {
+      if (markingChoice === 'public') {
+        doc.isCorrect = false;
+        doc.feedback = '⚠️ 這份簡報包含團隊未公開的調校方法 know-how，若未標示機密，接手人或他人很容易誤以為是一般技術分享而轉發外流！';
+      } else {
+        doc.isCorrect = true;
+        doc.feedback = '✅ 判定正確！簡報包含自研 know-how，必須在封面與每頁頁腳標註機密與授權範圍，防止未授權轉發。';
+      }
+    } else if (doc.id === 'paper') {
+      if (markingChoice === 'public') {
+        doc.isCorrect = false;
+        doc.feedback = '⚠️ 紙本紀錄一旦放在桌面或被他人翻閱，若無首頁顯著機密標示，他人無法第一時間辨識並依機密規範鎖入公文櫃！';
+      } else {
+        doc.isCorrect = true;
+        doc.feedback = '✅ 判定正確！紙本原始紀錄必須在首頁顯著蓋上機密紅章與管制編號，確保實體保管與桌面淨空。';
+      }
+    }
+
+    c.markingCompleted = c.docs.every((d) => d.isCorrect);
+    return {
+      doc,
+      isCorrect: doc.isCorrect,
+      feedback: doc.feedback,
+      allCompleted: c.markingCompleted
+    };
+  }
+
+  function unlockCh5Ending(id) {
+    try {
+      const raw = localStorage.getItem(CH5_STORAGE_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      const list = Array.isArray(arr) ? arr : [];
+      if (!list.includes(id)) {
+        list.push(id);
+        localStorage.setItem(CH5_STORAGE_KEY, JSON.stringify(list));
+      }
+      return list;
+    } catch {
+      return [id];
+    }
+  }
+
+  function evaluateChapter5Handover(state) {
+    const c = state.ch5;
+    const isPerfect = c.markingCompleted && c.verifiedWithQing;
+    const endingId = isPerfect ? 'ch5_perfect_marking' : 'ch5_incomplete_marking';
+    unlockCh5Ending(endingId);
+
+    const banner = isPerfect
+      ? {
+          icon: '🏷️',
+          title: '文件標示與防護交接典範',
+          desc: '精準判定公開海報與未公開技術文件，落實封面、頁腳與紙本首頁顯著機密標示，並向接手人完整交接！'
+        }
+      : {
+          icon: '⚠️',
+          title: '文件標示尚有未完成項目',
+          desc: '尚未完成全部三份文件的機密標示或尚未交由小晴確認。交班紀錄已列出待辦事項！'
+        };
+
+    const docBadge = c.markingCompleted ? { text: '精準標示', cls: 'ok' } : { text: '尚未完成標示', cls: 'warn' };
+    const docDetail = '正確分辨可公開活動海報（維持公開版面）、含未公開調校參數之電子簡報（標註機密與授權範圍），以及含關鍵樣品量測結果之紙本手稿（首頁加蓋機密紅章）。';
+    const docReminder = '「標示是讓接手人與看見這份文件的人，第一時間知道它的機密等級與保管規範。」';
+
+    const visualBadge = c.markingCompleted ? { text: '位置明確', cls: 'ok' } : { text: '尚未預覽效果', cls: 'warn' };
+    const visualDetail = '電子簡報於封面顯著者標註機密並於每頁頁腳標記防轉傳警語；紙本紀錄於封面與首頁顯著加蓋機密方框印章及管制編號，視覺警示清晰。';
+    const visualReminder = '「標示要放在最顯眼的位置（封面、頁首頁尾、紙本印記），避免夾在內文而被忽略。」';
+
+    const handoverBadge = c.verifiedWithQing ? { text: '交接落實', cls: 'ok' } : { text: '尚未與小晴交接', cls: 'warn' };
+    const handoverDetail = '小晴依標示採取對應保管作為（海報公開張貼、簡報加密資料夾與權限確認、紙本鎖入公文櫃），並確立核心原則：「標示讓接手人知道怎麼處理，分享前仍要確認對象及權限」。';
+    const handoverReminder = '「標示讓接手人知道怎麼處理，分享前仍要確認對象及權限。」';
+
+    return {
+      chapter: 5,
+      complete: isPerfect,
+      hasRisk: !isPerfect,
+      banner,
+      sections: {
+        doc: { badge: docBadge, detail: docDetail, reminder: docReminder },
+        visual: { badge: visualBadge, detail: visualDetail, reminder: visualReminder },
+        handover: { badge: handoverBadge, detail: handoverDetail, reminder: handoverReminder }
+      }
+    };
+  }
+
   window.BS.State = {
     ENDINGS_CATALOG,
     CH4_PATHS,
@@ -1084,12 +1280,16 @@
     canHandover,
     isCh3FullyComplete,
     isCh4FullyComplete,
+    isCh5FullyComplete,
     getCh3AccessPreview,
     getCh3PendingItems,
+    setCh5DocMarking,
+    unlockCh5Ending,
     evaluateCh4Lookup,
     evaluateHandover,
     evaluateChapter2Handover,
     evaluateChapter3Handover,
-    evaluateChapter4Handover
+    evaluateChapter4Handover,
+    evaluateChapter5Handover
   };
 })();

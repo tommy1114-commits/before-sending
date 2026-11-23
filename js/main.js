@@ -98,6 +98,8 @@
         ? 17 * 60 + 25
         : currentChapter === 3
         ? 17 * 60 + 55
+        : currentChapter === 5
+        ? 16 * 60 + 25
         : currentChapter === 2
         ? 18 * 60 + 55
         : 16 * 60 + 5;
@@ -114,9 +116,11 @@
 
     $('micro-chapter').textContent =
       currentChapter === 3
-        ? 'Ch4 阿文的最後一天'
+        ? 'Ch5 阿文的最後一天'
         : currentChapter === 4
-        ? 'Ch3 這批資料要列入清單嗎？'
+        ? 'Ch4 這批資料要列入清單嗎？'
+        : currentChapter === 5
+        ? 'Ch3 這份文件要怎麼標？'
         : currentChapter === 2
         ? 'Ch2 投稿前一晚'
         : 'Ch1 寄出之前';
@@ -132,7 +136,9 @@
       (currentChapter === 3 && state.ch3.interruptedByEarlyRevoke && state.ch3.rawLogLocation !== 'project');
 
     const readyToastNow =
-      currentChapter === 4
+      currentChapter === 5
+        ? window.BS.State.isCh5FullyComplete(state) && !state.handoverDone
+        : currentChapter === 4
         ? window.BS.State.isCh4FullyComplete(state) && !state.handoverDone
         : currentChapter === 3
         ? window.BS.State.isCh3FullyComplete(state) && !state.handoverDone
@@ -151,6 +157,20 @@
             ? '🚨 回 2F 電腦聯絡主辦方！'
             : '🚨 找 2F 阿明組長回報！'
           : '🚨 下樓找 1F 阿明組長補救移交！';
+    } else if (currentChapter === 5 && state.ch5) {
+      const c = state.ch5;
+      statusPill.classList.remove('hidden');
+      if (!c.markingCompleted) {
+        statusPill.textContent = '目標：檢視三份文件並決定機密標示與版面預覽';
+      } else if (!c.verifiedWithQing) {
+        statusPill.textContent = '目標：在 2F 辦公區找小晴接手文件';
+      } else {
+        statusPill.textContent = '✨ 任務完成！向小晴或回值班桌完成交班';
+        if (!handoverToastShown) {
+          handoverToastShown = true;
+          window.BS.UI.showToast('🎉 文件標示與交接已核對完成！向小晴或回值班桌完成交班。', false, 5200);
+        }
+      }
     } else if (currentChapter === 4 && state.ch4) {
       const c = state.ch4;
       statusPill.classList.remove('hidden');
@@ -180,7 +200,8 @@
   }
 
   function startChapter(chapter) {
-    currentChapter = chapter === 4 ? 4 : chapter === 3 ? 3 : chapter === 2 ? 2 : 1;
+    const validChapters = [1, 2, 5, 4, 3];
+    currentChapter = validChapters.includes(Number(chapter)) ? Number(chapter) : 1;
     handoverToastShown = false;
     window.BS.Audio.stopTitleBgm(750);
     window.BS.UI.closeAllModals();
@@ -217,7 +238,7 @@
     fade.alpha = 0;
     state.started = false;
     $('title-screen').classList.remove('hidden');
-    const displayOrder = [1, 2, 4, 3];
+    const displayOrder = [1, 2, 5, 4, 3];
     const menuIdx = displayOrder.indexOf(currentChapter);
     window.BS.UI.setTitleCursor(menuIdx >= 0 ? menuIdx : 0);
     window.BS.Audio.startTitleBgm();
@@ -764,24 +785,12 @@
       });
     }
 
-    $('btn-start-ch1').addEventListener('click', () => {
-      window.BS.Audio.confirm();
-      startChapter(1);
-    });
-
-    $('btn-start-ch2').addEventListener('click', () => {
-      window.BS.Audio.confirm();
-      startChapter(2);
-    });
-
-    $('btn-start-ch4').addEventListener('click', () => {
-      window.BS.Audio.confirm();
-      startChapter(4);
-    });
-
-    $('btn-start-ch3').addEventListener('click', () => {
-      window.BS.Audio.confirm();
-      startChapter(3);
+    document.querySelectorAll('#title-menu-list .cursor-menu-item').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        window.BS.Audio.confirm();
+        const chId = Number(btn.dataset.chapter) || 1;
+        startChapter(chId);
+      });
     });
 
     canvas.addEventListener('click', () => {

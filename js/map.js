@@ -242,8 +242,16 @@
         { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', floor: 2, x: 10, y: 4, dir: 'left' }
       ];
     }
+    if (chapter === 5) {
+      // Menu Ch3: 這份文件要怎麼標？ (internal 5)
+      return [
+        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', floor: 2, x: 10, y: 4, dir: 'left' },
+        { id: 'npc_qing', sprite: 'qing', label: '接手同事 小晴', floor: 2, x: 5, y: 11, dir: 'left' },
+        { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', floor: 2, x: 8, y: 17, dir: 'up' }
+      ];
+    }
     if (chapter === 3) {
-      // Menu Ch4: 阿文的最後一天 (internal 3)
+      // Menu Ch5: 阿文的最後一天 (internal 3)
       return [
         { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', floor: 1, x: 4, y: 10, dir: 'right' },
         { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', floor: 2, x: 10, y: 4, dir: 'left' },
@@ -251,7 +259,7 @@
       ];
     }
     if (chapter === 4) {
-      // Menu Ch3: 這批資料要列入清單嗎？ (internal 4)
+      // Menu Ch4: 這批資料要列入清單嗎？ (internal 4)
       return [
         { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', floor: 1, x: 9, y: 6, dir: 'down' },
         { id: 'npc_qing', sprite: 'qing', label: '盤點同事 小晴', floor: 2, x: 5, y: 11, dir: 'left' },

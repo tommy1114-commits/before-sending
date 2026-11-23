@@ -41,7 +41,7 @@
 
             <div class="title-menu-box" role="menu" aria-label="章節選單">
               <div class="title-menu-list" id="title-menu-list">
-                <button class="cursor-menu-item selected" id="btn-start-ch1" data-idx="0" type="button" role="menuitem">
+                <button class="cursor-menu-item selected" id="btn-start-ch1" data-idx="0" data-chapter="1" type="button" role="menuitem">
                   <span class="menu-cursor">▶</span>
                   <span class="menu-body">
                     <span class="menu-main">
@@ -50,7 +50,7 @@
                     </span>
                   </span>
                 </button>
-                <button class="cursor-menu-item" id="btn-start-ch2" data-idx="1" type="button" role="menuitem">
+                <button class="cursor-menu-item" id="btn-start-ch2" data-idx="1" data-chapter="2" type="button" role="menuitem">
                   <span class="menu-cursor">▶</span>
                   <span class="menu-body">
                     <span class="menu-main">
@@ -59,26 +59,35 @@
                     </span>
                   </span>
                 </button>
-                <button class="cursor-menu-item" id="btn-start-ch4" data-idx="2" type="button" role="menuitem">
+                <button class="cursor-menu-item" id="btn-start-ch5" data-idx="2" data-chapter="5" type="button" role="menuitem">
                   <span class="menu-cursor">▶</span>
                   <span class="menu-body">
                     <span class="menu-main">
-                      <span class="menu-title-text">第三章　這批資料要列入清單嗎？</span>
+                      <span class="menu-title-text">第三章　這份文件要怎麼標？</span>
                       <span class="menu-difficulty" title="難度：2顆星"><span class="diff-tag">難度</span><span class="diff-stars"><span class="star-on">★★</span><span class="star-off">☆☆</span></span></span>
                     </span>
                   </span>
                 </button>
-                <button class="cursor-menu-item" id="btn-start-ch3" data-idx="3" type="button" role="menuitem">
+                <button class="cursor-menu-item" id="btn-start-ch4" data-idx="3" data-chapter="4" type="button" role="menuitem">
                   <span class="menu-cursor">▶</span>
                   <span class="menu-body">
                     <span class="menu-main">
-                      <span class="menu-title-text">第四章　阿文的最後一天</span>
+                      <span class="menu-title-text">第四章　這批資料要列入清單嗎？</span>
+                      <span class="menu-difficulty" title="難度：2顆星"><span class="diff-tag">難度</span><span class="diff-stars"><span class="star-on">★★</span><span class="star-off">☆☆</span></span></span>
+                    </span>
+                  </span>
+                </button>
+                <button class="cursor-menu-item" id="btn-start-ch3" data-idx="4" data-chapter="3" type="button" role="menuitem">
+                  <span class="menu-cursor">▶</span>
+                  <span class="menu-body">
+                    <span class="menu-main">
+                      <span class="menu-title-text">第五章　阿文的最後一天</span>
                       <span class="menu-difficulty" title="難度：3顆星"><span class="diff-tag">難度</span><span class="diff-stars"><span class="star-on">★★★</span><span class="star-off">☆</span></span></span>
                     </span>
                   </span>
                 </button>
               </div>
-              <div class="title-menu-footer">↑↓ 移動游標 · A / Enter 確認 · 四章皆可直接進入</div>
+              <div class="title-menu-footer">↑↓ 移動游標 · A / Enter 確認 · 五章皆可直接進入</div>
               <div class="bgm-autoplay-hint hidden" id="bgm-autoplay-hint" role="button" tabindex="0" aria-label="點擊播放首頁音樂">🔊 點擊畫面任意處或按鍵立即播放首頁音樂 🎵</div>
             </div>
           </div>
@@ -139,7 +148,18 @@
           </div>
         </section>
 
-        <!-- Chapter 3 (Internal 4): R&D Asset Checklist & Patent Disclosure Workbench -->
+        <!-- Chapter 3 (Internal 5): Document Confidentiality Marking & Preview Modal -->
+        <section class="modal-overlay hidden" id="marking-modal" role="dialog" aria-modal="true" aria-labelledby="marking-title">
+          <div class="modal-window marking-window">
+            <div class="modal-header">
+              <span id="marking-title">🏷️ 2F 辦公區 — 文件機密標示與版面預覽工作台</span>
+              <button class="modal-close" id="btn-marking-close" type="button" aria-label="關閉標示工作台">✕</button>
+            </div>
+            <div class="modal-body" id="marking-body"></div>
+          </div>
+        </section>
+
+        <!-- Chapter 4 (Internal 4): R&D Asset Checklist & Patent Disclosure Workbench -->
         <section class="modal-overlay hidden" id="record-modal" role="dialog" aria-modal="true" aria-labelledby="record-title">
           <div class="modal-window poster-window">
             <div class="modal-header">
@@ -150,7 +170,7 @@
           </div>
         </section>
 
-        <!-- Chapter 3 (Internal 4): Data Cards Identification Modal -->
+        <!-- Chapter 4 (Internal 4): Data Cards Identification Modal -->
         <section class="modal-overlay hidden" id="lookup-modal" role="dialog" aria-modal="true" aria-labelledby="lookup-title">
           <div class="modal-window poster-window">
             <div class="modal-header">
@@ -161,7 +181,7 @@
           </div>
         </section>
 
-        <!-- Chapter 4 (Internal 3): Offboarding Checklist & Access Perspective Preview Modal -->
+        <!-- Chapter 5 (Internal 3): Offboarding Checklist & Access Perspective Preview Modal -->
         <section class="modal-overlay hidden" id="offboard-modal" role="dialog" aria-modal="true" aria-labelledby="offboard-title">
           <div class="modal-window poster-window">
             <div class="modal-header">

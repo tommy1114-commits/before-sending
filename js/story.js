@@ -65,7 +65,9 @@
 
       if (handleCommonScenery(state, target.id)) return;
 
-      if (state.chapter === 4) {
+      if (state.chapter === 5) {
+        interactCh5(state, target);
+      } else if (state.chapter === 4) {
         interactCh4(state, target);
       } else if (state.chapter === 3) {
         interactCh3(state, target);
@@ -81,7 +83,9 @@
       if (state.introShown) return;
       state.introShown = true;
 
-      if (state.chapter === 4) {
+      if (state.chapter === 5) {
+        playCh5Intro();
+      } else if (state.chapter === 4) {
         playCh4Intro();
       } else if (state.chapter === 3) {
         playCh3Intro();
@@ -1896,7 +1900,7 @@
           {
             speaker: '2F 值班桌（交班紀錄簿）',
             portrait: 'desk',
-            text: '第四章「阿文的最後一天」已經完成交班！要重新檢視通關畫面與交班紀錄，還是再挑戰其他路線呢？',
+            text: '第五章「阿文的最後一天」已經完成交班！要重新檢視通關畫面與交班紀錄，還是再挑戰其他路線呢？',
             choices: [
               {
                 label: '🏆 重新檢視通關畫面與交班紀錄',
@@ -1910,7 +1914,7 @@
                 }
               },
               {
-                label: '🔄 再玩一次第四章',
+                label: '🔄 再玩一次第五章',
                 onSelect: () => ctx.restartChapter()
               },
               {
@@ -2242,7 +2246,7 @@
       if (!c.verifiedWithQing) {
         window.BS.UI.startDialogue([
           {
-            speaker: '2F 值班桌（第三章交班）',
+            speaker: '2F 值班桌（第四章交班）',
             portrait: 'desk',
             text: '清單已更新存檔！請先找 2F 辦公區的盤點同事小晴核對一次明天的盤點重點，即可完成交班。'
           }
@@ -2252,18 +2256,309 @@
 
       window.BS.UI.startDialogue([
         {
-          speaker: '2F 值班桌（第三章交班）',
+          speaker: '2F 值班桌（第四章交班）',
           portrait: 'desk',
-          text: '研發成果清單已整理妥當，小晴也核對完畢！要現在完成第三章交班嗎？',
+          text: '研發成果清單已整理妥當，小晴也核對完畢！要現在完成第四章交班嗎？',
           choices: [
             {
-              label: '✍ 填寫第三章交班紀錄並完成本章',
+              label: '✍ 填寫第四章交班紀錄並完成本章',
               onSelect: () => completeCh4Handover(state)
             },
             { label: '先不交班', onSelect: () => {} }
           ]
         }
       ]);
+    }
+
+    // =========================================================================
+    // CHAPTER 3 (Internal 5): 這份文件要怎麼標？
+    // =========================================================================
+    function playCh5Intro() {
+      window.BS.UI.startDialogue([
+        {
+          speaker: '值班備忘錄（2F 辦公區）',
+          portrait: 'desk',
+          text: '下午 4:00，同事阿文拿著剛整理好的三份研究文件急匆匆走進 2F 辦公區，等一下小晴要接手盤點並準備會議資料。'
+        },
+        {
+          speaker: '阿文（同事）',
+          portrait: 'colleague',
+          text: '小安！這三份資料等一下要交接給小晴，但各份的內容和用途都不太一樣。我們得先逐份看清楚，決定要不要加上機密標示，並標在顯眼的位置（簡報封面與頁腳、紙本首頁蓋印），小晴接手才清楚怎麼處理！'
+        },
+        {
+          speaker: '小安（值班研究助理）',
+          portrait: 'player',
+          text: '沒問題！我們逐份查看內容和用途，確認哪些含有未公開的自研技術，加上正確標示並預覽版面效果後，再交給小晴！'
+        }
+      ], () => {
+        ctx.refreshHUD();
+      });
+    }
+
+    function completeCh5Handover(state) {
+      state.handoverDone = true;
+      state.timeMinutes = Math.max(state.timeMinutes, 16 * 60 + 20);
+      ctx.refreshHUD();
+      const result = window.BS.State.evaluateChapter5Handover(state);
+      if (result.hasRisk) {
+        window.BS.Audio.alert();
+      } else {
+        window.BS.Audio.fanfare();
+      }
+      window.BS.UI.openClearScreen(result, {
+        onReplay: () => ctx.restartChapter(),
+        onReturnMenu: () => ctx.returnToMenu(),
+        onStartChapter: (ch) => ctx.startChapter(ch)
+      });
+    }
+
+    function handleCh5Colleague(state) {
+      const c = state.ch5;
+      if (!c.markingCompleted) {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '阿文（同事）',
+            portrait: 'colleague',
+            text: '這三份文件分別是：成果發表會活動海報、量測調校方法內部簡報，以及關鍵樣品量測原始紙本手稿。我們打開工作台，逐份確認內容、用途與機密標示吧！',
+            choices: [
+              {
+                label: '🏷️ 打開文件標示與版面預覽工作台',
+                onSelect: () => {
+                  window.BS.UI.openMarkingModal(state, {
+                    onCompleted: () => {
+                      ctx.refreshHUD();
+                      window.BS.UI.showToast('🎉 三份文件標示已完成！請找 2F 辦公區的小晴接手文件。', false, 5000);
+                    }
+                  });
+                }
+              },
+              { label: '等一下再看', onSelect: () => {} }
+            ]
+          }
+        ]);
+        return;
+      }
+
+      window.BS.UI.startDialogue([
+        {
+          speaker: '阿文（同事）',
+          portrait: 'colleague',
+          text: '三份文件的機密標示都標妥了！海報維持公開版面、簡報在封面和頁腳標密、紙本首頁蓋印，一目了然！趕快拿去交給 2F 辦公區的小晴接手吧！'
+        }
+      ]);
+    }
+
+    function handleCh5OfficePC(state) {
+      window.BS.UI.startDialogue([
+        {
+          speaker: '2F 值班電腦',
+          portrait: 'monitor',
+          text: '螢幕開啟「文件機密標示與版面預覽工作台」。可逐份檢視文件內容、用途與機密標示決策，並即時預覽簡報封面／頁腳或紙本首頁印記。',
+          choices: [
+            {
+              label: '🏷️ 進入文件標示與版面預覽工作台',
+              onSelect: () => {
+                window.BS.UI.openMarkingModal(state, {
+                  onCompleted: () => {
+                    ctx.refreshHUD();
+                    window.BS.UI.showToast('🎉 三份文件標示已完成！請找 2F 辦公區的小晴接手文件。', false, 5000);
+                  }
+                });
+              }
+            },
+            { label: '離開電腦', onSelect: () => {} }
+          ]
+        }
+      ]);
+    }
+
+    function handleCh5Lead(state) {
+      window.BS.UI.startDialogue([
+        {
+          speaker: '負責人 阿明組長',
+          portrait: 'lead',
+          text: '小安，文件標示是營業秘密合理保密措施非常關鍵的一環！\n\n' +
+            '原則很明確：\n' +
+            '① 確認內容：確認是否含有未公開的自研技術、參數或實驗數據？若純為公開宣傳海報，無須標密。\n' +
+            '② 顯著標示：含未公開 know-how 的電子簡報，應於封面與每頁頁腳標註機密；紙本文件應於首頁顯著加蓋機密印章與編號。\n' +
+            '③ 清楚交接：標示讓接手人知道怎麼處理，分享前仍要確認對象及權限！'
+        }
+      ]);
+    }
+
+    function handleCh5Qing(state) {
+      const c = state.ch5;
+      if (!c.markingCompleted) {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '接手同事 小晴',
+            portrait: 'qing',
+            text: '小安，等阿文和你把三份文件的機密標示都確認好，再交給我喔！接手時我需要確認每一份的標示，才知道接下來要存放在哪裡、能不能對外分享。'
+          }
+        ]);
+        return;
+      }
+
+      if (!c.verifiedWithQing) {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '接手同事 小晴',
+            portrait: 'qing',
+            text: '太好了，三份文件都標示完成了！讓我一份一份核對：'
+          },
+          {
+            speaker: '接手同事 小晴',
+            portrait: 'qing',
+            text: '①【活動海報】：標示為「公開／一般」，確認內容沒有未公開自研技術！我等一下會直接拿去 1F 大廳形象區公布欄張貼，並發布公開報名資訊。'
+          },
+          {
+            speaker: '接手同事 小晴',
+            portrait: 'qing',
+            text: '②【調校方法內部簡報】：封面和每頁頁腳都清楚標註了「機密／限專案內部使用」！這份含有未公開最佳化參數，我會放入加密受控資料夾；日後若有外部合作廠商想要索取，我會先向阿明組長確認 NDA 與授權範圍，絕不私自轉發！'
+          },
+          {
+            speaker: '接手同事 小晴',
+            portrait: 'qing',
+            text: '③【原始紙本手稿】：首頁蓋有醒目的「機密」紅章與管制編號！因為記載第一手量測數據，我今天核對完會立刻鎖進 2F 防火公文櫃，離開座位時落實桌面淨空；日後借閱皆需在清冊登記。'
+          },
+          {
+            speaker: '接手同事 小晴',
+            portrait: 'qing',
+            text: '總結來說：\n「標示讓接手人知道怎麼處理，分享前仍要確認對象及權限。」'
+          }
+        ], () => {
+          c.verifiedWithQing = true;
+          ctx.refreshHUD();
+          window.BS.UI.startDialogue([
+            {
+              speaker: '接手同事 小晴',
+              portrait: 'qing',
+              text: '文件交接核對完成！你可以直接向我完成交班，或是回 2F 值班桌填寫交班紀錄簿！',
+              choices: [
+                {
+                  label: '✍ 現在完成第三章交班',
+                  onSelect: () => completeCh5Handover(state)
+                },
+                {
+                  label: '回 2F 值班桌交班',
+                  onSelect: () => {}
+                }
+              ]
+            }
+          ]);
+        });
+        return;
+      }
+
+      window.BS.UI.startDialogue([
+        {
+          speaker: '接手同事 小晴',
+          portrait: 'qing',
+          text: '三份文件我都按照標示妥善安排了！記得核心守則：「標示讓接手人知道怎麼處理，分享前仍要確認對象及權限。」隨時可完成交班喔！',
+          choices: [
+            {
+              label: '✍ 填寫交班紀錄並完成第三章',
+              onSelect: () => completeCh5Handover(state)
+            },
+            { label: '先不交班', onSelect: () => {} }
+          ]
+        }
+      ]);
+    }
+
+    function handleCh5DutyDesk(state) {
+      const c = state.ch5;
+      if (state.handoverDone) {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '2F 值班桌（第三章交班）',
+            portrait: 'desk',
+            text: '第三章「這份文件要怎麼標？」已經完成交班！要重新檢視交班紀錄，還是再挑戰一次呢？',
+            choices: [
+              {
+                label: '🏆 重新檢視通關畫面與交班紀錄',
+                onSelect: () => {
+                  const result = window.BS.State.evaluateChapter5Handover(state);
+                  window.BS.UI.openClearScreen(result, {
+                    onReplay: () => ctx.restartChapter(),
+                    onReturnMenu: () => ctx.returnToMenu(),
+                    onStartChapter: (ch) => ctx.startChapter(ch)
+                  });
+                }
+              },
+              {
+                label: '🔄 再玩一次第三章',
+                onSelect: () => ctx.restartChapter()
+              },
+              {
+                label: '🏠 返回首頁選單',
+                onSelect: () => ctx.returnToMenu()
+              },
+              { label: '先取消', onSelect: () => {} }
+            ]
+          }
+        ]);
+        return;
+      }
+
+      if (!c.markingCompleted) {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '2F 值班桌（第三章交班）',
+            portrait: 'desk',
+            text: '三份文件尚未完成標示喔！請先和 2F 的阿文或操作旁邊的 2F 值班電腦，逐份判定活動海報、調校簡報與紙本手稿的機密標示。'
+          }
+        ]);
+        return;
+      }
+
+      if (!c.verifiedWithQing) {
+        window.BS.UI.startDialogue([
+          {
+            speaker: '2F 值班桌（第三章交班）',
+            portrait: 'desk',
+            text: '三份文件的標示都完成了！請先找 2F 辦公區的接手同事小晴交接文件，確認保管方式與分享原則，即可完成交班。'
+          }
+        ]);
+        return;
+      }
+
+      window.BS.UI.startDialogue([
+        {
+          speaker: '2F 值班桌（第三章交班）',
+          portrait: 'desk',
+          text: '文件標示與版面預覽精準落實，小晴也已核對並清楚後續保管與分享規範！要現在完成第三章交班嗎？',
+          choices: [
+            {
+              label: '✍ 填寫第三章交班紀錄並完成本章',
+              onSelect: () => completeCh5Handover(state)
+            },
+            { label: '先不交班', onSelect: () => {} }
+          ]
+        }
+      ]);
+    }
+
+    function interactCh5(state, target) {
+      switch (target.id) {
+        case 'npc_colleague':
+          handleCh5Colleague(state);
+          break;
+        case 'npc_qing':
+          handleCh5Qing(state);
+          break;
+        case 'npc_lead':
+          handleCh5Lead(state);
+          break;
+        case 'pc':
+          handleCh5OfficePC(state);
+          break;
+        case 'duty_desk':
+          handleCh5DutyDesk(state);
+          break;
+        default:
+          break;
+      }
     }
 
     return {
