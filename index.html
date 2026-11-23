@@ -296,5 +296,29 @@
   <script defer src="js/ui.js?v=3.2"></script>
   <script defer src="js/story.js?v=3.2"></script>
   <script defer src="js/main.js?v=3.2"></script>
+
+  <!-- Cloudflare Web Analytics -->
+  <script>
+    (function () {
+      try {
+        const loc = window.location;
+        const isHttps = loc.protocol === 'https:';
+        const isHostname = loc.hostname === 'tommy1114-commits.github.io';
+        const isPath = loc.pathname === '/before-sending/' || loc.pathname === '/before-sending/index.html';
+
+        if (isHttps && isHostname && isPath && !window.__cfAnalyticsLoaded) {
+          window.__cfAnalyticsLoaded = true;
+          const cfScript = document.createElement('script');
+          cfScript.type = 'module';
+          cfScript.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+          cfScript.setAttribute('data-cf-beacon', '{"token": "053721d2a5ed4031b433671badfbfb74"}');
+          document.body.appendChild(cfScript);
+        }
+      } catch (err) {
+        // Fail silently so game continues to run normally if blocked or unsupported
+      }
+    })();
+  </script>
+  <!-- End Cloudflare Web Analytics -->
 </body>
 </html>
