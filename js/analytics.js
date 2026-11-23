@@ -10,13 +10,18 @@
   let isInitialized = false;
   let isProduction = false;
 
-  // Stable internal chapter mapping: prevents display renames or menu reordering from altering tracking
+  // Stable chapter mapping: aligns internal chapter code with user-facing chapter order:
+  // - 第1章 寄出之前 (內部代號 1) -> 'ch1'
+  // - 第2章 投稿前一晚 (內部代號 2) -> 'ch2'
+  // - 第3章 這份文件要怎麼標？ (內部代號 5) -> 'ch3'
+  // - 第4章 這批資料要列入清單嗎？ (內部代號 4) -> 'ch4'
+  // - 第5章 阿文的最後一天 (內部代號 3) -> 'ch5'
   const CHAPTER_ID_MAP = {
     1: 'ch1',
     2: 'ch2',
-    3: 'ch3',
+    5: 'ch3',
     4: 'ch4',
-    5: 'ch5'
+    3: 'ch5'
   };
 
   /**
