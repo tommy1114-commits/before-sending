@@ -61,11 +61,12 @@
             </div>
 
             <div class="title-menu-box" role="menu" aria-label="章節選單">
-              <div class="title-lang-bar">
-                <button type="button" class="lang-toggle-btn" id="btn-lang-toggle" aria-label="切換語言 / Switch Language">
-                  <span class="lang-toggle-icon">🌐</span>
-                  <span class="lang-toggle-text" id="lang-toggle-text">語言 / Language: 繁體中文</span>
-                </button>
+              <div class="title-lang-bar" role="group" aria-label="遊戲語言選擇 / Game Language Selection">
+                <div class="title-lang-label" id="title-lang-label" role="button" tabindex="0" title="點擊開啟語言選擇畫面 / Click to open language selection dialog">🌐 語言 / Language:</div>
+                <div class="title-lang-btn-group">
+                  <button type="button" class="title-lang-btn active" id="title-btn-lang-zh" data-lang="zh" aria-label="繁體中文">繁體中文</button>
+                  <button type="button" class="title-lang-btn" id="title-btn-lang-en" data-lang="en" aria-label="English">English</button>
+                </div>
               </div>
               <div class="title-menu-list" id="title-menu-list">
                 <button class="cursor-menu-item selected" id="btn-start-ch1" data-idx="0" data-chapter="1" type="button" role="menuitem">
@@ -115,7 +116,6 @@
                 </button>
               </div>
               <div class="title-menu-footer">↑↓ 移動游標 · A / Enter 確認 · 五章皆可直接進入</div>
-              <div class="bgm-autoplay-hint hidden" id="bgm-autoplay-hint" role="button" tabindex="0" aria-label="點擊播放首頁音樂">🔊 點擊畫面任意處或按鍵立即播放首頁音樂 🎵</div>
             </div>
           </div>
         </section>

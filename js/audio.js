@@ -39,11 +39,8 @@
 
     const hint = document.getElementById('bgm-autoplay-hint');
     if (hint) {
-      if (bgmWanted && bgmNeedsGesture && !bgmPlaying) {
-        hint.classList.remove('hidden');
-      } else {
-        hint.classList.add('hidden');
-      }
+      hint.classList.add('hidden');
+      hint.style.display = 'none';
     }
   }
 

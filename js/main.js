@@ -828,8 +828,18 @@
       desktopHints[3].innerHTML = isEn ? '<kbd>Esc</kbd>/<kbd>P</kbd> START' : '<kbd>Esc</kbd>/<kbd>P</kbd> START';
     }
 
-    const bgmHint = $('bgm-autoplay-hint');
-    if (bgmHint) bgmHint.textContent = t('bgmAutoplayHint');
+    // Update Home Screen Language Buttons
+    const curLang = window.BS.I18n.getLang();
+    const btnTitleZh = $('title-btn-lang-zh');
+    const btnTitleEn = $('title-btn-lang-en');
+    if (btnTitleZh) {
+      btnTitleZh.classList.toggle('active', curLang === 'zh');
+      btnTitleZh.setAttribute('aria-pressed', curLang === 'zh' ? 'true' : 'false');
+    }
+    if (btnTitleEn) {
+      btnTitleEn.classList.toggle('active', curLang === 'en');
+      btnTitleEn.setAttribute('aria-pressed', curLang === 'en' ? 'true' : 'false');
+    }
 
     const landText = document.querySelector('.landscape-lock-text');
     if (landText) landText.textContent = t('landscapeText');
@@ -861,16 +871,19 @@
     window.BS.UI.bindStaticHandlers();
 
     applyLanguageUI();
-    if (!window.BS.I18n.hasChosenLang()) {
+    // Show language selection screen on first entry or when not yet confirmed in current session
+    if (!sessionStorage.getItem('before_sending_session_lang_confirmed')) {
       $('lang-screen').classList.remove('hidden');
     }
 
     const btnLangZh = $('btn-lang-zh');
     if (btnLangZh) {
       btnLangZh.addEventListener('click', () => {
+        sessionStorage.setItem('before_sending_session_lang_confirmed', 'true');
         window.BS.Audio.confirm();
         window.BS.I18n.setLang('zh');
         $('lang-screen').classList.add('hidden');
+        window.BS.Audio.startTitleBgm();
         applyLanguageUI();
         refreshHUD();
       });
@@ -879,22 +892,46 @@
     const btnLangEn = $('btn-lang-en');
     if (btnLangEn) {
       btnLangEn.addEventListener('click', () => {
+        sessionStorage.setItem('before_sending_session_lang_confirmed', 'true');
         window.BS.Audio.confirm();
         window.BS.I18n.setLang('en');
         $('lang-screen').classList.add('hidden');
+        window.BS.Audio.startTitleBgm();
         applyLanguageUI();
         refreshHUD();
       });
     }
 
-    const btnLangToggle = $('btn-lang-toggle');
-    if (btnLangToggle) {
-      btnLangToggle.addEventListener('click', () => {
+    // Home screen prominent language selection buttons
+    const titleBtnZh = $('title-btn-lang-zh');
+    if (titleBtnZh) {
+      titleBtnZh.addEventListener('click', () => {
         window.BS.Audio.select();
-        const current = window.BS.I18n.getLang();
-        window.BS.I18n.setLang(current === 'en' ? 'zh' : 'en');
+        sessionStorage.setItem('before_sending_session_lang_confirmed', 'true');
+        window.BS.I18n.setLang('zh');
+        window.BS.Audio.unlockTitleBgmIfNeeded();
         applyLanguageUI();
         refreshHUD();
+      });
+    }
+
+    const titleBtnEn = $('title-btn-lang-en');
+    if (titleBtnEn) {
+      titleBtnEn.addEventListener('click', () => {
+        window.BS.Audio.select();
+        sessionStorage.setItem('before_sending_session_lang_confirmed', 'true');
+        window.BS.I18n.setLang('en');
+        window.BS.Audio.unlockTitleBgmIfNeeded();
+        applyLanguageUI();
+        refreshHUD();
+      });
+    }
+
+    const titleLangLabel = $('title-lang-label');
+    if (titleLangLabel) {
+      titleLangLabel.addEventListener('click', () => {
+        window.BS.Audio.select();
+        $('lang-screen').classList.remove('hidden');
       });
     }
 
@@ -1348,16 +1385,6 @@
     ['pointerdown', 'touchstart', 'mousedown', 'keydown', 'click'].forEach((evt) => {
       window.addEventListener(evt, tryUnlock, { capture: true, passive: true });
     });
-
-    const hint = $('bgm-autoplay-hint');
-    if (hint) {
-      hint.addEventListener('click', (ev) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        window.BS.Audio.unlockTitleBgmIfNeeded();
-        hint.classList.add('hidden');
-      });
-    }
 
     // Try starting playback immediately upon loading
     window.BS.Audio.startTitleBgm();
