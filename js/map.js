@@ -248,42 +248,53 @@
   };
 
   function createNPCsForChapter(chapter) {
+    let list = [];
     if (chapter === 2) {
-      return [
+      list = [
         { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 2, x: 8, y: 17, dir: 'up' },
         { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 5, y: 9, dir: 'down' }
       ];
-    }
-    if (chapter === 5) {
+    } else if (chapter === 5) {
       // Menu Ch3: 這份文件要怎麼標？ (internal 5)
-      return [
+      list = [
         { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 5, y: 9, dir: 'down' },
         { id: 'npc_qing', sprite: 'qing', label: '接手同事 小晴', label_en: 'Colleague: Xiao-Qing', floor: 2, x: 8, y: 10, dir: 'left' },
         { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 2, x: 8, y: 17, dir: 'up' }
       ];
-    }
-    if (chapter === 3) {
+    } else if (chapter === 3) {
       // Menu Ch5: 阿文的最後一天 (internal 3)
-      return [
+      list = [
         { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 1, x: 4, y: 10, dir: 'right' },
         { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 5, y: 9, dir: 'down' },
         { id: 'npc_qing', sprite: 'qing', label: '接手同事 小晴', label_en: 'Colleague: Xiao-Qing', floor: 2, x: 7, y: 5, dir: 'right' }
       ];
-    }
-    if (chapter === 4) {
+    } else if (chapter === 4) {
       // Menu Ch4: 這批資料要列入清單嗎？ (internal 4)
-      return [
+      list = [
         { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 1, x: 9, y: 6, dir: 'down' },
         { id: 'npc_qing', sprite: 'qing', label: '盤點同事 小晴', label_en: 'Colleague: Xiao-Qing', floor: 2, x: 5, y: 11, dir: 'left' },
         { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 2, x: 8, y: 17, dir: 'up' }
       ];
+    } else {
+      // Chapter 1: 寄出之前
+      list = [
+        { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 2, x: 8, y: 17, dir: 'up' },
+        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 10, y: 4, dir: 'left' },
+        { id: 'npc_visitor', sprite: 'visitor', label: '訪客 陳先生', label_en: 'Visitor: Mr. Chen', floor: 1, x: 7, y: 11, dir: 'up' }
+      ];
     }
-    // Chapter 1: 寄出之前
-    return [
-      { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 2, x: 8, y: 17, dir: 'up' },
-      { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 10, y: 4, dir: 'left' },
-      { id: 'npc_visitor', sprite: 'visitor', label: '訪客 陳先生', label_en: 'Visitor: Mr. Chen', floor: 1, x: 7, y: 11, dir: 'up' }
-    ];
+
+    return list.map((n) => ({
+      px: n.x * TILE,
+      py: n.y * TILE,
+      moving: false,
+      moveProgress: 0,
+      walkToggle: 0,
+      walkingPath: null,
+      finalDir: null,
+      onWalkDone: null,
+      ...n
+    }));
   }
 
   function createInitialNPCs() {
@@ -777,10 +788,56 @@
     if (grid[ty][tx]) return true;
     if (npcs) {
       for (const n of npcs) {
-        if (n.floor === floor && n.x === tx && n.y === ty) return true;
+        if (n.floor === floor) {
+          if (n.x === tx && n.y === ty) return true;
+          if (n.moving && n.toX === tx && n.toY === ty) return true;
+        }
       }
     }
     return false;
+  }
+
+  function findPath(floor, startX, startY, targetX, targetY, isBlockedExtra) {
+    if (startX === targetX && startY === targetY) return [];
+    const queue = [[startX, startY]];
+    const visited = new Set([startX + ',' + startY]);
+    const parent = new Map();
+    const dirs = [
+      { x: 0, y: -1, dir: 'up' },
+      { x: 1, y: 0, dir: 'right' },
+      { x: 0, y: 1, dir: 'down' },
+      { x: -1, y: 0, dir: 'left' }
+    ];
+    let found = false;
+    while (queue.length > 0) {
+      const [cx, cy] = queue.shift();
+      if (cx === targetX && cy === targetY) {
+        found = true;
+        break;
+      }
+      for (const d of dirs) {
+        const nx = cx + d.x;
+        const ny = cy + d.y;
+        const key = `${nx},${ny}`;
+        if (!visited.has(key) && !isSolid(floor, nx, ny, null)) {
+          if (!isBlockedExtra || !isBlockedExtra(nx, ny)) {
+            visited.add(key);
+            parent.set(key, { x: cx, y: cy, dir: d.dir });
+            queue.push([nx, ny]);
+          }
+        }
+      }
+    }
+    if (!found) return null;
+    const path = [];
+    let currKey = `${targetX},${targetY}`;
+    while (currKey !== `${startX},${startY}`) {
+      const p = parent.get(currKey);
+      const [tx, ty] = currKey.split(',').map(Number);
+      path.unshift({ x: tx, y: ty, dir: p.dir });
+      currKey = `${p.x},${p.y}`;
+    }
+    return path;
   }
 
   function getFloorTrigger(floor, tx, ty) {
@@ -825,7 +882,7 @@
     const floorNpcs = (npcs || []).filter((n) => n.floor === floor);
 
     for (const npc of floorNpcs) {
-      if (npc.x === fx && npc.y === fy) {
+      if ((npc.x === fx && npc.y === fy) || (npc.moving && npc.toX === fx && npc.toY === fy)) {
         const npcLabel = (isEn && npc.label_en) ? npc.label_en : npc.label;
         return { type: 'npc', id: npc.id, label: npcLabel, x: npc.x, y: npc.y };
       }
@@ -841,7 +898,7 @@
       const tx = pxTile + ax;
       const ty = pyTile + ay;
       for (const npc of floorNpcs) {
-        if (npc.x === tx && npc.y === ty) {
+        if ((npc.x === tx && npc.y === ty) || (npc.moving && npc.toX === tx && npc.toY === ty)) {
           const npcLabel = (isEn && npc.label_en) ? npc.label_en : npc.label;
           return { type: 'npc', id: npc.id, label: npcLabel, x: npc.x, y: npc.y };
         }
@@ -867,6 +924,7 @@
     getZoneName,
     drawMap,
     isSolid,
+    findPath,
     getFloorTrigger,
     findNearbyTarget
   };

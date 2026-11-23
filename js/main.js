@@ -68,6 +68,24 @@
 
   function transitionToFloor(targetFloor, spawnX, spawnY, spawnDir, onDone) {
     if (fade.active) return;
+    // Instantly finish any active NPC paths on floor change
+    for (const n of npcs) {
+      if (n.walkingPath && n.walkingPath.length > 0) {
+        const dest = n.walkingPath[n.walkingPath.length - 1];
+        n.x = dest.x;
+        n.y = dest.y;
+        n.px = n.x * TILE;
+        n.py = n.y * TILE;
+        n.moving = false;
+        n.walkingPath = null;
+        if (n.finalDir) n.dir = n.finalDir;
+        if (n.onWalkDone) {
+          const cb = n.onWalkDone;
+          n.onWalkDone = null;
+          cb();
+        }
+      }
+    }
     const goingUp = targetFloor > player.floor;
     window.BS.Audio.stairs(goingUp);
     heldDirs.length = 0;
@@ -78,18 +96,69 @@
     fade.pending = { floor: targetFloor, x: spawnX, y: spawnY, dir: spawnDir || 'down', onDone: onDone || null };
   }
 
-  function moveNpcTo(npcId, floor, tx, ty, dir) {
+  function walkNpcTo(npcId, floor, tx, ty, finalDir, onDone) {
     const npc = npcs.find((n) => n.id === npcId);
     if (!npc) return;
-    npc.floor = floor;
-    if (player.floor === floor && player.x === tx && player.y === ty) {
-      npc.x = tx + 1;
-      npc.y = ty;
-    } else {
+    if (npc.floor !== floor) {
+      npc.floor = floor;
       npc.x = tx;
       npc.y = ty;
+      npc.px = tx * TILE;
+      npc.py = ty * TILE;
+      npc.dir = finalDir || 'down';
+      npc.moving = false;
+      npc.walkingPath = null;
+      if (onDone) onDone();
+      return;
     }
-    npc.dir = dir || 'down';
+    if (npc.x === tx && npc.y === ty) {
+      npc.dir = finalDir || npc.dir;
+      npc.moving = false;
+      npc.walkingPath = null;
+      if (onDone) onDone();
+      return;
+    }
+    const path = window.BS.Map.findPath(floor, npc.x, npc.y, tx, ty);
+    if (!path || path.length === 0) {
+      npc.x = tx;
+      npc.y = ty;
+      npc.px = tx * TILE;
+      npc.py = ty * TILE;
+      npc.dir = finalDir || npc.dir;
+      npc.moving = false;
+      npc.walkingPath = null;
+      if (onDone) onDone();
+      return;
+    }
+    npc.walkingPath = path;
+    npc.finalDir = finalDir || 'down';
+    npc.onWalkDone = onDone || null;
+    npc.fromX = npc.x;
+    npc.fromY = npc.y;
+    npc.toX = npc.x;
+    npc.toY = npc.y;
+    npc.px = (npc.px !== undefined) ? npc.px : npc.x * TILE;
+    npc.py = (npc.py !== undefined) ? npc.py : npc.y * TILE;
+    npc.moving = false;
+    npc.moveProgress = 0;
+    npc.walkToggle = 1;
+  }
+
+  function moveNpcTo(npcId, floor, tx, ty, dir, instant = false) {
+    if (instant) {
+      const npc = npcs.find((n) => n.id === npcId);
+      if (!npc) return;
+      npc.floor = floor;
+      npc.x = tx;
+      npc.y = ty;
+      npc.px = tx * TILE;
+      npc.py = ty * TILE;
+      npc.dir = dir || 'down';
+      npc.moving = false;
+      npc.walkingPath = null;
+      return;
+    }
+    walkNpcTo(npcId, floor, tx, ty, dir);
   }
 
   function advanceTime(mins) {
@@ -334,6 +403,7 @@
     restartChapter,
     returnToMenu,
     moveNpcTo,
+    walkNpcTo,
     transitionToFloor
   });
 
@@ -974,6 +1044,7 @@
 
   // ===== Update Loop =====
   const MOVE_SPEED = 0.135;
+  const NPC_MOVE_SPEED = 0.065;
 
   function updateFade() {
     if (!fade.active) return;
@@ -1000,6 +1071,74 @@
     }
   }
 
+  function updateNPCs() {
+    if (fade.active || window.BS.UI.isOverlayOpen()) return;
+
+    for (const npc of npcs) {
+      if (npc.floor !== player.floor) continue;
+
+      if (npc.moving) {
+        npc.moveProgress += NPC_MOVE_SPEED;
+        if (npc.moveProgress >= 1) {
+          npc.x = npc.toX;
+          npc.y = npc.toY;
+          npc.px = npc.x * TILE;
+          npc.py = npc.y * TILE;
+          npc.moving = false;
+          npc.moveProgress = 0;
+
+          if (!npc.walkingPath || npc.walkingPath.length === 0) {
+            if (npc.finalDir) {
+              npc.dir = npc.finalDir;
+            }
+            if (npc.onWalkDone) {
+              const cb = npc.onWalkDone;
+              npc.onWalkDone = null;
+              cb();
+            }
+          }
+        } else {
+          npc.px = (npc.fromX + (npc.toX - npc.fromX) * npc.moveProgress) * TILE;
+          npc.py = (npc.fromY + (npc.toY - npc.fromY) * npc.moveProgress) * TILE;
+        }
+      }
+
+      if (!npc.moving && npc.walkingPath && npc.walkingPath.length > 0) {
+        const nextStep = npc.walkingPath[0];
+        if (player.floor === npc.floor && player.x === nextStep.x && player.y === nextStep.y && !player.moving) {
+          npc.blockedTicks = (npc.blockedTicks || 0) + 1;
+          if (npc.blockedTicks > 30) {
+            const dest = npc.walkingPath[npc.walkingPath.length - 1];
+            const alt = window.BS.Map.findPath(npc.floor, npc.x, npc.y, dest.x, dest.y, (x, y) => x === player.x && y === player.y);
+            if (alt && alt.length > 0) {
+              npc.walkingPath = alt;
+              npc.blockedTicks = 0;
+              continue;
+            } else if (npc.blockedTicks > 60) {
+              npc.blockedTicks = 0;
+            } else {
+              continue;
+            }
+          } else {
+            continue;
+          }
+        } else {
+          npc.blockedTicks = 0;
+        }
+
+        const step = npc.walkingPath.shift();
+        npc.dir = step.dir;
+        npc.fromX = npc.x;
+        npc.fromY = npc.y;
+        npc.toX = step.x;
+        npc.toY = step.y;
+        npc.moving = true;
+        npc.moveProgress = 0;
+        npc.walkToggle = npc.walkToggle === 1 ? 2 : 1;
+      }
+    }
+  }
+
   function update() {
     tick++;
     updateFade();
@@ -1014,6 +1153,7 @@
     }
 
     if (!fade.active && !window.BS.UI.isOverlayOpen()) {
+      updateNPCs();
       if (player.moving) {
         player.moveProgress += MOVE_SPEED;
         if (player.moveProgress >= 1) {
@@ -1124,6 +1264,13 @@
     ctx.textAlign = 'left';
   }
 
+  function drawNpcBubble(npc, text, bgColor, textColor) {
+    if (!npc || npc.floor !== player.floor) return;
+    const x = npc.moving ? (npc.px / TILE) : npc.x;
+    const y = npc.moving ? (npc.py / TILE) : npc.y;
+    drawQuestBubble(x, y - 0.3, text, bgColor, textColor);
+  }
+
   function render() {
     if (isTitleVisible()) {
       window.BS.Sprites.drawTitleBackdrop($('title-bg-canvas'), tick);
@@ -1139,10 +1286,13 @@
 
     const floorNpcs = npcs.filter((n) => n.floor === player.floor);
     const drawables = floorNpcs.map((n) => ({
-      sortY: n.y * TILE,
+      sortY: n.moving ? (n.py || n.y * TILE) : n.y * TILE,
       draw: () => {
-        const sp = window.BS.Sprites.getChar(n.sprite, n.dir, 0);
-        ctx.drawImage(sp, n.x * TILE, n.y * TILE - 4);
+        const frame = n.moving ? n.walkToggle : 0;
+        const sp = window.BS.Sprites.getChar(n.sprite, n.dir, frame);
+        const drawX = n.moving ? Math.round(n.px) : n.x * TILE;
+        const drawY = (n.moving ? Math.round(n.py) : n.y * TILE) - 4;
+        ctx.drawImage(sp, drawX, drawY);
       }
     }));
 
@@ -1174,7 +1324,7 @@
           drawQuestBubble(3, 8.5, '!', '#f59e0b', '#1e293b');
         }
         if (vNpc && vNpc.floor === 2 && state.visitor.status === 'in_lab') {
-          drawQuestBubble(vNpc.x, vNpc.y - 0.3, '!', '#38bdf8', '#0f172a');
+          drawNpcBubble(vNpc, '!', '#38bdf8', '#0f172a');
         }
         if (visitorWaiting1F) {
           drawQuestBubble(2.5, 2.5, '▼', '#38bdf8', '#0f172a');
@@ -1184,7 +1334,7 @@
         }
       } else {
         if (visitorWaiting1F) {
-          drawQuestBubble(vNpc.x, vNpc.y - 0.3, '!', '#38bdf8', '#0f172a');
+          drawNpcBubble(vNpc, '!', '#38bdf8', '#0f172a');
         }
         if (emailUrgent) {
           drawQuestBubble(2.5, 2.5, '▲', '#ef4444', '#ffffff');
@@ -1214,7 +1364,7 @@
 
         if (!c.clues.wenExplainedFig2 && c.outcome === 'in_progress') {
           const wen = npcs.find((n) => n.id === 'npc_colleague');
-          if (wen && wen.floor === 2) drawQuestBubble(wen.x, wen.y - 0.3, '?', '#38bdf8', '#0f172a');
+          if (wen && wen.floor === 2) drawNpcBubble(wen, '?', '#38bdf8', '#0f172a');
         }
         if (handoverReady) {
           drawQuestBubble(3, 11.5, '✓', '#22c55e', '#ffffff');
@@ -1231,7 +1381,7 @@
         if (!c.cardsCompleted) {
           const wen = npcs.find((n) => n.id === 'npc_colleague');
           if (wen && wen.floor === 1) {
-            drawQuestBubble(wen.x, wen.y - 0.3, '!', '#38bdf8', '#0f172a');
+            drawNpcBubble(wen, '!', '#38bdf8', '#0f172a');
           }
         } else {
           // Cards completed on 1F, guide upstairs to 2F
@@ -1244,12 +1394,12 @@
         } else if (!c.verifiedWithQing) {
           const qing = npcs.find((n) => n.id === 'npc_qing');
           if (qing && qing.floor === 2) {
-            drawQuestBubble(qing.x, qing.y - 0.3, '!', '#38bdf8', '#0f172a');
+            drawNpcBubble(qing, '!', '#38bdf8', '#0f172a');
           }
         } else if (allDone) {
           const qing = npcs.find((n) => n.id === 'npc_qing');
           if (qing && qing.floor === 2) {
-            drawQuestBubble(qing.x, qing.y - 0.3, '✓', '#22c55e', '#ffffff');
+            drawNpcBubble(qing, '✓', '#22c55e', '#ffffff');
           }
           drawQuestBubble(3, 11.5, '✓', '#22c55e', '#ffffff');
         }
@@ -1265,12 +1415,12 @@
         } else if (!c.verifiedWithQing) {
           const qing = npcs.find((n) => n.id === 'npc_qing');
           if (qing && qing.floor === 2) {
-            drawQuestBubble(qing.x, qing.y - 0.3, '!', '#38bdf8', '#0f172a');
+            drawNpcBubble(qing, '!', '#38bdf8', '#0f172a');
           }
         } else if (allDone) {
           const qing = npcs.find((n) => n.id === 'npc_qing');
           if (qing && qing.floor === 2) {
-            drawQuestBubble(qing.x, qing.y - 0.3, '✓', '#22c55e', '#ffffff');
+            drawNpcBubble(qing, '✓', '#22c55e', '#ffffff');
           }
           drawQuestBubble(3, 11.5, '✓', '#22c55e', '#ffffff');
         }
@@ -1298,17 +1448,14 @@
         }
         const wen = npcs.find((n) => n.id === 'npc_colleague');
         if (wen && wen.floor === 2 && ((c.rawLogLocation !== 'project' && c.awenOrigAccess !== 'revoked') || !c.ndaRemindedToAwen)) {
-          drawQuestBubble(wen.x, wen.y - 0.3, '!', '#38bdf8', '#0f172a');
+          drawNpcBubble(wen, '!', '#38bdf8', '#0f172a');
         }
         const qing = npcs.find((n) => n.id === 'npc_qing');
         if (qing && qing.floor === 2 && !c.qingConfirmedOpen) {
-          drawQuestBubble(
-            qing.x,
-            qing.y - 0.3,
-            c.rawLogLocation === 'project' && c.qingHasProjectAccess ? '!' : '?',
-            c.rawLogLocation === 'project' && c.qingHasProjectAccess ? '#22c55e' : '#38bdf8',
-            c.rawLogLocation === 'project' && c.qingHasProjectAccess ? '#ffffff' : '#0f172a'
-          );
+          const qText = c.rawLogLocation === 'project' && c.qingHasProjectAccess ? '!' : '?';
+          const qBg = c.rawLogLocation === 'project' && c.qingHasProjectAccess ? '#22c55e' : '#38bdf8';
+          const qColor = c.rawLogLocation === 'project' && c.qingHasProjectAccess ? '#ffffff' : '#0f172a';
+          drawNpcBubble(qing, qText, qBg, qColor);
         }
         if (need1F) {
           drawQuestBubble(2.5, 2.5, '▼', c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project' ? '#ef4444' : '#38bdf8', '#ffffff');
@@ -1320,7 +1467,7 @@
         // On 1F in Ch3
         const lead = npcs.find((n) => n.id === 'npc_lead');
         if (lead && lead.floor === 1 && (!c.clues.mingConfirmedScope || (c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project'))) {
-          drawQuestBubble(lead.x, lead.y - 0.3, '!', c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project' ? '#ef4444' : '#f59e0b', '#ffffff');
+          drawNpcBubble(lead, '!', c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project' ? '#ef4444' : '#f59e0b', '#ffffff');
         }
         if (!c.badgeReturned) {
           drawQuestBubble(7, 9.5, '!', '#38bdf8', '#0f172a');
