@@ -114,16 +114,18 @@
     }
     microHud.classList.remove('hidden');
 
+    const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
+
     $('micro-chapter').textContent =
       currentChapter === 3
-        ? 'Ch5 阿文的最後一天'
+        ? (isEn ? 'Ch5 A-Wen\'s Last Day' : 'Ch5 阿文的最後一天')
         : currentChapter === 4
-        ? 'Ch4 這批資料要列入清單嗎？'
+        ? (isEn ? 'Ch4 R&D Inventory' : 'Ch4 這批資料要列入清單嗎？')
         : currentChapter === 5
-        ? 'Ch3 這份文件要怎麼標？'
+        ? (isEn ? 'Ch3 Label Document' : 'Ch3 這份文件要怎麼標？')
         : currentChapter === 2
-        ? 'Ch2 投稿前一晚'
-        : 'Ch1 寄出之前';
+        ? (isEn ? 'Ch2 Before Submission' : 'Ch2 投稿前一晚')
+        : (isEn ? 'Ch1 Before Sending' : 'Ch1 寄出之前');
     $('micro-clock').textContent = `🕒 ${window.BS.State.formatClock(state.timeMinutes)}`;
     $('micro-zone').textContent = window.BS.Map.getZoneName(player.floor, player.x, player.y);
 
@@ -150,51 +152,51 @@
       statusPill.textContent =
         currentChapter === 1
           ? !state.email.linkRevoked
-            ? '🚨 回 2F 電腦停權！'
-            : '🚨 找 2F 阿明組長通報！'
+            ? (isEn ? '🚨 Revoke link at 2F PC!' : '🚨 回 2F 電腦停權！')
+            : (isEn ? '🚨 Report to A-Ming on 2F!' : '🚨 找 2F 阿明組長通報！')
           : currentChapter === 2
           ? !state.ch2.contactedOrganizer
-            ? '🚨 回 2F 電腦聯絡主辦方！'
-            : '🚨 找 2F 阿明組長回報！'
-          : '🚨 下樓找 1F 阿明組長補救移交！';
+            ? (isEn ? '🚨 Contact host at 2F PC!' : '🚨 回 2F 電腦聯絡主辦方！')
+            : (isEn ? '🚨 Report to A-Ming on 2F!' : '🚨 找 2F 阿明組長回報！')
+          : (isEn ? '🚨 Go to 1F and report to A-Ming!' : '🚨 下樓找 1F 阿明組長補救移交！');
     } else if (currentChapter === 5 && state.ch5) {
       const c = state.ch5;
       statusPill.classList.remove('hidden');
       if (!c.markingCompleted) {
-        statusPill.textContent = '目標：檢視三份文件並決定機密標示與版面預覽';
+        statusPill.textContent = isEn ? 'Goal: Review 3 docs & choose labels' : '目標：檢視三份文件並決定機密標示與版面預覽';
       } else if (!c.verifiedWithQing) {
-        statusPill.textContent = '目標：在 2F 辦公區找小晴接手文件';
+        statusPill.textContent = isEn ? 'Goal: Hand over docs to Xiao-Qing on 2F' : '目標：在 2F 辦公區找小晴接手文件';
       } else {
-        statusPill.textContent = '✨ 任務完成！向小晴或回值班桌完成交班';
+        statusPill.textContent = isEn ? '✨ Done! Hand over to Xiao-Qing or desk' : '✨ 任務完成！向小晴或回值班桌完成交班';
         if (!handoverToastShown) {
           handoverToastShown = true;
-          window.BS.UI.showToast('🎉 文件標示與交接已核對完成！向小晴或回值班桌完成交班。', false, 5200);
+          window.BS.UI.showToast(isEn ? '🎉 Document labels verified! Hand over to Xiao-Qing or at desk.' : '🎉 文件標示與交接已核對完成！向小晴或回值班桌完成交班。', false, 5200);
         }
       }
     } else if (currentChapter === 4 && state.ch4) {
       const c = state.ch4;
       statusPill.classList.remove('hidden');
       if (!c.cardsCompleted) {
-        statusPill.textContent = '目標：在 1F 實驗區找同事阿文辨識三組資料卡';
+        statusPill.textContent = isEn ? 'Goal: Check 3 data cards with A-Wen on 1F' : '目標：在 1F 實驗區找同事阿文辨識三組資料卡';
       } else if (player.floor === 1) {
-        statusPill.textContent = '▲ 請走樓梯上 2F 辦公區，到值班電腦確認清單';
+        statusPill.textContent = isEn ? '▲ Go up to 2F office to review inventory' : '▲ 請走樓梯上 2F 辦公區，到值班電腦確認清單';
       } else if (!c.updatedSaved) {
-        statusPill.textContent = '目標：在 2F 辦公區值班電腦確認與更新研發成果清單';
+        statusPill.textContent = isEn ? 'Goal: Review & save inventory at 2F PC' : '目標：在 2F 辦公區值班電腦確認與更新研發成果清單';
       } else if (!c.verifiedWithQing) {
-        statusPill.textContent = '目標：在 2F 辦公區找小晴核對清單';
+        statusPill.textContent = isEn ? 'Goal: Review inventory with Xiao-Qing on 2F' : '目標：在 2F 辦公區找小晴核對清單';
       } else {
-        statusPill.textContent = '✨ 任務完成！向小晴或回值班桌完成交班';
+        statusPill.textContent = isEn ? '✨ Done! Hand over to Xiao-Qing or desk' : '✨ 任務完成！向小晴或回值班桌完成交班';
         if (!handoverToastShown) {
           handoverToastShown = true;
-          window.BS.UI.showToast('🎉 研發成果清單已核對完成！向小晴或回值班桌完成交班。', false, 5200);
+          window.BS.UI.showToast(isEn ? '🎉 Inventory verified! Hand over to Xiao-Qing or at desk.' : '🎉 研發成果清單已核對完成！向小晴或回值班桌完成交班。', false, 5200);
         }
       }
     } else if (readyToastNow) {
       statusPill.classList.remove('hidden');
-      statusPill.textContent = '✨ 任務完成！回 2F 值班桌交班';
+      statusPill.textContent = isEn ? '✨ Done! Return to 2F duty desk' : '✨ 任務完成！回 2F 值班桌交班';
       if (!handoverToastShown) {
         handoverToastShown = true;
-        window.BS.UI.showToast('🎉 任務已處理完成！請回到 2F 辦公區值班桌（綠勾 ✓）完成交班與通關！', false, 5200);
+        window.BS.UI.showToast(isEn ? '🎉 Task completed! Return to 2F duty desk (✓) to finish!' : '🎉 任務已處理完成！請回到 2F 辦公區值班桌（綠勾 ✓）完成交班與通關！', false, 5200);
       }
     }
   }
@@ -770,8 +772,138 @@
     });
   }
 
+  function applyLanguageUI() {
+    const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
+    const t = window.BS.I18n ? window.BS.I18n.t : (k, fallback) => fallback || k;
+
+    document.title = t('pageTitle');
+    const kicker = document.querySelector('.title-kicker');
+    if (kicker) kicker.textContent = t('kicker');
+    const heading = $('title-heading');
+    if (heading) heading.textContent = t('gameTitle');
+    const subEn = document.querySelector('.title-sub-en');
+    if (subEn) subEn.textContent = t('gameTitleSub');
+    const footer = document.querySelector('.title-menu-footer');
+    if (footer) footer.textContent = t('titleFooter');
+    const toggleText = $('lang-toggle-text');
+    if (toggleText) toggleText.textContent = t('langToggleText');
+
+    const chMap = [
+      { id: 'btn-start-ch1', title: t('ch1Title'), time: t('timeCh1') },
+      { id: 'btn-start-ch2', title: t('ch2Title'), time: t('timeCh2') },
+      { id: 'btn-start-ch5', title: t('ch3Title'), time: t('timeCh3') },
+      { id: 'btn-start-ch4', title: t('ch4Title'), time: t('timeCh4') },
+      { id: 'btn-start-ch3', title: t('ch5Title'), time: t('timeCh5') }
+    ];
+
+    chMap.forEach((item) => {
+      const btn = $(item.id);
+      if (btn) {
+        const titleSpan = btn.querySelector('.menu-title-text');
+        if (titleSpan) titleSpan.textContent = item.title;
+        const timeVal = btn.querySelector('.time-val');
+        if (timeVal) timeVal.textContent = item.time;
+        const timeTag = btn.querySelector('.time-tag');
+        if (timeTag) timeTag.textContent = t('timeTag');
+        const menuTime = btn.querySelector('.menu-time');
+        if (menuTime) menuTime.setAttribute('title', `${t('timeTag')}: ${item.time}`);
+      }
+    });
+
+    const pillLabels = document.querySelectorAll('.gba-pill-label');
+    if (pillLabels.length >= 2) {
+      pillLabels[0].innerHTML = isEn ? 'SELECT<small>Notes</small>' : 'SELECT<small>筆記</small>';
+      pillLabels[1].innerHTML = isEn ? 'START<small>Menu</small>' : 'START<small>暫停選單</small>';
+    }
+    const touchB = $('touch-b');
+    if (touchB) touchB.innerHTML = isEn ? 'B<span>Back</span>' : 'B<span>返回</span>';
+    const touchA = $('touch-a');
+    if (touchA) touchA.innerHTML = isEn ? 'A<span>Action</span>' : 'A<span>互動</span>';
+
+    const desktopHints = document.querySelectorAll('.desktop-key-hint span');
+    if (desktopHints.length >= 4) {
+      desktopHints[0].innerHTML = isEn ? '<kbd>WASD</kbd>/<kbd>Arrows</kbd> Move' : '<kbd>WASD</kbd>/<kbd>↑↓←→</kbd> 移動';
+      desktopHints[1].innerHTML = isEn ? '<kbd>Space</kbd>/<kbd>Enter</kbd> Action' : '<kbd>Space</kbd>/<kbd>Enter</kbd> A鍵';
+      desktopHints[2].innerHTML = isEn ? '<kbd>Tab</kbd> SELECT' : '<kbd>Tab</kbd> SELECT';
+      desktopHints[3].innerHTML = isEn ? '<kbd>Esc</kbd>/<kbd>P</kbd> START' : '<kbd>Esc</kbd>/<kbd>P</kbd> START';
+    }
+
+    const bgmHint = $('bgm-autoplay-hint');
+    if (bgmHint) bgmHint.textContent = t('bgmAutoplayHint');
+
+    const landText = document.querySelector('.landscape-lock-text');
+    if (landText) landText.textContent = t('landscapeText');
+    const landSub = document.querySelector('.landscape-lock-sub');
+    if (landSub) landSub.textContent = t('landscapeSub');
+
+    const modalTitles = {
+      'pause-title': isEn ? '⏸ PAUSE — Game Paused' : '⏸ PAUSE — 遊戲暫停',
+      'pc-title': isEn ? '💻 2F Duty PC — Email, NDA & Sharing' : '💻 2F 值班電腦 — 郵件、NDA 查核與雲端分享',
+      'poster-title': isEn ? '💻 2F Office PC — Symposium Poster System' : '💻 2F 辦公區電腦 — 研討會海報編輯與投稿系統',
+      'marking-title': isEn ? '🏷️ 2F Office — Document Confidentiality Marking' : '🏷️ 2F 辦公區 — 文件機密標示與版面預覽工作台',
+      'record-title': isEn ? '📋 2F Duty PC — R&D Records Inventory' : '📋 2F 值班電腦 — 研發成果清單管理系統',
+      'cards-title': isEn ? '🔍 1F Lab — R&D Data Cards Review' : '🔍 1F 實驗區 — 晴空計畫三組研發成果資料卡',
+      'lookup-title': isEn ? '📁 2F Lab — Lab Record Computer' : '📁 2F 實驗區 — 實驗紀錄路徑對照',
+      'camera-title': isEn ? '📸 1F Lab — Visitor Photography Framing' : '📸 1F 管制實驗區 — 訪客相機取景預覽',
+      'offboard-title': isEn ? '📋 2F Duty PC — Offboarding Handover' : '📋 2F 值班電腦 — 離職交接與存取權限系統',
+      'clues-title': isEn ? '📋 Duty Notes & Progress (SELECT)' : '📋 值班筆記與任務進度（SELECT）',
+      'endings-title': isEn ? '🏆 Endings Gallery' : '🏆 結局圖鑑',
+      'handover-title': isEn ? '📝 End-of-Shift Handover Evaluation' : '📝 下班交班檢核表'
+    };
+
+    Object.entries(modalTitles).forEach(([id, text]) => {
+      const el = $(id);
+      if (el) el.textContent = text;
+    });
+  }
+
   function setupButtons() {
     window.BS.UI.bindStaticHandlers();
+
+    applyLanguageUI();
+    if (!window.BS.I18n.hasChosenLang()) {
+      $('lang-screen').classList.remove('hidden');
+    }
+
+    const btnLangZh = $('btn-lang-zh');
+    if (btnLangZh) {
+      btnLangZh.addEventListener('click', () => {
+        window.BS.Audio.confirm();
+        window.BS.I18n.setLang('zh');
+        $('lang-screen').classList.add('hidden');
+        applyLanguageUI();
+        refreshHUD();
+      });
+    }
+
+    const btnLangEn = $('btn-lang-en');
+    if (btnLangEn) {
+      btnLangEn.addEventListener('click', () => {
+        window.BS.Audio.confirm();
+        window.BS.I18n.setLang('en');
+        $('lang-screen').classList.add('hidden');
+        applyLanguageUI();
+        refreshHUD();
+      });
+    }
+
+    const btnLangToggle = $('btn-lang-toggle');
+    if (btnLangToggle) {
+      btnLangToggle.addEventListener('click', () => {
+        window.BS.Audio.select();
+        const current = window.BS.I18n.getLang();
+        window.BS.I18n.setLang(current === 'en' ? 'zh' : 'en');
+        applyLanguageUI();
+        refreshHUD();
+      });
+    }
+
+    if (window.BS.I18n) {
+      window.BS.I18n.onLangChange(() => {
+        applyLanguageUI();
+        refreshHUD();
+      });
+    }
 
     // Title Cursor Menu hover + click (only on fine pointer devices like desktop mouse)
     const canHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -832,8 +964,12 @@
     tick++;
     updateFade();
 
+    const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
+
     if (isTitleVisible()) {
-      $('nearby-hint').textContent = '↑↓ 移動游標選擇章節 · 按 A / START / Enter 進入';
+      $('nearby-hint').textContent = isEn
+        ? '↑↓ Move cursor to select chapter · Press A / START / Enter'
+        : '↑↓ 移動游標選擇章節 · 按 A / START / Enter 進入';
       return;
     }
 
@@ -881,31 +1017,51 @@
 
     nearbyTarget = window.BS.Map.findNearbyTarget(player.floor, player.x, player.y, player.dir, npcs, currentChapter);
     if (nearbyTarget) {
-      $('nearby-hint').textContent = `按 A / 空白鍵互動：${nearbyTarget.label}`;
+      $('nearby-hint').textContent = isEn
+        ? `Press A / Space to interact: ${nearbyTarget.label}`
+        : `按 A / 空白鍵互動：${nearbyTarget.label}`;
     } else if (currentChapter === 5 && state && state.ch5) {
       const c = state.ch5;
       if (!c.markingCompleted) {
-        $('nearby-hint').textContent = '目前在 2F 辦公區 · 請至左上方值班電腦檢視三份文件標示';
+        $('nearby-hint').textContent = isEn
+          ? '2F Office · Check 3 document markings at duty PC (top-left)'
+          : '目前在 2F 辦公區 · 請至左上方值班電腦檢視三份文件標示';
       } else if (!c.verifiedWithQing) {
-        $('nearby-hint').textContent = '目前在 2F 辦公區 · 請找小晴確認文件標示與保管';
+        $('nearby-hint').textContent = isEn
+          ? '2F Office · Confirm document labels & custody with Xiao-Qing'
+          : '目前在 2F 辦公區 · 請找小晴確認文件標示與保管';
       } else {
-        $('nearby-hint').textContent = '目前在 2F 辦公區 · 請向小晴或到值班桌完成交班';
+        $('nearby-hint').textContent = isEn
+          ? '2F Office · Complete handover with Xiao-Qing or at duty desk'
+          : '目前在 2F 辦公區 · 請向小晴或到值班桌完成交班';
       }
     } else if (currentChapter === 4 && state && state.ch4) {
       const c = state.ch4;
       if (!c.cardsCompleted) {
-        $('nearby-hint').textContent = '目前在 1F 實驗區 · 請走向右側同事阿文辨識三組資料卡';
+        $('nearby-hint').textContent = isEn
+          ? '1F Lab · Talk to colleague A-Wen to identify 3 data cards'
+          : '目前在 1F 實驗區 · 請走向右側同事阿文辨識三組資料卡';
       } else if (player.floor === 1) {
-        $('nearby-hint').textContent = '目前在 1F 實驗區 · ▲ 請往左走樓梯上 2F 辦公區';
+        $('nearby-hint').textContent = isEn
+          ? '1F Lab · ▲ Take stairs on the left up to 2F office'
+          : '目前在 1F 實驗區 · ▲ 請往左走樓梯上 2F 辦公區';
       } else if (!c.updatedSaved) {
-        $('nearby-hint').textContent = '目前在 2F 辦公區 · 請至左上方值班電腦確認清單';
+        $('nearby-hint').textContent = isEn
+          ? '2F Office · Review & save inventory at duty PC (top-left)'
+          : '目前在 2F 辦公區 · 請至左上方值班電腦確認清單';
       } else if (!c.verifiedWithQing) {
-        $('nearby-hint').textContent = '目前在 2F 辦公區 · 請找小晴核對清單';
+        $('nearby-hint').textContent = isEn
+          ? '2F Office · Verify inventory with Xiao-Qing'
+          : '目前在 2F 辦公區 · 請找小晴核對清單';
       } else {
-        $('nearby-hint').textContent = '目前在 2F 辦公區 · 請向小晴或到值班桌完成交班';
+        $('nearby-hint').textContent = isEn
+          ? '2F Office · Complete handover with Xiao-Qing or at duty desk'
+          : '目前在 2F 辦公區 · 請向小晴或到值班桌完成交班';
       }
     } else {
-      $('nearby-hint').textContent = '走近物件或同事查看提示 · START 選單 · SELECT 筆記';
+      $('nearby-hint').textContent = isEn
+        ? 'Approach objects or colleagues · START Menu · SELECT Notes'
+        : '走近物件或同事查看提示 · START 選單 · SELECT 筆記';
     }
   }
 

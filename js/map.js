@@ -149,6 +149,7 @@
       {
         id: 'reception',
         label: '1F 大門接待櫃台',
+        label_en: '1F Main Reception Desk',
         tiles: [{ x: 5, y: 10 }, { x: 6, y: 10 }, { x: 7, y: 10 }, { x: 8, y: 10 }, { x: 9, y: 10 }],
         badgeX: 7,
         badgeY: 9.3
@@ -156,6 +157,7 @@
       {
         id: 'elevator_up',
         label: '電梯（▲ 往 2F）',
+        label_en: 'Elevator (▲ to 2F)',
         tiles: [{ x: 4, y: 3 }],
         badgeX: 4,
         badgeY: 2.3
@@ -163,6 +165,7 @@
       {
         id: 'lobby_sign',
         label: '大廳形象牆（核准拍照區）',
+        label_en: 'Logo Wall (Photo Spot)',
         tiles: [{ x: 1, y: 7 }, { x: 2, y: 7 }, { x: 3, y: 7 }, { x: 4, y: 7 }],
         badgeX: 2.5,
         badgeY: 6.3
@@ -170,6 +173,7 @@
       {
         id: 'cleanroom_window',
         label: '管制實驗區觀測窗',
+        label_en: 'Restricted Area Window',
         tiles: [{ x: 7, y: 6 }, { x: 8, y: 6 }, { x: 9, y: 6 }, { x: 10, y: 6 }, { x: 11, y: 6 }, { x: 12, y: 6 }],
         badgeX: 9.5,
         badgeY: 5.3
@@ -177,6 +181,7 @@
       {
         id: 'conference_door',
         label: '1F 會議室',
+        label_en: '1F Conference Hall',
         tiles: [{ x: 13, y: 6 }, { x: 14, y: 6 }],
         badgeX: 13.5,
         badgeY: 5.3
@@ -186,6 +191,7 @@
       {
         id: 'pc',
         label: '值班電腦',
+        label_en: 'Duty PC',
         tiles: [{ x: 2, y: 9 }, { x: 3, y: 9 }, { x: 4, y: 9 }],
         badgeX: 3,
         badgeY: 8.3
@@ -193,6 +199,7 @@
       {
         id: 'duty_desk',
         label: '值班桌（交班）',
+        label_en: 'Duty Desk (Handover)',
         tiles: [{ x: 2, y: 12 }, { x: 3, y: 12 }, { x: 4, y: 12 }],
         badgeX: 3,
         badgeY: 11.3
@@ -200,6 +207,7 @@
       {
         id: 'elevator_down',
         label: '電梯（▼ 往 1F）',
+        label_en: 'Elevator (▼ to 1F)',
         tiles: [{ x: 4, y: 3 }],
         badgeX: 4,
         badgeY: 2.3
@@ -207,6 +215,7 @@
       {
         id: 'notice_board',
         label: '營業秘密宣導布告欄',
+        label_en: 'Notice Board',
         tiles: [{ x: 5, y: 1 }],
         badgeX: 5,
         badgeY: 0.7
@@ -214,6 +223,7 @@
       {
         id: 'whiteboard',
         label: '實驗白板',
+        label_en: 'Lab Whiteboard',
         tiles: [{ x: 8, y: 1 }, { x: 9, y: 1 }, { x: 10, y: 1 }],
         badgeX: 9,
         badgeY: 0.7
@@ -221,6 +231,7 @@
       {
         id: 'monitor',
         label: '實驗室螢幕',
+        label_en: 'Lab Monitor',
         tiles: [{ x: 11, y: 3 }, { x: 12, y: 3 }, { x: 13, y: 3 }],
         badgeX: 12,
         badgeY: 2.3
@@ -228,6 +239,7 @@
       {
         id: 'samples',
         label: '樣品架與標籤',
+        label_en: 'Sample Rack & Labels',
         tiles: [{ x: 8, y: 7 }, { x: 9, y: 7 }, { x: 10, y: 7 }, { x: 11, y: 7 }],
         badgeX: 9.5,
         badgeY: 6.3
@@ -238,39 +250,39 @@
   function createNPCsForChapter(chapter) {
     if (chapter === 2) {
       return [
-        { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', floor: 2, x: 8, y: 17, dir: 'up' },
-        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', floor: 2, x: 10, y: 4, dir: 'left' }
+        { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 2, x: 8, y: 17, dir: 'up' },
+        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 10, y: 4, dir: 'left' }
       ];
     }
     if (chapter === 5) {
       // Menu Ch3: 這份文件要怎麼標？ (internal 5)
       return [
-        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', floor: 2, x: 10, y: 4, dir: 'left' },
-        { id: 'npc_qing', sprite: 'qing', label: '接手同事 小晴', floor: 2, x: 5, y: 11, dir: 'left' },
-        { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', floor: 2, x: 8, y: 17, dir: 'up' }
+        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 10, y: 4, dir: 'left' },
+        { id: 'npc_qing', sprite: 'qing', label: '接手同事 小晴', label_en: 'Colleague: Xiao-Qing', floor: 2, x: 5, y: 11, dir: 'left' },
+        { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 2, x: 8, y: 17, dir: 'up' }
       ];
     }
     if (chapter === 3) {
       // Menu Ch5: 阿文的最後一天 (internal 3)
       return [
-        { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', floor: 1, x: 4, y: 10, dir: 'right' },
-        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', floor: 2, x: 10, y: 4, dir: 'left' },
-        { id: 'npc_qing', sprite: 'qing', label: '接手同事 小晴', floor: 2, x: 5, y: 11, dir: 'left' }
+        { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 1, x: 4, y: 10, dir: 'right' },
+        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 10, y: 4, dir: 'left' },
+        { id: 'npc_qing', sprite: 'qing', label: '接手同事 小晴', label_en: 'Colleague: Xiao-Qing', floor: 2, x: 5, y: 11, dir: 'left' }
       ];
     }
     if (chapter === 4) {
       // Menu Ch4: 這批資料要列入清單嗎？ (internal 4)
       return [
-        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', floor: 1, x: 9, y: 6, dir: 'down' },
-        { id: 'npc_qing', sprite: 'qing', label: '盤點同事 小晴', floor: 2, x: 5, y: 11, dir: 'left' },
-        { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', floor: 2, x: 8, y: 17, dir: 'up' }
+        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 1, x: 9, y: 6, dir: 'down' },
+        { id: 'npc_qing', sprite: 'qing', label: '盤點同事 小晴', label_en: 'Colleague: Xiao-Qing', floor: 2, x: 5, y: 11, dir: 'left' },
+        { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 2, x: 8, y: 17, dir: 'up' }
       ];
     }
     // Chapter 1: 寄出之前
     return [
-      { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', floor: 2, x: 8, y: 17, dir: 'up' },
-      { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', floor: 2, x: 10, y: 4, dir: 'left' },
-      { id: 'npc_visitor', sprite: 'visitor', label: '訪客 陳先生', floor: 1, x: 7, y: 11, dir: 'up' }
+      { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 2, x: 8, y: 17, dir: 'up' },
+      { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 10, y: 4, dir: 'left' },
+      { id: 'npc_visitor', sprite: 'visitor', label: '訪客 陳先生', label_en: 'Visitor: Mr. Chen', floor: 1, x: 7, y: 11, dir: 'up' }
     ];
   }
 
@@ -279,16 +291,17 @@
   }
 
   function getZoneName(floor, tx, ty) {
+    const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
     if (floor === 1) {
-      if (tx <= 4 && ty <= 5) return '1F 梯廳（往 2F）';
-      if (tx >= 6 && ty <= 6) return '1F 管制實驗區（觀測廊）';
-      if (ty >= 14) return '1F 大門大廳';
-      return '1F 大門大廳與櫃台';
+      if (tx <= 4 && ty <= 5) return isEn ? '1F Stairwell (to 2F)' : '1F 梯廳（往 2F）';
+      if (tx >= 6 && ty <= 6) return isEn ? '1F Restricted Area' : '1F 管制實驗區（觀測廊）';
+      if (ty >= 14) return isEn ? '1F Main Entrance Lobby' : '1F 大門大廳';
+      return isEn ? '1F Lobby & Reception' : '1F 大門大廳與櫃台';
     }
-    if (tx <= 5 && ty <= 5) return '2F 梯廳（往 1F）';
-    if (tx >= 6 && ty <= 7) return '2F 量測實驗區（門禁管制）';
-    if (ty >= 14) return '2F 組長辦公室';
-    return '2F 辦公區';
+    if (tx <= 5 && ty <= 5) return isEn ? '2F Stairwell (to 1F)' : '2F 梯廳（往 1F）';
+    if (tx >= 6 && ty <= 7) return isEn ? '2F Measurement Lab' : '2F 量測實驗區（門禁管制）';
+    if (ty >= 14) return isEn ? '2F Team Lead Office' : '2F 組長辦公室';
+    return isEn ? '2F Office Area' : '2F 辦公區';
   }
 
   function px(ctx, x, y, w, h, color) {
@@ -347,7 +360,8 @@
     px(ctx, ex + 6, ey + 2, 4, 1, tick % 50 < 35 ? '#38bdf8' : '#facc15');
 
     // Direction sign on wall (y=2)
-    const label = floor === 1 ? '▲ 往2F' : '▼ 往1F';
+    const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
+    const label = isEn ? (floor === 1 ? '▲ to 2F' : '▼ to 1F') : (floor === 1 ? '▲ 往2F' : '▼ 往1F');
     px(ctx, 1 * TILE + 4, 2 * TILE + 2, 40, 9, '#1e293b');
     ctx.fillStyle = floor === 1 ? '#7dd3fc' : '#fde68a';
     ctx.font = 'bold 7px sans-serif';
@@ -451,9 +465,10 @@
     });
 
     // Cleanroom caption on top wall
+    const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
     ctx.fillStyle = 'rgba(25, 65, 80, 0.75)';
     ctx.font = 'bold 6.5px sans-serif';
-    ctx.fillText('1F 管制實驗區（門禁觀測）', 7 * TILE + 2, 2 * TILE + 10);
+    ctx.fillText(isEn ? '1F Restricted Cleanroom (Obs.)' : '1F 管制實驗區（門禁觀測）', 7 * TILE + 2, 2 * TILE + 10);
 
     // 5. Lobby Sign Plaque on wall (x=1..4, y=7)
     for (let x = 1; x <= 4; x++) {
@@ -461,11 +476,11 @@
     }
     px(ctx, 1 * TILE + 3, 7 * TILE + 2, 4 * TILE - 6, 12, '#2f7d6d');
     ctx.fillStyle = '#e8fff9';
-    ctx.font = 'bold 7px sans-serif';
-    ctx.fillText('中研院 RCCI 形象牆', 1 * TILE + 7, 7 * TILE + 9);
+    ctx.font = 'bold 6.5px sans-serif';
+    ctx.fillText(isEn ? 'Academia Sinica RCCI' : '中研院 RCCI 形象牆', 1 * TILE + 7, 7 * TILE + 9);
     ctx.fillStyle = '#a7f3d0';
     ctx.font = 'bold 5px monospace';
-    ctx.fillText('核准拍照區 PHOTO SPOT', 1 * TILE + 7, 7 * TILE + 13);
+    ctx.fillText(isEn ? 'PHOTO SPOT (APPROVED)' : '核准拍照區 PHOTO SPOT', 1 * TILE + 7, 7 * TILE + 13);
 
     // 6. 1F Reception Counter (x=5..9, y=10)
     drawDesk(ctx, 5, 10, 5, '#8f6b4e', '#654a34');
@@ -492,8 +507,8 @@
     // Zone captions
     ctx.font = 'bold 7px sans-serif';
     ctx.fillStyle = 'rgba(55, 65, 80, 0.58)';
-    ctx.fillText('1F 大門大廳', 2 * TILE, 17 * TILE + 12);
-    ctx.fillText('接待櫃台', 6 * TILE + 4, 11 * TILE + 12);
+    ctx.fillText(isEn ? '1F Lobby' : '1F 大門大廳', 2 * TILE, 17 * TILE + 12);
+    ctx.fillText(isEn ? 'Reception' : '接待櫃台', 6 * TILE + 4, 11 * TILE + 12);
   }
 
   // ===== Render Floor 2 (16 x 20) =====
@@ -739,12 +754,13 @@
     drawPlant(ctx, 2, 18);
 
     // Zone captions
+    const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
     ctx.font = 'bold 7px sans-serif';
     ctx.fillStyle = 'rgba(65, 50, 30, 0.58)';
-    ctx.fillText('2F 辦公區', 6 * TILE, 9 * TILE + 12);
-    ctx.fillText('組長辦公室', 6 * TILE, 18 * TILE + 12);
+    ctx.fillText(isEn ? '2F Office' : '2F 辦公區', 6 * TILE, 9 * TILE + 12);
+    ctx.fillText(isEn ? 'Lead Office' : '組長辦公室', 6 * TILE, 18 * TILE + 12);
     ctx.fillStyle = 'rgba(30, 72, 74, 0.62)';
-    ctx.fillText('2F 量測實驗區', 8 * TILE, 3 * TILE + 12);
+    ctx.fillText(isEn ? '2F Measurement Lab' : '2F 量測實驗區', 8 * TILE, 3 * TILE + 12);
   }
 
   function drawMap(ctx, state, floor, tick) {
@@ -773,20 +789,29 @@
   }
 
   function getObjectLabel(obj, chapter) {
+    const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
     if (chapter === 5) {
-      if (obj.id === 'pc') return '值班電腦（文件標示檢視）';
-      if (obj.id === 'duty_desk') return '值班桌（第三章交班）';
+      if (obj.id === 'pc') return isEn ? 'Duty PC (Label Review)' : '值班電腦（文件標示檢視）';
+      if (obj.id === 'duty_desk') return isEn ? 'Duty Desk (Ch3 Handover)' : '值班桌（第三章交班）';
     } else if (chapter === 4) {
-      if (obj.id === 'pc') return '值班電腦（研發成果清單）';
-      if (obj.id === 'duty_desk') return '值班桌（第四章交班）';
+      if (obj.id === 'pc') return isEn ? 'Duty PC (R&D Inventory)' : '值班電腦（研發成果清單）';
+      if (obj.id === 'duty_desk') return isEn ? 'Duty Desk (Ch4 Handover)' : '值班桌（第四章交班）';
     } else if (chapter === 3) {
-      if (obj.id === 'monitor') return '實驗紀錄電腦（路徑對照）';
-      if (obj.id === 'duty_desk') return '值班桌（第五章交班）';
+      if (obj.id === 'monitor') return isEn ? 'Lab Monitor (Access Diff)' : '實驗紀錄電腦（路徑對照）';
+      if (obj.id === 'duty_desk') return isEn ? 'Duty Desk (Ch5 Handover)' : '值班桌（第五章交班）';
+    } else if (chapter === 2) {
+      if (obj.id === 'pc') return isEn ? 'Duty PC (Poster Review)' : '值班電腦（海報審核與上傳）';
+      if (obj.id === 'duty_desk') return isEn ? 'Duty Desk (Ch2 Handover)' : '值班桌（第二章交班）';
+    } else if (chapter === 1) {
+      if (obj.id === 'pc') return isEn ? 'Duty PC (Email & Share)' : '值班電腦（郵件與分享）';
+      if (obj.id === 'duty_desk') return isEn ? 'Duty Desk (Ch1 Handover)' : '值班桌（第一章交班）';
     }
+    if (isEn && obj.label_en) return obj.label_en;
     return obj.label;
   }
 
   function findNearbyTarget(floor, pxTile, pyTile, dir, npcs, chapter) {
+    const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
     const offsets = {
       up: [0, -1],
       down: [0, 1],
@@ -801,7 +826,8 @@
 
     for (const npc of floorNpcs) {
       if (npc.x === fx && npc.y === fy) {
-        return { type: 'npc', id: npc.id, label: npc.label, x: npc.x, y: npc.y };
+        const npcLabel = (isEn && npc.label_en) ? npc.label_en : npc.label;
+        return { type: 'npc', id: npc.id, label: npcLabel, x: npc.x, y: npc.y };
       }
     }
     for (const obj of floorObjs) {
@@ -816,7 +842,8 @@
       const ty = pyTile + ay;
       for (const npc of floorNpcs) {
         if (npc.x === tx && npc.y === ty) {
-          return { type: 'npc', id: npc.id, label: npc.label, x: npc.x, y: npc.y };
+          const npcLabel = (isEn && npc.label_en) ? npc.label_en : npc.label;
+          return { type: 'npc', id: npc.id, label: npcLabel, x: npc.x, y: npc.y };
         }
       }
       for (const obj of floorObjs) {

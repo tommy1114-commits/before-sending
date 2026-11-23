@@ -29,6 +29,27 @@
           </div>
         </div>
 
+        <!-- Language Selection Screen (First Visit or Manual Toggle) -->
+        <section class="overlay-screen lang-overlay hidden" id="lang-screen" role="dialog" aria-modal="true" aria-labelledby="lang-choice-title">
+          <div class="lang-modal-box">
+            <div class="lang-modal-header">
+              <div class="lang-badge">LANGUAGE / 語言</div>
+              <h2 id="lang-choice-title" class="lang-modal-title">請選擇遊戲語言<br><span class="lang-sub-title">Please Select Language</span></h2>
+              <p class="lang-modal-desc">本遊戲支援繁體中文與英文雙語版本，日後可隨時於首頁切換。<br>Full Traditional Chinese &amp; English support. You can switch anytime on the title screen.</p>
+            </div>
+            <div class="lang-choice-list">
+              <button type="button" class="lang-select-btn" id="btn-lang-zh" data-lang="zh">
+                <span class="lang-btn-name">繁體中文</span>
+                <span class="lang-btn-sub">Traditional Chinese</span>
+              </button>
+              <button type="button" class="lang-select-btn" id="btn-lang-en" data-lang="en">
+                <span class="lang-btn-name">English</span>
+                <span class="lang-btn-sub">For international researchers</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
         <!-- GBA Animated Title Screen Overlay -->
         <section class="overlay-screen title-overlay" id="title-screen" role="dialog" aria-modal="true" aria-labelledby="title-heading">
           <canvas id="title-bg-canvas" width="256" height="320" aria-hidden="true"></canvas>
@@ -40,6 +61,12 @@
             </div>
 
             <div class="title-menu-box" role="menu" aria-label="章節選單">
+              <div class="title-lang-bar">
+                <button type="button" class="lang-toggle-btn" id="btn-lang-toggle" aria-label="切換語言 / Switch Language">
+                  <span class="lang-toggle-icon">🌐</span>
+                  <span class="lang-toggle-text" id="lang-toggle-text">語言 / Language: 繁體中文</span>
+                </button>
+              </div>
               <div class="title-menu-list" id="title-menu-list">
                 <button class="cursor-menu-item selected" id="btn-start-ch1" data-idx="0" data-chapter="1" type="button" role="menuitem">
                   <span class="menu-cursor">▶</span>
@@ -289,13 +316,14 @@
     </div>
   </div>
 
-  <script defer src="js/audio.js?v=3.2"></script>
-  <script defer src="js/sprites.js?v=3.2"></script>
-  <script defer src="js/map.js?v=3.2"></script>
-  <script defer src="js/state.js?v=3.2"></script>
-  <script defer src="js/ui.js?v=3.2"></script>
-  <script defer src="js/story.js?v=3.2"></script>
-  <script defer src="js/main.js?v=3.2"></script>
+  <script defer src="js/i18n.js?v=3.3"></script>
+  <script defer src="js/audio.js?v=3.3"></script>
+  <script defer src="js/sprites.js?v=3.3"></script>
+  <script defer src="js/map.js?v=3.3"></script>
+  <script defer src="js/state.js?v=3.3"></script>
+  <script defer src="js/ui.js?v=3.3"></script>
+  <script defer src="js/story.js?v=3.3"></script>
+  <script defer src="js/main.js?v=3.3"></script>
 
   <!-- Cloudflare Web Analytics -->
   <script>

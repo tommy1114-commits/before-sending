@@ -18,8 +18,10 @@
         window.BS.UI.startDialogue([
           {
             speaker: '1F 大廳形象牆',
+            speaker_en: '1F Logo Wall',
             portrait: 'reception',
-            text: '中研院RCCI實驗室一樓大廳形象牆。這裡是訪客核准拍照區，構圖專業且完全不會拍到管制實驗區內部資訊。'
+            text: '中研院RCCI實驗室一樓大廳形象牆。這裡是訪客核准拍照區，構圖專業且完全不會拍到管制實驗區內部資訊。',
+            text_en: 'Academia Sinica RCCI Lab 1F Logo Wall. This is the designated visitor photo spot—framed safely so no restricted lab information is visible.'
           }
         ]);
         return true;
@@ -28,8 +30,10 @@
         window.BS.UI.startDialogue([
           {
             speaker: '1F 管制實驗區觀測窗',
+            speaker_en: '1F Cleanroom Window',
             portrait: 'monitor',
-            text: '透過大面玻璃觀測窗可看到一樓管制實驗區的機台運作。門禁告示寫著：「未經授權人員禁止入內，訪客參觀須事前申請並全程陪同。」'
+            text: '透過大面玻璃觀測窗可看到一樓管制實驗區的機台運作。門禁告示寫著：「未經授權人員禁止入內，訪客參觀須事前申請並全程陪同。」',
+            text_en: 'Equipment operates behind the glass window. Notice: "Authorized personnel only. Visitors require prior registration and continuous escort."'
           }
         ]);
         return true;
@@ -38,10 +42,14 @@
         window.BS.UI.startDialogue([
           {
             speaker: '1F 演講與會議廳',
+            speaker_en: '1F Conference Hall',
             portrait: 'poster',
             text: state.chapter === 2
               ? '一樓演講與會議廳，明天研討會前夕燈光已暗。對外公開的海報與簡報，務必先確認授權與版本！'
-              : '一樓大型演講與會議廳。舉辦外部交流活動時，來賓須先於大門櫃台登記並遵守拍攝規範。'
+              : '一樓大型演講與會議廳。舉辦外部交流活動時，來賓須先於大門櫃台登記並遵守拍攝規範。',
+            text_en: state.chapter === 2
+              ? '1F Conference Hall before tomorrow\'s symposium. Before public presentation, always verify partner authorization and final approved version!'
+              : '1F Main Auditorium. For external events, visitors must register at reception and comply with photography policies.'
           }
         ]);
         return true;
@@ -50,8 +58,10 @@
         window.BS.UI.startDialogue([
           {
             speaker: '2F 營業秘密宣導布告欄',
+            speaker_en: '2F Trade Secret Notice Board',
             portrait: 'desk',
-            text: '【實驗室營業秘密三提醒】\n① 對外給廠商資料：先確認有效 NDA、最小範圍與連結效期。\n② 訪客接待與拍照：一樓登記、全程陪同、拍前巡視白板螢幕樣品。\n③ 論文與海報公開：確認合作授權與專利安排，核准綁定版本。'
+            text: '【實驗室營業秘密三提醒】\n① 對外給廠商資料：先確認有效 NDA、最小範圍與連結效期。\n② 訪客接待與拍照：一樓登記、全程陪同、拍前巡視白板螢幕樣品。\n③ 論文與海報公開：確認合作授權與專利安排，核准綁定版本。',
+            text_en: '【Three Lab Trade Secret Reminders】\n① Sharing data with vendors: verify active NDA, minimal scope, and link expiry.\n② Visitor escort & photos: 1F sign-in, continuous escort, inspect whiteboards & screens before shooting.\n③ Papers & posters: verify partner consent and patent status; bind approval to exact version.'
           }
         ]);
         return true;
@@ -103,13 +113,17 @@
       window.BS.UI.startDialogue([
         {
           speaker: '值班備忘錄（2F 辦公區）',
+          speaker_en: 'Duty Memo (2F Office)',
           portrait: 'desk',
-          text: '下午 3:40，下班前還有兩件事要處理：\n① 2F 辦公區電腦有合作方急著要會議資料的來信。\n② 1F 大門櫃台有預約來賓陳先生等候拍照（可由左側樓梯／電梯下樓）。'
+          text: '下午 3:40，下班前還有兩件事要處理：\n① 2F 辦公區電腦有合作方急著要會議資料的來信。\n② 1F 大門櫃台有預約來賓陳先生等候拍照（可由左側樓梯／電梯下樓）。',
+          text_en: '3:40 PM. Two tasks before clocking out:\n① An urgent email from partner requesting meeting slides on 2F duty PC.\n② Scheduled visitor Mr. Chen waiting at 1F reception for photography (take stairs/elevator on left).'
         },
         {
           speaker: '小安（值班研究助理）',
+          speaker_en: 'Xiao-An (Duty Research Assistant)',
           portrait: 'player',
-          text: '順序可以自己安排。跟外部廠商交流資料前，記得先確認對方是否已簽署有效 NDA！有不確定的地方，就查電腦合約清單，或問 2F 實驗區的阿文與組長辦公室的阿明組長吧！'
+          text: '順序可以自己安排。跟外部廠商交流資料前，記得先確認對方是否已簽署有效 NDA！有不確定的地方，就查電腦合約清單，或問 2F 實驗區的阿文與組長辦公室的阿明組長吧！',
+          text_en: 'I can tackle them in any order. Before sharing data with external partners, ensure a valid Non-Disclosure Agreement (NDA) is signed! If unsure, check NDA records on PC or consult A-Wen in 2F lab and Team Lead A-Ming!'
         }
       ]);
     }
@@ -642,8 +656,10 @@
       window.BS.UI.startDialogue([
         {
           speaker: '1F 大門接待櫃台（登記簿）',
+          speaker_en: '1F Main Reception Desk (Logbook)',
           portrait: 'reception',
-          text: '【今日預約登記】\n來訪人員：陳先生（外校參訪來賓）｜時間：15:30\n核准活動範圍：1F 大門大廳形象牆拍照留念；若須上 2F 實驗區參觀拍照，須由值班人員全程陪同，且拍攝前須確認畫面無未遮蔽之研究資訊。'
+          text: '【今日預約登記】\n來訪人員：陳先生（外校參訪來賓）｜時間：15:30\n核准活動範圍：1F 大門大廳形象牆拍照留念；若須上 2F 實驗區參觀拍照，須由值班人員全程陪同，且拍攝前須確認畫面無未遮蔽之研究資訊。',
+          text_en: '[Today\'s Visitor Registry]\nVisitor: Mr. Chen (Academic Guest) | Time: 15:30\nApproved Scope: Commemorative photo at 1F Lobby Logo Wall; if visiting 2F lab, must be escorted continuously by duty staff with prior verification that no unshielded research info is in view.'
         }
       ]);
     }
@@ -938,18 +954,24 @@
       window.BS.UI.startDialogue([
         {
           speaker: '同事 阿文（辦公區門口）',
+          speaker_en: 'Colleague: A-Wen (Office Entrance)',
           portrait: 'colleague',
-          text: '小安，太好了你還沒走！我正在趕明天研討會要用的海報。\n「我把上次合作會議的圖放進海報了。今晚要交，你可以幫我看一下嗎？」'
+          text: '小安，太好了你還沒走！我正在趕明天研討會要用的海報。\n「我把上次合作會議的圖放進海報了。今晚要交，你可以幫我看一下嗎？」',
+          text_en: 'Xiao-An, so glad you are still here! I am rushing tomorrow\'s symposium poster.\n"I included charts from our last partner meeting. Deadline is tonight—could you review it with me?"'
         },
         {
           speaker: '同事 阿文',
+          speaker_en: 'Colleague: A-Wen',
           portrait: 'colleague',
-          text: '海報草稿我已經存到辦公區電腦裡了。我先回實驗區整理手邊的圖檔，如果有圖片需要確認來源或換圖，再過來實驗區找我！'
+          text: '海報草稿我已經存到辦公區電腦裡了。我先回實驗區整理手邊的圖檔，如果有圖片需要確認來源或換圖，再過來實驗區找我！',
+          text_en: 'I saved the draft on the office PC. I will be in the lab organizing figures. If any figure needs source verification or replacement, come find me!'
         },
         {
           speaker: '小安',
+          speaker_en: 'Xiao-An',
           portrait: 'player',
-          text: '晚上六點了，公開研討會海報可不能馬虎。先去辦公區電腦看看草稿有三張什麼圖，也可以找實驗區的阿文和辦公區的阿明組長確認！'
+          text: '晚上六點了，公開研討會海報可不能馬虎。先去辦公區電腦看看草稿有三張什麼圖，也可以找實驗區的阿文和辦公區的阿明組長確認！',
+          text_en: 'It\'s 6:00 PM. A public symposium poster must be handled rigorously. Check the 3 draft figures at the office PC, and consult A-Wen and Team Lead A-Ming!'
         }
       ], () => {
         // Move 阿文 back to his 2F Lab bench so player walks to 2F 實驗區的阿文 for clues
@@ -1423,18 +1445,24 @@
       window.BS.UI.startDialogue([
         {
           speaker: '同事 阿文（2F 辦公區旁）',
+          speaker_en: 'Colleague: A-Wen (2F Office)',
           portrait: 'colleague',
-          text: '下午五點了，今天就是我在實驗室的最後一天。\n「上次那批資料已經有清冊，我們從那裡找。我把交接清單放在電腦裡了。對了，下個月改論文還要用之前開會那兩張圖。我原本的資料夾權限可以先留著嗎？」'
+          text: '下午五點了，今天就是我在實驗室的最後一天。\n「上次那批資料已經有清冊，我們從那裡找。我把交接清單放在電腦裡了。對了，下個月改論文還要用之前開會那兩張圖。我原本的資料夾權限可以先留著嗎？」',
+          text_en: '5:00 PM. Today is my last day in the lab.\n"The previous records are already inventoried; we can check there. I left the handover checklist on the PC. By the way, I need 2 figures to revise my thesis next month. Can I keep my folder access?"'
         },
         {
           speaker: '同事 阿文',
+          speaker_en: 'Colleague: A-Wen',
           portrait: 'colleague',
-          text: '我先回 2F 實驗區整理個人工作區。接手我研究的小晴也在 2F 實驗區，阿明組長跟門禁回收櫃台都在 1F 大廳喔！'
+          text: '我先回 2F 實驗區整理個人工作區。接手我研究的小晴也在 2F 實驗區，阿明組長跟門禁回收櫃台都在 1F 大廳喔！',
+          text_en: 'I will tidy my desk in 2F lab. Xiao-Qing (taking over my project) is also in 2F lab. Team Lead A-Ming and the badge desk are in 1F lobby!'
         },
         {
           speaker: '小安',
+          speaker_en: 'Xiao-An',
           portrait: 'player',
-          text: '離職交接可不能漏掉任何一步！先看看 2F 值班電腦的交接清單與存取預覽，或是先問 2F 的阿文與小晴、下樓找 1F 阿明組長與大門櫃台都可以！'
+          text: '離職交接可不能漏掉任何一步！先看看 2F 值班電腦的交接清單與存取預覽，或是先問 2F 的阿文與小晴、下樓找 1F 阿明組長與大門櫃台都可以！',
+          text_en: 'Offboarding requires rigorous execution! Review the handover checklist and access preview on 2F PC, or consult A-Wen, Xiao-Qing, and Team Lead A-Ming!'
         }
       ], () => {
         ctx.moveNpcTo('npc_colleague', 2, 10, 4, 'left');
@@ -1985,13 +2013,17 @@
       window.BS.UI.startDialogue([
         {
           speaker: '同事 阿文（1F 實驗區）',
+          speaker_en: 'Colleague: A-Wen (1F Lab)',
           portrait: 'colleague',
-          text: '阿文在 1F 實驗區拿出同一個虛構量測計畫（晴空計畫）的三組資料，對小安說：\n「這三組資料都是同一個計畫做的。小晴明天要盤點，你幫我看看哪些需要列進研發成果清單？她要知道去哪裡找，還有該找誰問。」'
+          text: '阿文在 1F 實驗區拿出同一個虛構量測計畫（晴空計畫）的三組資料，對小安說：\n「這三組資料都是同一個計畫做的。小晴明天要盤點，你幫我看看哪些需要列進研發成果清單？她要知道去哪裡找，還有該找誰問。」',
+          text_en: 'In 1F lab, A-Wen presents 3 data sets from the ClearSky Project and says:\n"These are all from the same project. Xiao-Qing will inventory them tomorrow. Which ones should go into the R&D Records Inventory? She needs to know where to find them and who to ask."'
         },
         {
           speaker: '小安',
+          speaker_en: 'Xiao-An',
           portrait: 'player',
-          text: '好！同一計畫可能同時包含公開資訊、未公開 know-how 和專利申請資料。我們一起看這三張資料卡，確認各自該如何判斷！'
+          text: '好！同一計畫可能同時包含公開資訊、未公開 know-how 和專利申請資料。我們一起看這三張資料卡，確認各自該如何判斷！',
+          text_en: 'Great! A single project can encompass public information, undisclosed know-how, and patent filings. Let us examine the 3 data cards to classify each properly!'
         }
       ], () => {
         ctx.refreshHUD();
@@ -2277,18 +2309,24 @@
       window.BS.UI.startDialogue([
         {
           speaker: '值班備忘錄（2F 辦公區）',
+          speaker_en: 'Duty Memo (2F Office)',
           portrait: 'desk',
-          text: '下午 4:00，同事阿文拿著剛整理好的三份研究文件急匆匆走進 2F 辦公區，等一下小晴要接手盤點並準備會議資料。'
+          text: '下午 4:00，同事阿文拿著剛整理好的三份研究文件急匆匆走進 2F 辦公區，等一下小晴要接手盤點並準備會議資料。',
+          text_en: '4:00 PM. Colleague A-Wen rushes into 2F office holding 3 research documents. Xiao-Qing will take over soon to prepare meeting materials.'
         },
         {
           speaker: '阿文（同事）',
+          speaker_en: 'A-Wen (Colleague)',
           portrait: 'colleague',
-          text: '小安！這三份資料等一下要交接給小晴，但各份的內容和用途都不太一樣。我們得先逐份看清楚，決定要不要加上機密標示，並標在顯眼的位置（簡報封面與頁腳、紙本首頁蓋印），小晴接手才清楚怎麼處理！'
+          text: '小安！這三份資料等一下要交接給小晴，但各份的內容和用途都不太一樣。我們得先逐份看清楚，決定要不要加上機密標示，並標在顯眼的位置（簡報封面與頁腳、紙本首頁蓋印），小晴接手才清楚怎麼處理！',
+          text_en: 'Xiao-An! These 3 files will be handed over to Xiao-Qing, but their contents and purposes differ. We must review each to decide whether to add a Confidentiality Label in prominent spots (slides cover/footer, paper cover stamp) so she knows how to handle them!'
         },
         {
           speaker: '小安（值班研究助理）',
+          speaker_en: 'Xiao-An (Duty Research Assistant)',
           portrait: 'player',
-          text: '沒問題！我們逐份查看內容和用途，確認哪些含有未公開的自研技術，加上正確標示並預覽版面效果後，再交給小晴！'
+          text: '沒問題！我們逐份查看內容和用途，確認哪些含有未公開的自研技術，加上正確標示並預覽版面效果後，再交給小晴！',
+          text_en: 'No problem! Let us check contents and purposes, identify undisclosed know-how, apply proper Confidentiality Labels, preview layouts, and hand them to Xiao-Qing!'
         }
       ], () => {
         ctx.refreshHUD();
