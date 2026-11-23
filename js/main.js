@@ -882,6 +882,15 @@
     nearbyTarget = window.BS.Map.findNearbyTarget(player.floor, player.x, player.y, player.dir, npcs, currentChapter);
     if (nearbyTarget) {
       $('nearby-hint').textContent = `按 A / 空白鍵互動：${nearbyTarget.label}`;
+    } else if (currentChapter === 5 && state && state.ch5) {
+      const c = state.ch5;
+      if (!c.markingCompleted) {
+        $('nearby-hint').textContent = '目前在 2F 辦公區 · 請至左上方值班電腦檢視三份文件標示';
+      } else if (!c.verifiedWithQing) {
+        $('nearby-hint').textContent = '目前在 2F 辦公區 · 請找小晴確認文件標示與保管';
+      } else {
+        $('nearby-hint').textContent = '目前在 2F 辦公區 · 請向小晴或到值班桌完成交班';
+      }
     } else if (currentChapter === 4 && state && state.ch4) {
       const c = state.ch4;
       if (!c.cardsCompleted) {
@@ -1049,8 +1058,29 @@
           drawQuestBubble(3, 11.5, '✓', '#22c55e', '#ffffff');
         }
       }
-    } else {
-      // Chapter 4 (Internal 3) cross-floor quest markers!
+    } else if (currentChapter === 5 && state.ch5) {
+      // Chapter 3 (Internal 5): 這份文件要怎麼標？
+      const c = state.ch5;
+      const allDone = c.markingCompleted && c.verifiedWithQing && !state.handoverDone;
+
+      if (player.floor === 2) {
+        if (!c.markingCompleted) {
+          drawQuestBubble(3, 8.5, '!', '#f59e0b', '#1e293b');
+        } else if (!c.verifiedWithQing) {
+          const qing = npcs.find((n) => n.id === 'npc_qing');
+          if (qing && qing.floor === 2) {
+            drawQuestBubble(qing.x, qing.y - 0.3, '!', '#38bdf8', '#0f172a');
+          }
+        } else if (allDone) {
+          const qing = npcs.find((n) => n.id === 'npc_qing');
+          if (qing && qing.floor === 2) {
+            drawQuestBubble(qing.x, qing.y - 0.3, '✓', '#22c55e', '#ffffff');
+          }
+          drawQuestBubble(3, 11.5, '✓', '#22c55e', '#ffffff');
+        }
+      }
+    } else if (currentChapter === 3 && state.ch3) {
+      // Chapter 5 (Internal 3) cross-floor quest markers!
       const c = state.ch3;
       const allDone = window.BS.State.isCh3FullyComplete(state) && !state.handoverDone;
       const need1F =

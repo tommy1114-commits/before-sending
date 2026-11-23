@@ -502,6 +502,7 @@
     const isCh3 = state.chapter === 3;
     const isCh4 = state.chapter === 4;
     const isCh1 = state.chapter === 1;
+    const isCh5 = state.chapter === 5;
 
     // 1. Floor Tiles per Zone
     for (let y = 2; y <= 18; y++) {
@@ -676,15 +677,17 @@
     px(ctx, pcX + 1, pcY, 14, 11, '#293345');
     let pcAlert = false;
     let pcUnread = false;
-    if (isCh2) {
+    if (isCh2 && state.ch2) {
       pcAlert = state.ch2.misuploaded && !state.ch2.contactedOrganizer;
       pcUnread = !state.ch2.openedPoster || pcAlert;
-    } else if (isCh3) {
+    } else if (isCh3 && state.ch3) {
       pcAlert = state.ch3.interruptedByEarlyRevoke && !state.ch3.adminTransferCompleted;
       pcUnread = !state.ch3.openedChecklist || pcAlert;
-    } else if (isCh4) {
+    } else if (isCh4 && state.ch4) {
       pcUnread = !state.ch4.updatedSaved;
-    } else {
+    } else if (isCh5 && state.ch5) {
+      pcUnread = !state.ch5.markingCompleted;
+    } else if (state.email) {
       pcAlert = state.email.misshared && !state.email.linkRevoked;
       pcUnread = state.email.status === 'unread' || pcAlert;
     }
@@ -770,11 +773,15 @@
   }
 
   function getObjectLabel(obj, chapter) {
-    if (chapter === 4) {
-      if (obj.id === 'pc') return '值班電腦（研發成果清單）';
+    if (chapter === 5) {
+      if (obj.id === 'pc') return '值班電腦（文件標示檢視）';
       if (obj.id === 'duty_desk') return '值班桌（第三章交班）';
+    } else if (chapter === 4) {
+      if (obj.id === 'pc') return '值班電腦（研發成果清單）';
+      if (obj.id === 'duty_desk') return '值班桌（第四章交班）';
     } else if (chapter === 3) {
       if (obj.id === 'monitor') return '實驗紀錄電腦（路徑對照）';
+      if (obj.id === 'duty_desk') return '值班桌（第五章交班）';
     }
     return obj.label;
   }
