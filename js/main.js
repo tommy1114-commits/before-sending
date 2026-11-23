@@ -214,6 +214,9 @@
 
     state = window.BS.State.createStateForChapter(currentChapter);
     state.started = true;
+    if (window.BS.Analytics) {
+      window.BS.Analytics.trackChapterStart(state);
+    }
     npcs = window.BS.Map.createNPCsForChapter(currentChapter);
 
     if (currentChapter === 4) {

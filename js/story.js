@@ -963,6 +963,9 @@
                 state.timeMinutes = Math.max(state.timeMinutes, 16 * 60);
                 ctx.refreshHUD();
                 const result = window.BS.State.evaluateHandover(state);
+                if (window.BS.Analytics) {
+                  window.BS.Analytics.trackChapterComplete(state);
+                }
                 if (result.ending.id === 'alarm_handover') {
                   window.BS.Audio.alert();
                 } else {
@@ -1487,6 +1490,9 @@
                 state.timeMinutes = Math.max(state.timeMinutes, 18 * 60 + 25);
                 ctx.refreshHUD();
                 const result = window.BS.State.evaluateChapter2Handover(state);
+                if (window.BS.Analytics) {
+                  window.BS.Analytics.trackChapterComplete(state);
+                }
                 if (unfinishedRemedy) {
                   window.BS.Audio.alert();
                 } else {
@@ -2130,6 +2136,9 @@
                 state.timeMinutes = Math.max(state.timeMinutes, 17 * 60 + 25);
                 ctx.refreshHUD();
                 const result = window.BS.State.evaluateChapter3Handover(state);
+                if (window.BS.Analytics) {
+                  window.BS.Analytics.trackChapterComplete(state);
+                }
                 if (result.hasRisk) {
                   window.BS.Audio.alert();
                 } else {
@@ -2181,6 +2190,9 @@
       state.timeMinutes = Math.max(state.timeMinutes, 17 * 60);
       ctx.refreshHUD();
       const result = window.BS.State.evaluateChapter4Handover(state);
+      if (window.BS.Analytics) {
+        window.BS.Analytics.trackChapterComplete(state);
+      }
       if (result.hasRisk) {
         window.BS.Audio.alert();
       } else {
@@ -2533,6 +2545,9 @@
       state.timeMinutes = Math.max(state.timeMinutes, 16 * 60 + 20);
       ctx.refreshHUD();
       const result = window.BS.State.evaluateChapter5Handover(state);
+      if (window.BS.Analytics) {
+        window.BS.Analytics.trackChapterComplete(state);
+      }
       if (result.hasRisk) {
         window.BS.Audio.alert();
       } else {
