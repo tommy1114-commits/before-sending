@@ -932,6 +932,18 @@
       }
     });
 
+    const charBtn = $('btn-show-characters');
+    if (charBtn) {
+      const charTitle = charBtn.querySelector('.menu-title-text');
+      if (charTitle) charTitle.textContent = t('charactersTitle');
+      const charTimeVal = charBtn.querySelector('.time-val');
+      if (charTimeVal) charTimeVal.textContent = t('charactersCount');
+      const charTimeTag = charBtn.querySelector('.time-tag');
+      if (charTimeTag) charTimeTag.textContent = t('charactersTag');
+      const menuTime = charBtn.querySelector('.menu-time');
+      if (menuTime) menuTime.setAttribute('title', `${t('charactersTag')}: ${t('charactersCount')}`);
+    }
+
     const pillLabels = document.querySelectorAll('.gba-pill-label');
     if (pillLabels.length >= 2) {
       pillLabels[0].innerHTML = isEn ? 'SELECT<small>Notes</small>' : 'SELECT<small>筆記</small>';
@@ -1085,6 +1097,10 @@
     document.querySelectorAll('#title-menu-list .cursor-menu-item').forEach((btn) => {
       btn.addEventListener('click', () => {
         window.BS.Audio.confirm();
+        if (btn.dataset.action === 'characters') {
+          window.BS.UI.openCharactersModal();
+          return;
+        }
         const chId = Number(btn.dataset.chapter) || 1;
         startChapter(chId);
       });
@@ -1251,11 +1267,21 @@
     }
 
     nearbyTarget = window.BS.Map.findNearbyTarget(player.floor, player.x, player.y, player.dir, npcs, currentChapter);
+    const nearbyHintEl = $('nearby-hint');
     if (nearbyTarget) {
-      $('nearby-hint').textContent = isEn
-        ? `Press A / Space to interact: ${nearbyTarget.label}`
-        : `按 A / 空白鍵互動：${nearbyTarget.label}`;
-    } else if (currentChapter === 5 && state && state.ch5) {
+      if (nearbyTarget.type === 'npc') {
+        nearbyHintEl.textContent = isEn
+          ? `Press A to talk to ${nearbyTarget.label}`
+          : `按 A 與 ${nearbyTarget.label} 對話`;
+      } else {
+        nearbyHintEl.textContent = isEn
+          ? `Press A to inspect ${nearbyTarget.label}`
+          : `按 A 查看 ${nearbyTarget.label}`;
+      }
+      nearbyHintEl.classList.add('has-target');
+    } else {
+      nearbyHintEl.classList.remove('has-target');
+      if (currentChapter === 5 && state && state.ch5) {
       const c = state.ch5;
       if (!c.markingCompleted) {
         $('nearby-hint').textContent = isEn
@@ -1303,6 +1329,7 @@
       $('nearby-hint').textContent = isEn
         ? 'Approach objects or colleagues · START Menu · SELECT Notes'
         : '走近物件或同事查看提示 · START 選單 · SELECT 筆記';
+    }
     }
   }
 

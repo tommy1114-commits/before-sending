@@ -243,6 +243,7 @@
       'camera-modal',
       'clues-modal',
       'endings-modal',
+      'characters-modal',
       'handover-modal',
       'pause-modal',
       'clear-screen'
@@ -3252,6 +3253,176 @@
     `;
   }
 
+  // ===== Character Profiles Modal =====
+  const CHARACTER_PROFILES = [
+    {
+      key: 'an',
+      spriteKey: 'player',
+      name: '小安',
+      name_en: 'Xiao-An',
+      title: '值班研究助理 · 玩家主角',
+      title_en: 'Duty Research Assistant · Player Protagonist',
+      chapter: '全章節主角（第 1 ~ 5 章）',
+      chapter_en: 'All Chapters (Ch 1–5)',
+      badge: '防護先鋒',
+      badge_en: 'Protagonist',
+      badgeClass: '',
+      desc: '中央研究院 RCCI 智慧感知與前瞻運算實驗室研究助理。負責日常值班、實驗室安全規範落實、訪客接待及交接任務。在每一章面對不同情境的營業秘密與智財防護決策。',
+      desc_en: 'Research Assistant at the RCCI Lab. Responsible for daily duty, lab safety protocols, visitor management, and handover tasks. Guides the team through trade secret defense decisions across all chapters.',
+      keyPoint: '嚴格遵守保密守則，落實訪客 NDA 簽署、清除白板敏感公式、收拾未公開樣品、鎖定值班電腦螢幕，並在交接時核對資產與權限。',
+      keyPoint_en: 'Strictly follow confidentiality rules: execute visitor NDAs, clear sensitive whiteboards, store prototypes, lock terminals, and verify handover clearances.'
+    },
+    {
+      key: 'colleague',
+      name: '阿文',
+      name_en: 'A-Wen',
+      title: '資深研發人員',
+      title_en: 'Senior Researcher',
+      chapter: '登場章節：第 2、4、5 章',
+      chapter_en: 'Appears in Ch 2, 4, 5',
+      badge: '研發主力',
+      badge_en: 'Researcher',
+      badgeClass: 'colleague',
+      desc: '實驗室的資深研發主力，技術能力強且工作投入。曾面臨論文截稿壓力欲攜出未公開數據、離職前夕整理研發成果與移轉清冊，代表研發人員在效率、學術發表與保密界線間的挑戰。',
+      desc_en: 'Senior core researcher at RCCI Lab. Dedicated and high-output, he experiences submission crunch deadlines and offboarding handovers, embodying the tension between research speed and IP protection.',
+      keyPoint: '未公開的核心數據與演算法嚴禁以私人隨身碟或外部雲端攜出；離職前落實研發清單盤點、繳回設備並切斷系統存取權限。',
+      keyPoint_en: 'Never transfer unreleased core data/code via private USBs or clouds; verify complete IP inventory, return devices, and revoke access upon departure.'
+    },
+    {
+      key: 'lead',
+      name: '阿明組長',
+      name_en: 'Lead A-Ming',
+      title: '實驗室負責人 · 計畫主持人',
+      title_en: 'Lab Lead · Principal Investigator',
+      chapter: '登場章節：第 1、2、3 章',
+      chapter_en: 'Appears in Ch 1, 2, 3',
+      badge: '計畫主持',
+      badge_en: 'Lab Lead',
+      badgeClass: 'lead',
+      desc: 'RCCI 實驗室計畫主持人與法規守門人。負責統籌研發計畫、對外合作審查、保密措施制度化推動，以及產學合作合約與專利申請進度把關。',
+      desc_en: 'Principal Investigator and IP gatekeeper at RCCI Lab. Oversees research roadmaps, joint venture contracts, patent filing schedules, and compliance standards.',
+      keyPoint: '研發成果發表前必須評估專利申請時程，避免「先公開後申請」喪失新穎性；產學合作時嚴格把關保密條款與授權界線。',
+      keyPoint_en: 'Assess patent timing before publishing to protect novelty; strictly enforce NDAs and intellectual property licensing scopes in partnerships.'
+    },
+    {
+      key: 'qing',
+      name: '小晴',
+      name_en: 'Xiao-Qing',
+      title: '接手研究助理 · 成果盤點員',
+      title_en: 'Successor & Inventory Assistant',
+      chapter: '登場章節：第 3、4、5 章',
+      chapter_en: 'Appears in Ch 3, 4, 5',
+      badge: '交接盤點',
+      badge_en: 'Handover Lead',
+      badgeClass: '',
+      desc: '細心負責的研究團隊成員，負責研發文件機密等級標示、成果清單盤點與離職人員業務接手。嚴格把關每一份研發紀錄的實質保護措施。',
+      desc_en: 'Meticulous research team member in charge of document sensitivity labeling, asset inventorying, and offboarding succession. Ensures rigorous protective measures for all lab assets.',
+      keyPoint: '落實「合理保密措施」，明確區分機密／內部／公開文件標示，確保離職交接清單與智財權利移轉文件完整簽署並歸檔。',
+      keyPoint_en: 'Enforce reasonable security measures: label docs by sensitivity tier (Secret/Internal/Public) and archive signed handover & IP transfer records.'
+    },
+    {
+      key: 'visitor',
+      name: '陳先生',
+      name_en: 'Mr. Chen',
+      title: '學術參訪學者 · 外部交流訪客',
+      title_en: 'Visiting Scholar',
+      chapter: '登場章節：第 1 章',
+      chapter_en: 'Appears in Ch 1',
+      badge: '外部訪客',
+      badge_en: 'Guest',
+      badgeClass: 'guest',
+      desc: '受邀前來實驗室參觀並進行技術交流的外部訪客。對前瞻實驗器材與進行中的專案高度好奇，考驗實驗室接待流程中的保密界線與動線控管。',
+      desc_en: 'External visiting scholar invited for academic exchange. Highly curious about active research setups and instruments, testing the lab\'s physical security and NDA protocols.',
+      keyPoint: '外部人士進入核心研發場域前必須換證並簽署保密協定（NDA）；參訪全程專人陪同，管制拍照攝影與未經許可的接觸。',
+      keyPoint_en: 'External visitors must register and sign NDAs before entering labs; provide continuous escorts and prohibit unauthorized photo-taking.'
+    },
+    {
+      key: 'su',
+      name: '蘇小姐',
+      name_en: 'Ms. Su',
+      title: '星芒科技業界窗口 · 產學合作經理',
+      title_en: 'Industry Partner Contact',
+      chapter: '登場章節：第 3 章',
+      chapter_en: 'Appears in Ch 3',
+      badge: '合作夥伴',
+      badge_en: 'Partner',
+      badgeClass: 'partner',
+      desc: '業界合作夥伴「星芒科技」的研發專案經理。前來洽談產學合作案規格與技術轉移細節，代表外部企業在研發合作過程中的資訊互換與邊界維護。',
+      desc_en: 'R&D Project Manager from industry partner Starlight Tech. Coordinates collaboration specs and technology transfer, representing external partner interactions and IP boundaries.',
+      keyPoint: '交付合作廠商的文件必須清晰標示「機密（Confidential）」字樣、指定收受對象與用途限制，防杜合作過程中的二次擴散與外流。',
+      keyPoint_en: 'Deliverables shared with partners must feature clear "Confidential" watermarks, designated recipients, and purpose-bound use clauses.'
+    }
+  ];
+
+  function openCharactersModal() {
+    activeModal = 'characters';
+    $('characters-modal').classList.remove('hidden');
+    const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
+
+    const titleEl = $('characters-title');
+    if (titleEl) {
+      titleEl.textContent = isEn
+        ? '👥 Character Profiles — RCCI Lab Team & External Partners'
+        : '👥 登場人物介紹 — RCCI 實驗室團隊與外部夥伴';
+    }
+
+    const bodyEl = $('characters-body');
+    if (bodyEl) {
+      bodyEl.innerHTML = `
+        <p style="margin:0 0 12px; font-size:12.5px; color:#4c586e; line-height:1.5;">
+          ${isEn
+            ? 'Meet the <strong>6 key characters</strong> appearing across the 5 chapters. Learn their roles, lab duties, and essential trade secret protection takeaways:'
+            : '本遊戲共收錄 <strong>6 位核心登場人物</strong>。了解他們在各章節的角色定位、研發職責，以及在營業秘密防護情境中的關鍵守則：'}
+        </p>
+        <div class="character-list">
+          ${CHARACTER_PROFILES.map((c) => {
+            const title = isEn ? c.title_en : c.title;
+            const chapter = isEn ? c.chapter_en : c.chapter;
+            const desc = isEn ? c.desc_en : c.desc;
+            const badge = isEn ? c.badge_en : c.badge;
+            const keyPoint = isEn ? c.keyPoint_en : c.keyPoint;
+            return `
+              <div class="character-card">
+                <div class="character-portrait-box">
+                  <canvas id="char-canvas-${c.key}" class="character-portrait-canvas" width="32" height="32" aria-label="${c.name}"></canvas>
+                </div>
+                <div class="character-info">
+                  <div class="character-header-line">
+                    <div class="character-name-group">
+                      <span class="character-name">${c.name}</span>
+                      <span class="character-name-en">${c.name_en}</span>
+                    </div>
+                    <span class="character-role-badge ${c.badgeClass || ''}">${badge}</span>
+                  </div>
+                  <div class="character-chapters-tag">${chapter} · ${title}</div>
+                  <div class="character-bio">${desc}</div>
+                  <div class="character-secret-duty">
+                    <span class="duty-label">${isEn ? '🔑 Secret Defense Note: ' : '🔑 營業秘密防護職責：'}</span>${keyPoint}
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      // Draw portraits on each canvas
+      setTimeout(() => {
+        CHARACTER_PROFILES.forEach((c) => {
+          const cvs = document.getElementById(`char-canvas-${c.key}`);
+          if (cvs && window.BS && window.BS.Sprites && window.BS.Sprites.drawPortrait) {
+            window.BS.Sprites.drawPortrait(cvs, c.spriteKey || c.key);
+          }
+        });
+      }, 0);
+    }
+  }
+
+  function closeCharactersModal() {
+    $('characters-modal').classList.add('hidden');
+    if (activeModal === 'characters') activeModal = null;
+  }
+
   // ===== Handover Summary Modal (Ch1, Ch2, Ch3, Ch4 & Ch5) =====
   function openHandoverModal(result, callbacks) {
     activeModal = 'handover';
@@ -3751,6 +3922,10 @@
       window.BS.Audio.cancel();
       closeAllModals();
     });
+    $('btn-characters-close').addEventListener('click', () => {
+      window.BS.Audio.cancel();
+      closeAllModals();
+    });
     $('btn-pause-close').addEventListener('click', () => {
       window.BS.Audio.cancel();
       closeAllModals();
@@ -3793,6 +3968,8 @@
     openMarkingModal,
     openCluesModal,
     openEndingsModal,
+    openCharactersModal,
+    closeCharactersModal,
     openHandoverModal
   };
 })();

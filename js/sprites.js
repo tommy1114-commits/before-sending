@@ -155,6 +155,15 @@
       shirt: '#fbf7f0',
       pants: '#2f3a4f',
       badge: true
+    },
+    su: {
+      hair: '#2c1e21',
+      hairHighlight: '#473337',
+      skin: '#f7d3ba',
+      coat: '#225588',
+      shirt: '#ffffff',
+      pants: '#1e293b',
+      badge: true
     }
   };
 
@@ -182,7 +191,8 @@
         lead: '#f0e2cb',
         colleague: '#dcebfa',
         visitor: '#f7e5c6',
-        qing: '#eadcf7'
+        qing: '#eadcf7',
+        su: '#dbeafe'
       };
       px(ctx, 0, 0, 32, 32, bgColors[id] || '#e8e0cc');
       const sp = spriteCache[id].down[0];

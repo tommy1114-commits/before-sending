@@ -114,6 +114,15 @@
                     </span>
                   </span>
                 </button>
+                <button class="cursor-menu-item" id="btn-show-characters" data-idx="5" data-action="characters" type="button" role="menuitem">
+                  <span class="menu-cursor">▶</span>
+                  <span class="menu-body">
+                    <span class="menu-main">
+                      <span class="menu-title-text" id="title-characters-text">👥 登場人物介紹</span>
+                      <span class="menu-time" title="登場人物：全 6 位"><span class="time-tag">圖鑑</span><span class="time-val">全 6 位</span></span>
+                    </span>
+                  </span>
+                </button>
               </div>
               <div class="title-menu-footer">↑↓ 移動游標 · A / Enter 確認 · 五章皆可直接進入</div>
             </div>
@@ -252,6 +261,17 @@
           </div>
         </section>
 
+        <!-- Character Profiles Modal -->
+        <section class="modal-overlay hidden" id="characters-modal" role="dialog" aria-modal="true" aria-labelledby="characters-title">
+          <div class="modal-window notes-window characters-window">
+            <div class="modal-header">
+              <span id="characters-title">👥 登場人物介紹 — RCCI 實驗室團隊與外部夥伴</span>
+              <button class="modal-close" id="btn-characters-close" type="button" aria-label="關閉人物介紹">✕</button>
+            </div>
+            <div class="modal-body" id="characters-body"></div>
+          </div>
+        </section>
+
         <!-- Handover Summary Screen -->
         <section class="modal-overlay hidden" id="handover-modal" role="dialog" aria-modal="true" aria-labelledby="handover-title">
           <div class="modal-window handover-window">
@@ -270,6 +290,7 @@
       <div class="nearby-strip" id="nearby-hint">↑↓ 選擇章節，按 A 或 Enter 開始</div>
       <!-- In-Game Chapter Mission & Progress Indicator (Tap to open SELECT notes) -->
       <div class="chapter-progress-strip hidden" id="chapter-progress-strip">
+        <div class="gba-subbrand-title">BEFORE SENDING ADVANCE</div>
         <button type="button" class="chapter-progress-pill" id="chapter-progress-pill" title="點擊查看詳細筆記與清單 (SELECT)" aria-label="任務進度與筆記">
           <span class="progress-pill-icon" id="progress-pill-icon">🌟</span>
           <span class="progress-pill-text" id="progress-pill-text">營業秘密防護查核：已完成 0 / 4</span>
