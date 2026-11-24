@@ -628,6 +628,123 @@
     return c.markingCompleted && c.verifiedWithQing;
   }
 
+  // ===== Dynamic In-Game Chapter Progress Calculator =====
+  function getChapterProgress(state) {
+    if (!state) return null;
+    const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
+
+    // Chapter 1: 寄出之前 (internal 1)
+    if (state.chapter === 1) {
+      const c = state.clues || {};
+      const e = state.email || {};
+      const emailTouched = Boolean(e.status && e.status !== 'unread' && e.status !== 'read' && e.status !== 'holding');
+      const visitorResolved = Boolean(state.visitor && (
+        state.visitor.status === 'done_entrance' ||
+        state.visitor.status === 'done_lab_clean' ||
+        state.visitor.status === 'done_lab_leaked'
+      ));
+
+      let done = 0;
+      if (c.ndaScope || c.ndaCheckedInSystem || e.usedHoldingReply) done++;
+      if (c.meetingVersion) done++;
+      if (visitorResolved) done++;
+      if (emailTouched) done++;
+
+      const isAllDone = done === 4;
+      return {
+        icon: isAllDone ? '🌟' : '🛡️',
+        title: isEn ? 'Trade Secret Checklist' : '營業秘密防護查核',
+        done,
+        total: 4,
+        unit: isEn ? 'Items' : '項',
+        isAllDone
+      };
+    }
+
+    // Chapter 2: 投稿前一晚 (internal 2)
+    if (state.chapter === 2) {
+      const c = state.ch2 || {};
+      const clues = c.clues || {};
+      let done = 0;
+      if (c.openedPoster) done++;
+      if (clues.wenExplainedFig2) done++;
+      if (clues.mingExplainedRules) done++;
+      if (c.outcome && c.outcome !== 'in_progress') done++;
+
+      const isAllDone = done === 4;
+      return {
+        icon: isAllDone ? '🌟' : '📑',
+        title: isEn ? 'Poster Review Progress' : '海報公開審查進度',
+        done,
+        total: 4,
+        unit: isEn ? 'Items' : '項',
+        isAllDone
+      };
+    }
+
+    // Chapter 3: 這份文件要怎麼標？ (internal 5)
+    if (state.chapter === 5) {
+      const c = state.ch5 || {};
+      const docs = c.docs || [];
+      let done = 0;
+      if (docs[0] && (docs[0].chosenMarking || docs[0].isCorrect)) done++;
+      if (docs[1] && (docs[1].chosenMarking || docs[1].isCorrect)) done++;
+      if (docs[2] && (docs[2].chosenMarking || docs[2].isCorrect)) done++;
+
+      const isAllDone = done === 3 && Boolean(c.verifiedWithQing);
+      return {
+        icon: isAllDone ? '🌟' : '🏷️',
+        title: isEn ? 'Document Labeling' : '文件機密標示',
+        done,
+        total: 3,
+        unit: isEn ? 'Docs' : '份',
+        isAllDone
+      };
+    }
+
+    // Chapter 4: 這批資料要列入清單嗎？ (internal 4)
+    if (state.chapter === 4) {
+      const c = state.ch4 || {};
+      const cards = c.cards || {};
+      let done = 0;
+      if (cards.card1 && cards.card1.choice !== null) done++;
+      if (cards.card2 && cards.card2.choice !== null) done++;
+      if (cards.card3 && cards.card3.choice !== null) done++;
+
+      return {
+        icon: done === 3 ? '🌟' : '📋',
+        title: isEn ? 'R&D Inventory Audit' : '成果清單盤點辨識',
+        done,
+        total: 3,
+        unit: isEn ? 'Sets' : '組',
+        isAllDone: done === 3
+      };
+    }
+
+    // Chapter 5: 阿文的最後一天 (internal 3)
+    if (state.chapter === 3) {
+      const c = state.ch3 || {};
+      let done = 0;
+      if (c.rawLogLocation === 'project') done++;
+      if (c.ndaRemindedToAwen) done++;
+      if (c.badgeReturned) done++;
+      if (c.awenOrigAccess === 'revoked') done++;
+      if (c.qingConfirmedOpen) done++;
+
+      const isAllDone = done === 5;
+      return {
+        icon: isAllDone ? '🌟' : '🪪',
+        title: isEn ? 'Departure Handover' : '離職保密交接清單',
+        done,
+        total: 5,
+        unit: isEn ? 'Items' : '項',
+        isAllDone
+      };
+    }
+
+    return null;
+  }
+
   // ===== Chapter 1 Handover Evaluation =====
   function evaluateHandover(state) {
     if (state.chapter === 2) {
@@ -1534,6 +1651,7 @@
     isCh3FullyComplete,
     isCh4FullyComplete,
     isCh5FullyComplete,
+    getChapterProgress,
     getCh3AccessPreview,
     getCh3PendingItems,
     setCh5DocMarking,

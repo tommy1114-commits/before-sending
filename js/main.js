@@ -177,13 +177,39 @@
 
   function refreshHUD() {
     const microHud = $('micro-hud');
+    const progressStrip = $('chapter-progress-strip');
     if (isTitleVisible()) {
       microHud.classList.add('hidden');
+      if (progressStrip) progressStrip.classList.add('hidden');
       return;
     }
     microHud.classList.remove('hidden');
 
     const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
+
+    if (progressStrip) {
+      progressStrip.classList.remove('hidden');
+      const p = window.BS.State && window.BS.State.getChapterProgress ? window.BS.State.getChapterProgress(state) : null;
+      if (p) {
+        const iconEl = $('progress-pill-icon');
+        const textEl = $('progress-pill-text');
+        const tagEl = $('progress-pill-tag');
+        const pillBtn = $('chapter-progress-pill');
+
+        if (iconEl) iconEl.textContent = p.icon;
+        if (textEl) {
+          textEl.textContent = isEn
+            ? `${p.title}: ${p.isAllDone ? 'All Completed' : 'Completed'} ${p.done} / ${p.total}`
+            : `${p.title}：${p.isAllDone ? '全數完成' : '已完成'} ${p.done} / ${p.total} ${p.unit || ''}`;
+        }
+        if (tagEl) {
+          tagEl.textContent = isEn ? 'SELECT Notes' : 'SELECT 筆記';
+        }
+        if (pillBtn) {
+          pillBtn.classList.toggle('completed', Boolean(p.isAllDone));
+        }
+      }
+    }
 
     $('micro-chapter').textContent =
       currentChapter === 3
@@ -828,6 +854,14 @@
 
     bindPillButton('btn-start-gba', togglePauseMenu);
     bindPillButton('btn-select-gba', toggleSelectNotes);
+
+    const chapterProgPill = $('chapter-progress-pill');
+    if (chapterProgPill) {
+      chapterProgPill.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        toggleSelectNotes();
+      });
+    }
 
     // Global Safety Net: clear all pressed states when all fingers leave the screen or blur occurs
     const safetyClear = (ev) => {

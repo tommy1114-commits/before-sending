@@ -1442,6 +1442,90 @@ html, body {
   line-height: 1.25;
 }
 
+/* ===== In-Game Chapter Mission & Progress Pill ===== */
+.chapter-progress-strip {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 1px 0 2px;
+}
+
+.chapter-progress-strip.hidden {
+  display: none !important;
+}
+
+.chapter-progress-pill {
+  appearance: none;
+  border: 1px solid rgba(75, 110, 168, 0.55);
+  background: linear-gradient(180deg, rgba(23, 35, 56, 0.9) 0%, rgba(13, 20, 34, 0.95) 100%);
+  border-radius: 999px;
+  padding: 3px 12px 3px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  max-width: 98%;
+  line-height: 1.25;
+}
+
+.chapter-progress-pill:hover {
+  background: linear-gradient(180deg, rgba(32, 48, 76, 0.95) 0%, rgba(18, 28, 46, 0.98) 100%);
+  border-color: #60a5fa;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.chapter-progress-pill:active {
+  transform: translateY(0);
+  filter: brightness(0.92);
+}
+
+.progress-pill-icon {
+  font-size: 13px;
+  line-height: 1;
+  filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.5));
+}
+
+.progress-pill-text {
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.progress-pill-tag {
+  font-size: 9px;
+  font-weight: 800;
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.18);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 999px;
+  padding: 1px 6px;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
+/* All tasks completed in current chapter */
+.chapter-progress-pill.completed {
+  border-color: #34d399;
+  background: linear-gradient(180deg, rgba(16, 68, 54, 0.92) 0%, rgba(9, 38, 30, 0.96) 100%);
+  color: #ecfdf5;
+  box-shadow: 0 0 12px rgba(52, 211, 153, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.chapter-progress-pill.completed .progress-pill-tag {
+  color: #a7f3d0;
+  background: rgba(52, 211, 153, 0.22);
+  border-color: rgba(52, 211, 153, 0.5);
+}
+
 .gba-mid-btns {
   display: flex;
   align-items: center;
@@ -2116,6 +2200,23 @@ html, body {
     overflow-wrap: break-word;
     line-height: 1.2;
     letter-spacing: -0.01em;
+  }
+  .chapter-progress-strip {
+    margin: 1px 0 1px;
+  }
+  .chapter-progress-pill {
+    font-size: clamp(9px, 2.7vw, 10.5px);
+    padding: 2px 8px 2px 7px;
+    gap: 5px;
+    max-width: 98%;
+    line-height: 1.2;
+  }
+  .progress-pill-icon {
+    font-size: 11px;
+  }
+  .progress-pill-tag {
+    font-size: 8px;
+    padding: 0.5px 5px;
   }
   .gba-mid-btns {
     gap: 12px;
