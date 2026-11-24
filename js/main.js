@@ -189,6 +189,9 @@
 
     if (progressStrip) {
       progressStrip.classList.remove('hidden');
+      if (player && typeof player.floor === 'number') {
+        state.currentFloor = player.floor;
+      }
       const p = window.BS.State && window.BS.State.getChapterProgress ? window.BS.State.getChapterProgress(state) : null;
       if (p) {
         const iconEl = $('progress-pill-icon');
@@ -1282,54 +1285,58 @@
     } else {
       nearbyHintEl.classList.remove('has-target');
       if (currentChapter === 5 && state && state.ch5) {
-      const c = state.ch5;
-      if (!c.markingCompleted) {
-        $('nearby-hint').textContent = isEn
-          ? '2F Office · Check 3 document markings at duty PC (top-left)'
-          : '目前在 2F 辦公區 · 請至左上方值班電腦檢視三份文件標示';
-      } else if (!c.verifiedWithQing) {
-        $('nearby-hint').textContent = isEn
-          ? '2F Office · Confirm document labels & custody with Xiao-Qing'
-          : '目前在 2F 辦公區 · 請找小晴確認文件標示與保管';
-      } else {
-        $('nearby-hint').textContent = isEn
-          ? '2F Office · Complete handover with Xiao-Qing or at duty desk'
-          : '目前在 2F 辦公區 · 請向小晴或到值班桌完成交班';
-      }
-    } else if (currentChapter === 4 && state && state.ch4) {
-      const c = state.ch4;
-      if (!c.cardsCompleted) {
-        if (player.floor === 1) {
+        const c = state.ch5;
+        if (!c.markingCompleted) {
           $('nearby-hint').textContent = isEn
-            ? '1F Lobby · ▲ Take stairs on the left up to 2F Lab to find A-Wen'
-            : '目前在 1F 大廳 · ▲ 請往左走樓梯上 2F 量測實驗區找阿文';
+            ? 'Office Area · Check 3 document markings at duty PC (top-left)'
+            : '目前在辦公區 · 請至左上方值班電腦檢視三份文件標示';
+        } else if (!c.verifiedWithQing) {
+          $('nearby-hint').textContent = isEn
+            ? 'Office Area · Confirm document labels & custody with Xiao-Qing'
+            : '目前在辦公區 · 請找小晴確認文件標示與保管';
         } else {
           $('nearby-hint').textContent = isEn
-            ? '2F Lab · Talk to colleague A-Wen to identify 3 data cards'
-            : '目前在 2F 量測實驗區 · 請向阿文辨識三組資料卡';
+            ? 'Office Area · Complete handover with Xiao-Qing or at duty desk'
+            : '目前在辦公區 · 請向小晴或到值班桌完成交班';
+        }
+      } else if (currentChapter === 4 && state && state.ch4) {
+        const c = state.ch4;
+        if (!c.cardsCompleted) {
+          if (player.floor === 1) {
+            $('nearby-hint').textContent = isEn
+              ? '1F Lobby · ▲ Take stairs on the left up to 2F Lab to find A-Wen'
+              : '目前在 1F 大廳 · ▲ 請走左側樓梯上 2F 量測實驗區找阿文';
+          } else {
+            $('nearby-hint').textContent = isEn
+              ? 'Measurement Lab · Talk to colleague A-Wen to identify 3 data cards'
+              : '目前在量測實驗區 · 請向阿文辨識三組資料卡';
+          }
+        } else if (player.floor === 1) {
+          $('nearby-hint').textContent = isEn
+            ? '1F Lobby · ▲ Take stairs on the left up to 2F office'
+            : '目前在 1F 大廳 · ▲ 請走左側樓梯上 2F 辦公區';
+        } else if (!c.updatedSaved) {
+          $('nearby-hint').textContent = isEn
+            ? 'Office Area · Review & save inventory at duty PC (top-left)'
+            : '目前在辦公區 · 請至左上方值班電腦確認清單';
+        } else if (!c.verifiedWithQing) {
+          $('nearby-hint').textContent = isEn
+            ? 'Office Area · Verify inventory with Xiao-Qing'
+            : '目前在辦公區 · 請找小晴核對清單';
+        } else {
+          $('nearby-hint').textContent = isEn
+            ? 'Office Area · Complete handover with Xiao-Qing or at duty desk'
+            : '目前在辦公區 · 請向小晴或到值班桌完成交班';
         }
       } else if (player.floor === 1) {
         $('nearby-hint').textContent = isEn
-          ? '1F Lobby · ▲ Take stairs on the left up to 2F office'
-          : '目前在 1F 大廳 · ▲ 請往左走樓梯上 2F 辦公區';
-      } else if (!c.updatedSaved) {
-        $('nearby-hint').textContent = isEn
-          ? '2F Office · Review & save inventory at duty PC (top-left)'
-          : '目前在 2F 辦公區 · 請至左上方值班電腦確認清單';
-      } else if (!c.verifiedWithQing) {
-        $('nearby-hint').textContent = isEn
-          ? '2F Office · Verify inventory with Xiao-Qing'
-          : '目前在 2F 辦公區 · 請找小晴核對清單';
+          ? '1F Lobby · Approach targets or take stairs to 2F · START Menu · SELECT Notes'
+          : '目前在 1F 大廳 · 走近目標或由左側樓梯上 2F · START 選單 · SELECT 筆記';
       } else {
         $('nearby-hint').textContent = isEn
-          ? '2F Office · Complete handover with Xiao-Qing or at duty desk'
-          : '目前在 2F 辦公區 · 請向小晴或到值班桌完成交班';
+          ? 'Approach objects or colleagues · START Menu · SELECT Notes'
+          : '走近物件或同事查看提示 · START 選單 · SELECT 筆記';
       }
-    } else {
-      $('nearby-hint').textContent = isEn
-        ? 'Approach objects or colleagues · START Menu · SELECT Notes'
-        : '走近物件或同事查看提示 · START 選單 · SELECT 筆記';
-    }
     }
   }
 

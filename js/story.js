@@ -115,15 +115,15 @@
           speaker: '值班備忘錄（2F 辦公區）',
           speaker_en: 'Duty Memo (2F Office)',
           portrait: 'desk',
-          text: '下午 3:40，下班前還有兩件事要處理：\n① 2F 辦公區電腦有合作方急著要會議資料的來信。\n② 1F 大門櫃台有預約來賓陳先生等候拍照（可由左側樓梯／電梯下樓）。',
-          text_en: '3:40 PM. Two tasks before clocking out:\n① An urgent email from partner requesting meeting slides on 2F duty PC.\n② Scheduled visitor Mr. Chen waiting at 1F reception for photography (take stairs/elevator on left).'
+          text: '下午 3:40，下班前還有兩件事要處理：\n① 辦公區值班電腦有合作方急著要會議資料的來信。\n② 1F 大門接待處有預約來賓陳先生等候拍照（可由左側樓梯下樓）。',
+          text_en: '3:40 PM. Two tasks before clocking out:\n① An urgent email from partner requesting meeting slides on Duty PC.\n② Scheduled visitor Mr. Chen waiting at 1F reception for photography (take stairs on left).'
         },
         {
           speaker: '小安（值班研究助理）',
           speaker_en: 'Xiao-An (Duty Research Assistant)',
           portrait: 'player',
-          text: '順序可以自己安排。跟外部廠商交流資料前，記得先確認對方是否已簽署有效 NDA！有不確定的地方，就查電腦合約清單，或問 2F 實驗區的阿文與組長辦公室的阿明組長吧！',
-          text_en: 'I can tackle them in any order. Before sharing data with external partners, ensure a valid Non-Disclosure Agreement (NDA) is signed! If unsure, check NDA records on PC or consult A-Wen in 2F lab and Team Lead A-Ming!'
+          text: '順序可以自己安排。跟外部廠商交流資料前，記得先確認對方是否已簽署有效 NDA！有不確定的地方，就查電腦合約清單，或問實驗區的阿文與組長辦公室的阿明組長吧！',
+          text_en: 'I can tackle them in any order. Before sharing data with external partners, ensure a valid Non-Disclosure Agreement (NDA) is signed! If unsure, check NDA records on PC or consult A-Wen in the lab and Team Lead A-Ming!'
         }
       ]);
     }
@@ -1624,15 +1624,15 @@
           speaker: '同事 阿文',
           speaker_en: 'Colleague: A-Wen',
           portrait: 'colleague',
-          text: '我先回 2F 實驗區整理個人工作區。接手我研究的小晴也在 2F 實驗區，阿明組長跟門禁回收櫃台都在 1F 大廳喔！',
-          text_en: 'I will tidy my desk in 2F lab. Xiao-Qing (taking over my project) is also in 2F lab. Team Lead A-Ming and the badge desk are in 1F lobby!'
+          text: '我先回實驗區整理個人工作區。接手我研究的小晴也在實驗區，阿明組長跟門禁回收櫃台都在 1F 大廳喔！',
+          text_en: 'I will tidy my desk in the lab area. Xiao-Qing (taking over my project) is also in the lab. Team Lead A-Ming and the badge desk are in 1F lobby!'
         },
         {
           speaker: '小安',
           speaker_en: 'Xiao-An',
           portrait: 'player',
-          text: '離職交接可不能漏掉任何一步！先看看 2F 值班電腦的交接清單與存取預覽，或是先問 2F 的阿文與小晴、下樓找 1F 阿明組長與大門櫃台都可以！',
-          text_en: 'Offboarding requires rigorous execution! Review the handover checklist and access preview on 2F PC, or consult A-Wen, Xiao-Qing, and Team Lead A-Ming!'
+          text: '離職交接可不能漏掉任何一步！先看看值班電腦的交接清單與存取預覽，或是先問實驗區的阿文與小晴、下樓找 1F 阿明組長與大門櫃台都可以！',
+          text_en: 'Offboarding requires rigorous execution! Review the handover checklist and access preview on Duty PC, or consult A-Wen, Xiao-Qing, and Team Lead A-Ming!'
         }
       ], () => {
         ctx.moveNpcTo('npc_colleague', 2, 10, 4, 'left');
@@ -2364,10 +2364,10 @@
                       ctx.refreshHUD();
                       window.BS.UI.startDialogue([
                         {
-                          speaker: '同事 阿文（2F 實驗區）',
+                          speaker: '同事 阿文（實驗區）',
                           portrait: 'colleague',
-                          text: '太清楚了！同一研究計畫下，公開資訊、自研 know-how 跟專利申請資料的界線完全分明了。\n小晴剛剛已經先去 2F 辦公室了，請到旁邊 2F 辦公區的值班電腦，把這份清單確認並存檔！',
-                          text_en: 'Crystal clear! Under the same project, the boundaries between public information, proprietary know-how, and patent filings are completely distinct.\nXiao-Qing has headed to the 2F Office. Please go to the 2F Duty PC nearby to review and save the inventory!'
+                          text: '太清楚了！同一研究計畫下，公開資訊、自研 know-how 跟專利申請資料的界線完全分明了。\n小晴剛剛已經先去辦公區了，請到旁邊值班電腦把這份清單確認並存檔！',
+                          text_en: 'Crystal clear! Under the same project, the boundaries between public information, proprietary know-how, and patent filings are completely distinct.\nXiao-Qing has headed to the office area. Please head to the nearby Duty PC to review and save the inventory!'
                         }
                       ], () => {
                         ctx.refreshHUD();
@@ -2389,10 +2389,10 @@
 
       window.BS.UI.startDialogue([
         {
-          speaker: '同事 阿文（2F 實驗區）',
+          speaker: '同事 阿文（實驗區）',
           portrait: 'colleague',
-          text: '三組資料卡我們都已經辨識完畢囉！請到旁邊 2F 辦公區的值班電腦確認清單草稿並存檔。',
-          text_en: "We've classified all three data cards! Head over to the Duty PC in the 2F Office area to review and save the draft inventory."
+          text: '三組資料卡我們都已經辨識完畢囉！請到旁邊值班電腦確認清單草稿並存檔。',
+          text_en: "We've classified all three data cards! Head over to the Duty PC nearby to review and save the draft inventory."
         }
       ]);
     }
@@ -2588,8 +2588,8 @@
           {
             speaker: '2F 值班桌（第四章交班）',
             portrait: 'desk',
-            text: '清單已更新存檔！請先找 2F 辦公區的盤點同事小晴核對一次明天的盤點重點，即可完成交班。',
-            text_en: 'Inventory updated and saved! Please verify tomorrow\'s inventory focus with Xiao-Qing in 2F Office to complete handover.'
+            text: '清單已更新存檔！請先找辦公區的盤點同事小晴核對一次明天的盤點重點，即可完成交班。',
+            text_en: 'Inventory updated and saved! Please verify tomorrow\'s inventory focus with Xiao-Qing in the office to complete handover.'
           }
         ]);
         return;
@@ -2685,7 +2685,7 @@
                   window.BS.UI.openMarkingModal(state, {
                     onCompleted: () => {
                       ctx.refreshHUD();
-                      window.BS.UI.showToast('🎉 三份文件標示已完成！請找 2F 辦公區的小晴接手文件。', false, 5000);
+                      window.BS.UI.showToast('🎉 三份文件標示已完成！請找辦公區的小晴接手文件。', false, 5000);
                     }
                   });
                 }
@@ -2705,8 +2705,8 @@
         {
           speaker: '阿文（同事）',
           portrait: 'colleague',
-          text: '三份文件的機密標示都標妥了！海報維持公開版面、簡報在封面和頁腳標密、紙本首頁蓋印，一目了然！趕快拿去交給 2F 辦公區的小晴接手吧！',
-          text_en: 'Confidentiality Labels for all three documents are complete! The poster remains public, the slides are marked confidential on cover and footer, and the paper manuscript is stamped on the cover—crystal clear! Take them to Xiao-Qing in 2F Office now!'
+          text: '三份文件的機密標示都標妥了！海報維持公開版面、簡報在封面和頁腳標密、紙本首頁蓋印，一目了然！趕快拿去交給辦公區的小晴接手吧！',
+          text_en: 'Confidentiality Labels for all three documents are complete! The poster remains public, the slides are marked confidential on cover and footer, and the paper manuscript is stamped on the cover—crystal clear! Take them to Xiao-Qing in the office now!'
         }
       ]);
     }
@@ -2726,7 +2726,7 @@
                 window.BS.UI.openMarkingModal(state, {
                   onCompleted: () => {
                     ctx.refreshHUD();
-                    window.BS.UI.showToast('🎉 三份文件標示已完成！請找 2F 辦公區的小晴接手文件。', false, 5000);
+                    window.BS.UI.showToast('🎉 三份文件標示已完成！請找辦公區的小晴接手文件。', false, 5000);
                   }
                 });
               }
@@ -2915,8 +2915,8 @@
           {
             speaker: '2F 值班桌（第三章交班）',
             portrait: 'desk',
-            text: '三份文件的標示都完成了！請先找 2F 辦公區的接手同事小晴交接文件，確認保管方式與分享原則，即可完成交班。',
-            text_en: 'Labels for all three documents are complete! Please hand them over to Xiao-Qing in 2F Office to confirm storage methods and sharing rules before completing handover.'
+            text: '三份文件的標示都完成了！請先找辦公區的接手同事小晴交接文件，確認保管方式與分享原則，即可完成交班。',
+            text_en: 'Labels for all three documents are complete! Please hand them over to Xiao-Qing in the office to confirm storage methods and sharing rules before completing handover.'
           }
         ]);
         return;

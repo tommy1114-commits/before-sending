@@ -654,34 +654,58 @@
       const isAllDone = done === 4;
       let nextHint = '';
       let nextHintAlert = false;
+      const floor = state.currentFloor || 2;
+      const on2F = floor === 2;
 
       if (e.misshared && !e.linkRevoked) {
-        nextHint = isEn ? '🚨 Public link active! Revoke access at 2F PC immediately!' : '🚨 誤設公開連結！立即回 2F 電腦停用分享連結！';
+        nextHint = on2F
+          ? (isEn ? '🚨 Public link active! Revoke access at Duty PC immediately!' : '🚨 誤設公開連結！立即回值班電腦停用分享連結！')
+          : (isEn ? '🚨 Public link active! Take stairs to 2F Duty PC to revoke link!' : '🚨 誤設公開連結！立即走樓梯上 2F 值班電腦停用分享連結！');
         nextHintAlert = true;
       } else if (e.misshared && !e.reportedToLead) {
-        nextHint = isEn ? '🚨 Report mis-share incident to Lead A-Ming on 2F!' : '🚨 找 2F 辦公區阿明組長通報誤分享事件（人、事、時、地、物）！';
+        nextHint = on2F
+          ? (isEn ? '🚨 Report mis-share incident to Lead A-Ming in office area!' : '🚨 找辦公區阿明組長通報誤分享事件（人、事、時、地、物）！')
+          : (isEn ? '🚨 Take stairs to 2F to report incident to Lead A-Ming!' : '🚨 走樓梯上 2F 找阿明組長通報誤分享事件（人、事、時、地、物）！');
         nextHintAlert = true;
       } else if (isAllDone) {
-        nextHint = isEn ? '✨ All tasks complete! Clock out at 2F Duty Desk (green checkmark)' : '✨ 任務全數達成！請到 2F 辦公區值班桌（綠勾）填寫紀錄並完成交班';
+        nextHint = on2F
+          ? (isEn ? '✨ All tasks complete! Clock out at Duty Desk (green checkmark)' : '✨ 任務全數達成！請到值班桌（綠勾）填寫紀錄並完成交班')
+          : (isEn ? '✨ All tasks complete! Take stairs to 2F Duty Desk (green checkmark)' : '✨ 任務全數達成！走樓梯上 2F 值班桌（綠勾）填寫紀錄並完成交班');
       } else if (e.status === 'unread') {
-        nextHint = isEn ? 'Check partner urgent email at 2F Office Duty PC' : '到 2F 辦公區電腦查看星海科技合作方的緊急來信';
+        nextHint = on2F
+          ? (isEn ? 'Check partner urgent email at Duty PC' : '至值班電腦查看星海科技合作方的緊急來信')
+          : (isEn ? 'Take stairs to 2F Duty PC to check partner urgent email' : '走樓梯上 2F 至值班電腦查看星海科技合作方的緊急來信');
       } else if (!c.ndaScope && !c.ndaCheckedInSystem && !e.usedHoldingReply) {
-        nextHint = isEn ? 'Verify NDA list at 2F PC or consult Lead A-Ming in Office' : '在 2F 電腦查核 NDA 簽署清單，或詢問辦公室阿明組長';
+        nextHint = on2F
+          ? (isEn ? 'Verify NDA list at Duty PC or consult Team Lead A-Ming' : '在值班電腦查核 NDA 簽署清單，或詢問辦公區阿明組長')
+          : (isEn ? 'Take stairs to 2F to verify NDA list at Duty PC or consult Lead A-Ming' : '走樓梯上 2F 在值班電腦查核 NDA 簽署清單，或詢問阿明組長');
       } else if (!c.meetingVersion) {
-        nextHint = isEn ? 'Ask A-Wen at 2F Lab for approved meeting charts' : '到 2F 實驗區找阿文確認會議用圖版本（勿傳未核准原始資料夾）';
+        nextHint = on2F
+          ? (isEn ? 'Ask colleague A-Wen in lab area for approved meeting charts' : '到實驗區找阿文確認會議用圖版本（勿傳未核准原始資料夾）')
+          : (isEn ? 'Take stairs to 2F Lab to ask A-Wen for approved meeting charts' : '走樓梯上 2F 實驗區找阿文確認會議用圖版本（勿傳未核准原始資料夾）');
       } else if (!visitorResolved) {
         const exposed = (state.labItems && (!state.labItems.whiteboard || !state.labItems.monitor || !state.labItems.samples));
         if (exposed && v.status === 'waiting') {
-          nextHint = isEn ? 'Inspect 2F Lab (whiteboard, monitor, samples), then escort 1F visitor' : '巡視 2F 實驗區收妥白板／螢幕／樣品，再下樓至 1F 接待訪客陳先生';
+          nextHint = on2F
+            ? (isEn ? 'Inspect lab area to clear whiteboard/monitor/samples, then head down to 1F for Mr. Chen' : '巡視實驗區收妥白板／螢幕／樣品，再下樓至 1F 接待訪客陳先生')
+            : (isEn ? 'Take stairs to 2F Lab to clear whiteboard/monitor/samples first' : '先走樓梯上 2F 實驗區收妥白板／螢幕／樣品，再回 1F 接待訪客');
         } else if (v.status === 'waiting') {
-          nextHint = isEn ? 'Take stairs to 1F reception to escort visitor Mr. Chen for photos' : '走左側樓梯至 1F 大門接待處，引導預約訪客陳先生拍照';
+          nextHint = on2F
+            ? (isEn ? 'Take stairs down to 1F reception to escort visitor Mr. Chen for photos' : '走樓梯下樓至 1F 大廳接待處，引導預約訪客陳先生拍照留念')
+            : (isEn ? 'Escort visitor Mr. Chen at 1F reception for photos' : '引導 1F 大廳接待處的預約訪客陳先生拍照留念');
         } else {
-          nextHint = isEn ? 'Escort Mr. Chen to complete photos (ensure lab data is shielded)' : '引導訪客陳先生拍照（確認白板與螢幕敏感數據已遮蔽）';
+          nextHint = isEn
+            ? 'Escort visitor Mr. Chen to complete photos (ensure lab data is shielded)'
+            : '引導訪客陳先生拍照留念（確認白板與螢幕敏感數據已遮蔽）';
         }
       } else if (!emailTouched) {
-        nextHint = isEn ? 'Send 2 approved charts with 7-day read-only link at 2F PC' : '回 2F 電腦選擇「僅會議用兩張圖」並設定 7 天唯讀權限寄出';
+        nextHint = on2F
+          ? (isEn ? 'Return to Duty PC: select 2 approved charts with 7-day read-only link' : '回值班電腦選擇「僅會議用兩張圖」並設定 7 天唯讀權限寄出')
+          : (isEn ? 'Take stairs to 2F Duty PC: send 2 approved charts with 7-day read-only link' : '走樓梯上 2F 回值班電腦，選擇「僅會議用兩張圖」並設定 7 天唯讀權限寄出');
       } else {
-        nextHint = isEn ? 'Proceed to 2F Duty Desk to complete handover' : '請前往 2F 辦公區值班桌完成交班';
+        nextHint = on2F
+          ? (isEn ? 'Proceed to Duty Desk to complete handover' : '請前往值班桌完成交班')
+          : (isEn ? 'Take stairs to 2F Duty Desk to complete handover' : '走樓梯上 2F 前往值班桌完成交班');
       }
 
       return {
@@ -709,18 +733,30 @@
       const isAllDone = done === 4;
       let nextHint = '';
       let nextHintAlert = false;
+      const floor = state.currentFloor || 2;
+      const on2F = floor === 2;
 
       if (c.misuploaded && (!c.contactedOrganizer || !c.reportedToLead)) {
-        nextHint = isEn ? '🚨 Unconfirmed version uploaded! Contact host from PC & report to Lead A-Ming!' : '🚨 誤傳未確認版本！請回電腦聯絡主辦方並向阿明組長回報通報！';
+        nextHint = on2F
+          ? (isEn ? '🚨 Unconfirmed version uploaded! Contact host from Duty PC & report to Lead A-Ming!' : '🚨 誤傳未確認版本！請回值班電腦聯絡主辦方並向阿明組長通報！')
+          : (isEn ? '🚨 Unconfirmed version uploaded! Take stairs to 2F Duty PC to contact host!' : '🚨 誤傳未確認版本！請走樓梯上 2F 值班電腦聯絡主辦方並向組長通報！');
         nextHintAlert = true;
       } else if (isAllDone) {
-        nextHint = isEn ? '✨ Decision finalized! Clock out at 2F Duty Desk (green checkmark)' : '✨ 審查決策已完成！請到 2F 辦公區值班桌填寫紀錄並完成交班';
+        nextHint = on2F
+          ? (isEn ? '✨ Decision finalized! Clock out at Duty Desk (green checkmark)' : '✨ 審查決策已完成！請到值班桌（綠勾）填寫紀錄並完成交班')
+          : (isEn ? '✨ Decision finalized! Take stairs to 2F Duty Desk' : '✨ 審查決策已完成！走樓梯上 2F 值班桌填寫紀錄並完成交班');
       } else if (!c.openedPoster) {
-        nextHint = isEn ? 'Open & inspect symposium poster draft at 2F Office PC' : '至 2F 辦公區電腦開啟並檢視研討會海報草稿';
+        nextHint = on2F
+          ? (isEn ? 'Open & inspect symposium poster draft at Duty PC' : '至值班電腦開啟並檢視研討會海報草稿')
+          : (isEn ? 'Take stairs to 2F Duty PC to inspect poster draft' : '走樓梯上 2F 至值班電腦開啟並檢視海報草稿');
       } else if (!clues.wenExplainedFig2) {
-        nextHint = isEn ? 'Ask A-Wen in 2F Lab about Fig 2 origin and unlock replacement figure' : '到 2F 實驗區找阿文詢問圖二來源，並取得自研替代圖';
+        nextHint = on2F
+          ? (isEn ? 'Ask colleague A-Wen in lab area about Fig 2 origin and get replacement figure' : '到實驗區找阿文詢問圖二來源，並取得自研替代圖')
+          : (isEn ? 'Take stairs to 2F Lab to ask A-Wen about Fig 2 and get replacement figure' : '走樓梯上 2F 實驗區找阿文詢問圖二來源，並取得自研替代圖');
       } else if (!clues.mingExplainedRules) {
-        nextHint = isEn ? 'Consult Team Lead A-Ming in Office regarding Fig 2 consent & Fig 3 patent' : '向辦公區阿明組長確認圖二公開授權與圖三專利公開時點';
+        nextHint = on2F
+          ? (isEn ? 'Consult Team Lead A-Ming in office area regarding Fig 2 consent & Fig 3 patent' : '向辦公區阿明組長確認圖二公開授權與圖三專利公開時點')
+          : (isEn ? 'Take stairs to 2F to consult Lead A-Ming regarding Fig 2 consent & Fig 3 patent' : '走樓梯上 2F 向阿明組長確認圖二公開授權與圖三專利公開時點');
       } else if (c.outcome === 'in_progress') {
         const versions = c.versions || [];
         const hasApproved = versions.some((v) => v.status === 'approved');
@@ -729,16 +765,26 @@
         const figuresFixed = workingVer && workingVer.slots && workingVer.slots.fig2 === 'alt' && workingVer.slots.fig3 === 'removed';
 
         if (hasApproved) {
-          nextHint = isEn ? 'Return to 2F Office PC, switch to Submission tab and submit approved file' : '回 2F 辦公區電腦切換至「提交投稿」分頁，提交已核准檔案';
+          nextHint = on2F
+            ? (isEn ? 'Return to Duty PC, switch to Submission tab and submit approved file' : '回值班電腦切換至「提交投稿」分頁，提交已核准檔案')
+            : (isEn ? 'Take stairs to 2F Duty PC: switch to Submission tab and submit approved file' : '走樓梯上 2F 回值班電腦，切換至「提交投稿」分頁提交已核准檔案');
         } else if (hasPending) {
-          nextHint = isEn ? 'Talk to Team Lead A-Ming in Office to obtain final approval for the poster' : '到辦公區找阿明組長對話，取得海報核准';
+          nextHint = on2F
+            ? (isEn ? 'Talk to Team Lead A-Ming in office area to obtain final approval for poster' : '到辦公區找阿明組長對話，取得海報核准')
+            : (isEn ? 'Take stairs to 2F to talk to Team Lead A-Ming for poster approval' : '走樓梯上 2F 找阿明組長對話，取得海報核准');
         } else if (!figuresFixed) {
-          nextHint = isEn ? 'On Office PC: replace Fig 2 with alternative chart and remove Fig 3' : '至辦公區電腦將圖二替換為替代圖、並移除圖三';
+          nextHint = on2F
+            ? (isEn ? 'At Duty PC: replace Fig 2 with alternative chart and remove Fig 3' : '至值班電腦將圖二替換為替代圖、並移除圖三')
+            : (isEn ? 'Take stairs to 2F Duty PC: replace Fig 2 with alternative chart and remove Fig 3' : '走樓梯上 2F 至值班電腦將圖二替換為替代圖、並移除圖三');
         } else {
-          nextHint = isEn ? 'On Office PC: submit current version to Team Lead A-Ming for review' : '在辦公區電腦點選「送交阿明組長確認」送出審核';
+          nextHint = on2F
+            ? (isEn ? 'At Duty PC: click "Submit to Team Lead A-Ming" for approval' : '在值班電腦點選「送交阿明組長確認」送出審核')
+            : (isEn ? 'Take stairs to 2F Duty PC: submit version to Team Lead A-Ming for review' : '走樓梯上 2F 在值班電腦點選「送交阿明組長確認」');
         }
       } else {
-        nextHint = isEn ? 'Proceed to 2F Duty Desk to complete handover' : '請前往 2F 辦公區值班桌完成交班';
+        nextHint = on2F
+          ? (isEn ? 'Proceed to Duty Desk to complete handover' : '請前往值班桌完成交班')
+          : (isEn ? 'Take stairs to 2F Duty Desk to complete handover' : '走樓梯上 2F 前往值班桌完成交班');
       }
 
       return {
@@ -764,15 +810,25 @@
 
       const isAllDone = done === 3 && Boolean(c.verifiedWithQing);
       let nextHint = '';
+      const floor = state.currentFloor || 2;
+      const on2F = floor === 2;
 
       if (isAllDone) {
-        nextHint = isEn ? '✨ All labeled & verified! Complete handover at Duty Desk or with Xiao-Qing' : '✨ 標示與交接核對完成！向小晴或回 2F 值班桌完成交班';
+        nextHint = on2F
+          ? (isEn ? '✨ All labeled & verified! Complete handover at Duty Desk or with Xiao-Qing' : '✨ 標示與交接核對完成！向小晴或回值班桌完成交班')
+          : (isEn ? '✨ All labeled & verified! Take stairs to 2F to complete handover' : '✨ 標示與交接核對完成！走樓梯上 2F 向小晴或至值班桌完成交班');
       } else if (done < 3) {
-        nextHint = isEn ? `Review & label all 3 documents at 2F Office PC (${done}/3 labeled)` : `至 2F 辦公區值班電腦，檢視三份文件並完成機密標示（已完成 ${done}/3 份）`;
+        nextHint = on2F
+          ? (isEn ? `Review & label all 3 documents at Duty PC (${done}/3 labeled)` : `至值班電腦檢視三份文件並完成機密標示（已完成 ${done}/3 份）`)
+          : (isEn ? `Take stairs to 2F Duty PC to label 3 documents (${done}/3 labeled)` : `走樓梯上 2F 至值班電腦檢視三份文件並完成標示（已完成 ${done}/3 份）`);
       } else if (!c.verifiedWithQing) {
-        nextHint = isEn ? 'Find colleague Xiao-Qing in 2F Office to hand over labeled documents' : '找 2F 辦公區同事小晴接手文件，確認保管方式與分享原則';
+        nextHint = on2F
+          ? (isEn ? 'Talk to colleague Xiao-Qing in office to hand over labeled documents' : '找辦公區同事小晴接手文件，確認保管方式與分享原則')
+          : (isEn ? 'Take stairs to 2F office to hand over labeled documents with Xiao-Qing' : '走樓梯上 2F 找同事小晴接手文件，確認保管方式與分享原則');
       } else {
-        nextHint = isEn ? 'Proceed to 2F Duty Desk to complete handover' : '請前往 2F 辦公區值班桌完成交班';
+        nextHint = on2F
+          ? (isEn ? 'Proceed to Duty Desk to complete handover' : '請前往值班桌完成交班')
+          : (isEn ? 'Take stairs to 2F Duty Desk to complete handover' : '走樓梯上 2F 前往值班桌完成交班');
       }
 
       return {
@@ -798,19 +854,33 @@
 
       const isAllDone = done === 3 && Boolean(c.verifiedWithQing);
       let nextHint = '';
+      const floor = state.currentFloor || 1;
+      const on1F = floor === 1;
 
       if (isAllDone) {
-        nextHint = isEn ? '✨ Inventory verified! Complete handover at Duty Desk or with Xiao-Qing' : '✨ 清單核對已完成！向小晴或回 2F 值班桌完成交班';
+        nextHint = on1F
+          ? (isEn ? '✨ Inventory verified! Take stairs to 2F to complete handover' : '✨ 清單核對已完成！走樓梯上 2F 向小晴或回值班桌完成交班')
+          : (isEn ? '✨ Inventory verified! Complete handover at Duty Desk or with Xiao-Qing' : '✨ 清單核對已完成！向小晴或回值班桌完成交班');
       } else if (done < 3) {
-        nextHint = isEn ? `Take stairs to 2F Lab to review 3 data cards with A-Wen (${done}/3)` : `走樓梯至 2F 量測實驗區找同事阿文，辨識三組研發成果資料卡（已完成 ${done}/3）`;
+        nextHint = on1F
+          ? (isEn ? `Take stairs to 2F Lab to review 3 data cards with A-Wen (${done}/3)` : `走樓梯上 2F 量測實驗區找同事阿文，辨識三組研發成果資料卡（已完成 ${done}/3）`)
+          : (isEn ? `Review 3 data cards with colleague A-Wen in lab area (${done}/3)` : `在量測實驗區找同事阿文，辨識三組研發成果資料卡（已完成 ${done}/3）`);
       } else if (!c.draftSaved) {
-        nextHint = isEn ? 'Review 5-field inventory draft at 2F Office PC' : '至 2F 辦公區值班電腦，確認五欄位研發成果清單草稿';
+        nextHint = on1F
+          ? (isEn ? 'Take stairs to 2F Duty PC to review inventory draft' : '走樓梯上 2F 辦公區值班電腦，確認五欄位研發成果清單草稿')
+          : (isEn ? 'Review 5-field inventory draft at Duty PC' : '至值班電腦確認五欄位研發成果清單草稿');
       } else if (!c.updatedSaved) {
-        nextHint = isEn ? 'Check Team Lead notice at 2F PC and update patent publication status' : '收到阿明組長專利公開通知，請在 2F 電腦更新裝置公開狀態';
+        nextHint = on1F
+          ? (isEn ? 'Take stairs to 2F PC to update patent status upon Team Lead notice' : '收到阿明組長通知，請走樓梯上 2F 電腦更新裝置公開狀態')
+          : (isEn ? 'Check Team Lead notice at Duty PC and update patent publication status' : '收到阿明組長專利公開通知，請在值班電腦更新裝置公開狀態');
       } else if (!c.verifiedWithQing) {
-        nextHint = isEn ? 'Find colleague Xiao-Qing in 2F Office to verify inventory list' : '找 2F 辦公區同事小晴核對清單並確認欄位紀錄';
+        nextHint = on1F
+          ? (isEn ? 'Take stairs to 2F Office to verify inventory list with Xiao-Qing' : '走樓梯上 2F 辦公區找同事小晴核對清單並確認欄位紀錄')
+          : (isEn ? 'Find colleague Xiao-Qing in office area to verify inventory list' : '找辦公區同事小晴核對清單並確認欄位紀錄');
       } else {
-        nextHint = isEn ? 'Proceed to 2F Duty Desk to complete handover' : '請前往 2F 辦公區值班桌完成交班';
+        nextHint = on1F
+          ? (isEn ? 'Take stairs to 2F Duty Desk to complete handover' : '走樓梯上 2F 前往值班桌完成交班')
+          : (isEn ? 'Proceed to Duty Desk to complete handover' : '請前往值班桌完成交班');
       }
 
       return {
@@ -838,30 +908,52 @@
       const isAllDone = done === 5;
       let nextHint = '';
       let nextHintAlert = false;
+      const floor = state.currentFloor || 2;
+      const on2F = floor === 2;
 
       if (c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project') {
-        nextHint = isEn ? '🚨 Revoked early! Ask Lead A-Ming on 1F for admin transfer assistance' : '🚨 提前停權！請下樓找 1F 阿明組長安排管理員單獨移交紀錄！';
+        nextHint = on2F
+          ? (isEn ? '🚨 Revoked early! Take stairs to 1F Lead A-Ming for admin transfer assistance' : '🚨 提前停權！請走樓梯下樓至 1F 找阿明組長安排管理員單獨移交紀錄！')
+          : (isEn ? '🚨 Revoked early! Ask Lead A-Ming at 1F for admin transfer assistance' : '🚨 提前停權！請在 1F 找阿明組長安排管理員單獨移交紀錄！');
         nextHintAlert = true;
       } else if (isAllDone) {
-        nextHint = isEn ? '✨ All 5 handover items done! Clock out at Duty Desk or with Xiao-Qing' : '✨ 5 項交接全數完成！向小晴或回 2F 值班桌完成交班';
+        nextHint = on2F
+          ? (isEn ? '✨ All 5 handover items done! Clock out at Duty Desk or with Xiao-Qing' : '✨ 5 項交接全數完成！向小晴或回值班桌完成交班')
+          : (isEn ? '✨ All 5 handover items done! Take stairs to 2F Duty Desk' : '✨ 5 項交接全數完成！走樓梯上 2F 向小晴或回值班桌完成交班');
       } else if (c.rawLogLocation !== 'project') {
-        nextHint = isEn ? 'Ask A-Wen in 2F Lab to transfer raw measurements to project folder' : '至 2F 實驗區找阿文，將原始紀錄移交至專案指定位置';
+        nextHint = on2F
+          ? (isEn ? 'Ask colleague A-Wen in lab area to transfer raw measurements to project folder' : '至實驗區找阿文，將原始紀錄移交至專案指定位置')
+          : (isEn ? 'Take stairs to 2F Lab: ask A-Wen to transfer raw measurements to project folder' : '走樓梯上 2F 實驗區找阿文，將原始紀錄移交至專案指定位置');
       } else if (!c.qingHasProjectAccess) {
-        nextHint = isEn ? 'Grant Xiao-Qing project folder access at 2F Duty PC' : '至 2F 值班電腦開通小晴的專案資料夾存取權限';
+        nextHint = on2F
+          ? (isEn ? 'Grant Xiao-Qing project folder access at Duty PC' : '至值班電腦開通小晴的專案資料夾存取權限')
+          : (isEn ? 'Take stairs to 2F Duty PC to grant Xiao-Qing folder access' : '走樓梯上 2F 至值班電腦開通小晴的專案資料夾存取權限');
       } else if (!c.qingConfirmedOpen) {
-        nextHint = isEn ? 'Ask Xiao-Qing in 2F Lab to test opening transferred records' : '至 2F 實驗區找小晴實測開啟原始紀錄，確認接收無誤';
+        nextHint = on2F
+          ? (isEn ? 'Ask Xiao-Qing in lab area to test opening transferred records' : '至實驗區找小晴實測開啟原始紀錄，確認接收無誤')
+          : (isEn ? 'Take stairs to 2F Lab: ask Xiao-Qing to test opening transferred records' : '走樓梯上 2F 實驗區找小晴實測開啟原始紀錄，確認接收無誤');
       } else if (!c.ndaRemindedToAwen) {
-        nextHint = isEn ? 'Remind A-Wen in 2F Lab of post-employment trade secret obligations' : '向 2F 實驗區阿文提醒離職保密義務，確認個人設備無留存機密';
+        nextHint = on2F
+          ? (isEn ? 'Remind A-Wen in lab area of post-employment trade secret obligations' : '向實驗區阿文提醒離職保密義務，確認個人設備無留存機密')
+          : (isEn ? 'Take stairs to 2F Lab to remind A-Wen of trade secret obligations' : '走樓梯上 2F 實驗區向阿文提醒離職保密義務，確認個人設備無留存機密');
       } else if (!c.badgeReturned) {
         if (!c.awenGaveBadge) {
-          nextHint = isEn ? 'Ask A-Wen for his physical badge, then return it at 1F Reception' : '向 2F 阿文索取實體門禁卡，並下樓至 1F 大門接待處登記收回';
+          nextHint = on2F
+            ? (isEn ? 'Ask A-Wen for his physical badge, then take stairs to 1F Reception' : '向阿文索取實體門禁卡，再走樓梯下樓至 1F 大門接待處登記收回')
+            : (isEn ? 'Take stairs to 2F to ask A-Wen for physical badge' : '走樓梯上 2F 實驗區向阿文索取實體門禁卡，再回 1F 接待處登記收回');
         } else {
-          nextHint = isEn ? 'Take stairs to 1F Main Reception Desk to register badge return' : '走樓梯至 1F 大門接待櫃台，完成阿文門禁卡收回與註銷登記';
+          nextHint = on2F
+            ? (isEn ? 'Take stairs down to 1F Main Reception Desk to register badge return' : '走樓梯下樓至 1F 大門接待櫃台，完成阿文門禁卡收回與註銷登記')
+            : (isEn ? 'Register badge return and cancellation at 1F Main Reception Desk' : '在 1F 大門接待櫃台，完成阿文門禁卡收回與註銷登記');
         }
       } else if (c.awenOrigAccess !== 'revoked') {
-        nextHint = isEn ? 'Revoke A-Wen original access at 2F Duty PC & set 30-day paper grant' : '回 2F 值班電腦終止阿文原專案權限，並核定兩張圖限期授權';
+        nextHint = on2F
+          ? (isEn ? 'Revoke A-Wen original access at Duty PC & set 30-day paper grant' : '回值班電腦終止阿文原專案權限，並核定兩張圖限期授權')
+          : (isEn ? 'Take stairs to 2F Duty PC: revoke A-Wen original access & set paper grant' : '走樓梯上 2F 回值班電腦，終止阿文原專案權限並核定兩張圖限期授權');
       } else {
-        nextHint = isEn ? 'Proceed to 2F Duty Desk to complete handover' : '請前往 2F 辦公區值班桌完成交班';
+        nextHint = on2F
+          ? (isEn ? 'Proceed to Duty Desk to complete handover' : '請前往值班桌完成交班')
+          : (isEn ? 'Take stairs to 2F Duty Desk to complete handover' : '走樓梯上 2F 前往值班桌完成交班');
       }
 
       return {
