@@ -637,11 +637,12 @@
     if (state.chapter === 1) {
       const c = state.clues || {};
       const e = state.email || {};
+      const v = state.visitor || {};
       const emailTouched = Boolean(e.status && e.status !== 'unread' && e.status !== 'read' && e.status !== 'holding');
-      const visitorResolved = Boolean(state.visitor && (
-        state.visitor.status === 'done_entrance' ||
-        state.visitor.status === 'done_lab_clean' ||
-        state.visitor.status === 'done_lab_leaked'
+      const visitorResolved = Boolean(v && (
+        v.status === 'done_entrance' ||
+        v.status === 'done_lab_clean' ||
+        v.status === 'done_lab_leaked'
       ));
 
       let done = 0;
@@ -651,13 +652,47 @@
       if (emailTouched) done++;
 
       const isAllDone = done === 4;
+      let nextHint = '';
+      let nextHintAlert = false;
+
+      if (e.misshared && !e.linkRevoked) {
+        nextHint = isEn ? '🚨 Public link active! Revoke access at 2F PC immediately!' : '🚨 誤設公開連結！立即回 2F 電腦停用分享連結！';
+        nextHintAlert = true;
+      } else if (e.misshared && !e.reportedToLead) {
+        nextHint = isEn ? '🚨 Report mis-share incident to Lead A-Ming on 2F!' : '🚨 找 2F 辦公區阿明組長通報誤分享事件（人、事、時、地、物）！';
+        nextHintAlert = true;
+      } else if (isAllDone) {
+        nextHint = isEn ? '✨ All tasks complete! Clock out at 2F Duty Desk (green checkmark)' : '✨ 任務全數達成！請到 2F 辦公區值班桌（綠勾）填寫紀錄並完成交班';
+      } else if (e.status === 'unread') {
+        nextHint = isEn ? 'Check partner urgent email at 2F Office Duty PC' : '到 2F 辦公區電腦查看星海科技合作方的緊急來信';
+      } else if (!c.ndaScope && !c.ndaCheckedInSystem && !e.usedHoldingReply) {
+        nextHint = isEn ? 'Verify NDA list at 2F PC or consult Lead A-Ming in Office' : '在 2F 電腦查核 NDA 簽署清單，或詢問辦公室阿明組長';
+      } else if (!c.meetingVersion) {
+        nextHint = isEn ? 'Ask A-Wen at 2F Lab for approved meeting charts' : '到 2F 實驗區找阿文確認會議用圖版本（勿傳未核准原始資料夾）';
+      } else if (!visitorResolved) {
+        const exposed = (state.labItems && (!state.labItems.whiteboard || !state.labItems.monitor || !state.labItems.samples));
+        if (exposed && v.status === 'waiting') {
+          nextHint = isEn ? 'Inspect 2F Lab (whiteboard, monitor, samples), then escort 1F visitor' : '巡視 2F 實驗區收妥白板／螢幕／樣品，再下樓至 1F 接待訪客陳先生';
+        } else if (v.status === 'waiting') {
+          nextHint = isEn ? 'Take stairs to 1F reception to escort visitor Mr. Chen for photos' : '走左側樓梯至 1F 大門接待處，引導預約訪客陳先生拍照';
+        } else {
+          nextHint = isEn ? 'Escort Mr. Chen to complete photos (ensure lab data is shielded)' : '引導訪客陳先生拍照（確認白板與螢幕敏感數據已遮蔽）';
+        }
+      } else if (!emailTouched) {
+        nextHint = isEn ? 'Send 2 approved charts with 7-day read-only link at 2F PC' : '回 2F 電腦選擇「僅會議用兩張圖」並設定 7 天唯讀權限寄出';
+      } else {
+        nextHint = isEn ? 'Proceed to 2F Duty Desk to complete handover' : '請前往 2F 辦公區值班桌完成交班';
+      }
+
       return {
         icon: isAllDone ? '🌟' : '🛡️',
         title: isEn ? 'Trade Secret Checklist' : '營業秘密防護查核',
         done,
         total: 4,
         unit: isEn ? 'Items' : '項',
-        isAllDone
+        isAllDone,
+        nextHint,
+        nextHintAlert
       };
     }
 
@@ -672,13 +707,35 @@
       if (c.outcome && c.outcome !== 'in_progress') done++;
 
       const isAllDone = done === 4;
+      let nextHint = '';
+      let nextHintAlert = false;
+
+      if (c.misuploaded && (!c.contactedOrganizer || !c.reportedToLead)) {
+        nextHint = isEn ? '🚨 Unconfirmed version uploaded! Contact host from PC & report to Lead A-Ming!' : '🚨 誤傳未確認版本！請回電腦聯絡主辦方並向阿明組長回報通報！';
+        nextHintAlert = true;
+      } else if (isAllDone) {
+        nextHint = isEn ? '✨ Decision finalized! Clock out at 2F Duty Desk (green checkmark)' : '✨ 審查決策已完成！請到 2F 辦公區值班桌填寫紀錄並完成交班';
+      } else if (!c.openedPoster) {
+        nextHint = isEn ? 'Open & inspect symposium poster draft at 2F Office PC' : '至 2F 辦公區電腦開啟並檢視研討會海報草稿';
+      } else if (!clues.wenExplainedFig2) {
+        nextHint = isEn ? 'Ask A-Wen in 2F Lab about Fig 2 origin and unlock replacement figure' : '到 2F 實驗區找阿文詢問圖二來源，並取得自研替代圖';
+      } else if (!clues.mingExplainedRules) {
+        nextHint = isEn ? 'Consult Team Lead A-Ming in Office regarding Fig 2 consent & Fig 3 patent' : '向辦公區阿明組長確認圖二公開授權與圖三專利公開時點';
+      } else if (c.outcome === 'in_progress') {
+        nextHint = isEn ? 'Finalize poster figures on PC; submit approved version or defer submission' : '在電腦完成海報圖替換／移除，選擇核准版提交或暫緩投稿';
+      } else {
+        nextHint = isEn ? 'Proceed to 2F Duty Desk to complete handover' : '請前往 2F 辦公區值班桌完成交班';
+      }
+
       return {
         icon: isAllDone ? '🌟' : '📑',
         title: isEn ? 'Poster Review Progress' : '海報公開審查進度',
         done,
         total: 4,
         unit: isEn ? 'Items' : '項',
-        isAllDone
+        isAllDone,
+        nextHint,
+        nextHintAlert
       };
     }
 
@@ -692,13 +749,27 @@
       if (docs[2] && (docs[2].chosenMarking || docs[2].isCorrect)) done++;
 
       const isAllDone = done === 3 && Boolean(c.verifiedWithQing);
+      let nextHint = '';
+
+      if (isAllDone) {
+        nextHint = isEn ? '✨ All labeled & verified! Complete handover at Duty Desk or with Xiao-Qing' : '✨ 標示與交接核對完成！向小晴或回 2F 值班桌完成交班';
+      } else if (done < 3) {
+        nextHint = isEn ? `Review & label all 3 documents at 2F Office PC (${done}/3 labeled)` : `至 2F 辦公區值班電腦，檢視三份文件並完成機密標示（已完成 ${done}/3 份）`;
+      } else if (!c.verifiedWithQing) {
+        nextHint = isEn ? 'Find colleague Xiao-Qing in 2F Office to hand over labeled documents' : '找 2F 辦公區同事小晴接手文件，確認保管方式與分享原則';
+      } else {
+        nextHint = isEn ? 'Proceed to 2F Duty Desk to complete handover' : '請前往 2F 辦公區值班桌完成交班';
+      }
+
       return {
         icon: isAllDone ? '🌟' : '🏷️',
         title: isEn ? 'Document Labeling' : '文件機密標示',
         done,
         total: 3,
         unit: isEn ? 'Docs' : '份',
-        isAllDone
+        isAllDone,
+        nextHint,
+        nextHintAlert: false
       };
     }
 
@@ -711,13 +782,32 @@
       if (cards.card2 && cards.card2.choice !== null) done++;
       if (cards.card3 && cards.card3.choice !== null) done++;
 
+      const isAllDone = done === 3 && Boolean(c.verifiedWithQing);
+      let nextHint = '';
+
+      if (isAllDone) {
+        nextHint = isEn ? '✨ Inventory verified! Complete handover at Duty Desk or with Xiao-Qing' : '✨ 清單核對已完成！向小晴或回 2F 值班桌完成交班';
+      } else if (done < 3) {
+        nextHint = isEn ? `Take stairs to 1F Lab to review 3 data cards with A-Wen (${done}/3)` : `走樓梯至 1F 實驗區找同事阿文，辨識三組研發成果資料卡（已完成 ${done}/3）`;
+      } else if (!c.draftSaved) {
+        nextHint = isEn ? 'Go up to 2F Office PC to review 5-field inventory draft' : '返回 2F 辦公區值班電腦，確認五欄位研發成果清單草稿';
+      } else if (!c.updatedSaved) {
+        nextHint = isEn ? 'Check Team Lead notice at 2F PC and update patent publication status' : '收到阿明組長專利公開通知，請在 2F 電腦更新裝置公開狀態';
+      } else if (!c.verifiedWithQing) {
+        nextHint = isEn ? 'Find colleague Xiao-Qing in 2F Office to verify inventory list' : '找 2F 辦公區同事小晴核對清單並確認欄位紀錄';
+      } else {
+        nextHint = isEn ? 'Proceed to 2F Duty Desk to complete handover' : '請前往 2F 辦公區值班桌完成交班';
+      }
+
       return {
-        icon: done === 3 ? '🌟' : '📋',
+        icon: isAllDone ? '🌟' : '📋',
         title: isEn ? 'R&D Inventory Audit' : '成果清單盤點辨識',
         done,
         total: 3,
         unit: isEn ? 'Sets' : '組',
-        isAllDone: done === 3
+        isAllDone,
+        nextHint,
+        nextHintAlert: false
       };
     }
 
@@ -732,13 +822,43 @@
       if (c.qingConfirmedOpen) done++;
 
       const isAllDone = done === 5;
+      let nextHint = '';
+      let nextHintAlert = false;
+
+      if (c.interruptedByEarlyRevoke && c.rawLogLocation !== 'project') {
+        nextHint = isEn ? '🚨 Revoked early! Ask Lead A-Ming on 1F for admin transfer assistance' : '🚨 提前停權！請下樓找 1F 阿明組長安排管理員單獨移交紀錄！';
+        nextHintAlert = true;
+      } else if (isAllDone) {
+        nextHint = isEn ? '✨ All 5 handover items done! Clock out at Duty Desk or with Xiao-Qing' : '✨ 5 項交接全數完成！向小晴或回 2F 值班桌完成交班';
+      } else if (c.rawLogLocation !== 'project') {
+        nextHint = isEn ? 'Ask A-Wen in 2F Lab to transfer raw measurements to project folder' : '至 2F 實驗區找阿文，將原始紀錄移交至專案指定位置';
+      } else if (!c.qingHasProjectAccess) {
+        nextHint = isEn ? 'Grant Xiao-Qing project folder access at 2F Duty PC' : '至 2F 值班電腦開通小晴的專案資料夾存取權限';
+      } else if (!c.qingConfirmedOpen) {
+        nextHint = isEn ? 'Ask Xiao-Qing in 2F Lab to test opening transferred records' : '至 2F 實驗區找小晴實測開啟原始紀錄，確認接收無誤';
+      } else if (!c.ndaRemindedToAwen) {
+        nextHint = isEn ? 'Remind A-Wen in 2F Lab of post-employment trade secret obligations' : '向 2F 實驗區阿文提醒離職保密義務，確認個人設備無留存機密';
+      } else if (!c.badgeReturned) {
+        if (!c.awenGaveBadge) {
+          nextHint = isEn ? 'Ask A-Wen for his physical badge, then return it at 1F Reception' : '向 2F 阿文索取實體門禁卡，並下樓至 1F 大門接待處登記收回';
+        } else {
+          nextHint = isEn ? 'Take stairs to 1F Main Reception Desk to register badge return' : '走樓梯至 1F 大門接待櫃台，完成阿文門禁卡收回與註銷登記';
+        }
+      } else if (c.awenOrigAccess !== 'revoked') {
+        nextHint = isEn ? 'Revoke A-Wen original access at 2F Duty PC & set 30-day paper grant' : '回 2F 值班電腦終止阿文原專案權限，並核定兩張圖限期授權';
+      } else {
+        nextHint = isEn ? 'Proceed to 2F Duty Desk to complete handover' : '請前往 2F 辦公區值班桌完成交班';
+      }
+
       return {
         icon: isAllDone ? '🌟' : '🪪',
         title: isEn ? 'Departure Handover' : '離職保密交接清單',
         done,
         total: 5,
         unit: isEn ? 'Items' : '項',
-        isAllDone
+        isAllDone,
+        nextHint,
+        nextHintAlert
       };
     }
 

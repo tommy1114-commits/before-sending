@@ -208,6 +208,16 @@
         if (pillBtn) {
           pillBtn.classList.toggle('completed', Boolean(p.isAllDone));
         }
+
+        const nextHintText = $('next-hint-text');
+        const nextHintWrap = $('mission-next-hint');
+        if (nextHintText && p.nextHint) {
+          nextHintText.textContent = p.nextHint;
+          if (nextHintWrap) {
+            nextHintWrap.classList.toggle('alert', Boolean(p.nextHintAlert));
+            nextHintWrap.classList.toggle('success', Boolean(p.isAllDone));
+          }
+        }
       }
     }
 
