@@ -271,8 +271,8 @@
     } else if (chapter === 4) {
       // Menu Ch4: 這批資料要列入清單嗎？ (internal 4)
       list = [
-        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 1, x: 9, y: 6, dir: 'down' },
-        { id: 'npc_qing', sprite: 'qing', label: '盤點同事 小晴', label_en: 'Colleague: Xiao-Qing', floor: 2, x: 5, y: 11, dir: 'left' },
+        { id: 'npc_qing', sprite: 'qing', label: '盤點同事 小晴', label_en: 'Colleague: Xiao-Qing', floor: 1, x: 9, y: 6, dir: 'down' },
+        { id: 'npc_colleague', sprite: 'colleague', label: '同事 阿文', label_en: 'Colleague: A-Wen', floor: 2, x: 10, y: 4, dir: 'left' },
         { id: 'npc_lead', sprite: 'lead', label: '負責人 阿明組長', label_en: 'Lead: Team Lead A-Ming', floor: 2, x: 8, y: 17, dir: 'up' }
       ];
     } else {

@@ -722,7 +722,21 @@
       } else if (!clues.mingExplainedRules) {
         nextHint = isEn ? 'Consult Team Lead A-Ming in Office regarding Fig 2 consent & Fig 3 patent' : '向辦公區阿明組長確認圖二公開授權與圖三專利公開時點';
       } else if (c.outcome === 'in_progress') {
-        nextHint = isEn ? 'Finalize poster figures on PC; submit approved version or defer submission' : '在電腦完成海報圖替換／移除，選擇核准版提交或暫緩投稿';
+        const versions = c.versions || [];
+        const hasApproved = versions.some((v) => v.status === 'approved');
+        const hasPending = versions.some((v) => v.status === 'pending_review');
+        const workingVer = versions.find((v) => v.id === c.workingVersionId) || versions[versions.length - 1];
+        const figuresFixed = workingVer && workingVer.slots && workingVer.slots.fig2 === 'alt' && workingVer.slots.fig3 === 'removed';
+
+        if (hasApproved) {
+          nextHint = isEn ? 'Return to 2F Office PC, switch to Submission tab and submit approved file' : '回 2F 辦公區電腦切換至「提交投稿」分頁，提交已核准檔案';
+        } else if (hasPending) {
+          nextHint = isEn ? 'Talk to Team Lead A-Ming in Office to obtain final approval for the poster' : '到辦公區找阿明組長對話，取得海報核准';
+        } else if (!figuresFixed) {
+          nextHint = isEn ? 'On Office PC: replace Fig 2 with alternative chart and remove Fig 3' : '至辦公區電腦將圖二替換為替代圖、並移除圖三';
+        } else {
+          nextHint = isEn ? 'On Office PC: submit current version to Team Lead A-Ming for review' : '在辦公區電腦點選「送交阿明組長確認」送出審核';
+        }
       } else {
         nextHint = isEn ? 'Proceed to 2F Duty Desk to complete handover' : '請前往 2F 辦公區值班桌完成交班';
       }
@@ -788,9 +802,9 @@
       if (isAllDone) {
         nextHint = isEn ? '✨ Inventory verified! Complete handover at Duty Desk or with Xiao-Qing' : '✨ 清單核對已完成！向小晴或回 2F 值班桌完成交班';
       } else if (done < 3) {
-        nextHint = isEn ? `Take stairs to 1F Lab to review 3 data cards with A-Wen (${done}/3)` : `走樓梯至 1F 實驗區找同事阿文，辨識三組研發成果資料卡（已完成 ${done}/3）`;
+        nextHint = isEn ? `Take stairs to 2F Lab to review 3 data cards with A-Wen (${done}/3)` : `走樓梯至 2F 量測實驗區找同事阿文，辨識三組研發成果資料卡（已完成 ${done}/3）`;
       } else if (!c.draftSaved) {
-        nextHint = isEn ? 'Go up to 2F Office PC to review 5-field inventory draft' : '返回 2F 辦公區值班電腦，確認五欄位研發成果清單草稿';
+        nextHint = isEn ? 'Review 5-field inventory draft at 2F Office PC' : '至 2F 辦公區值班電腦，確認五欄位研發成果清單草稿';
       } else if (!c.updatedSaved) {
         nextHint = isEn ? 'Check Team Lead notice at 2F PC and update patent publication status' : '收到阿明組長專利公開通知，請在 2F 電腦更新裝置公開狀態';
       } else if (!c.verifiedWithQing) {

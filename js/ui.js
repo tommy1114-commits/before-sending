@@ -525,8 +525,8 @@
       } else {
         rank = 'S';
         extraNote = isEn
-          ? 'Accurately distinguished proprietary know-how and patent filings, implemented all 5 mandatory fields, and updated upon publication!'
-          : '精準分辨自研 know-how 與專利資料，落實清單五欄位，並在專利公開時及時精確更新！';
+          ? 'R&D inventory fully verified with Xiao-Qing; ready for tomorrow\'s audit!'
+          : '已與同事小晴完整核對研發成果清單，明天的盤點作業萬無一失！';
       }
     } else if (isCh3) {
       icon = result.banner.icon;
@@ -1167,6 +1167,7 @@
       const displayVer = compareView === 'original' ? originalVer : workingVer;
       const workingMeta = window.BS.State.getVersionStatusMeta(workingVer.status);
       const workingIssues = window.BS.State.getVersionIssues(workingVer, c.clues);
+      const hasApproved = c.versions.some((v) => v.status === 'approved');
 
       if (!c.versions.some((v) => v.id === selectedUploadId)) {
         selectedUploadId = workingVer.id;
@@ -1277,7 +1278,7 @@
                 curRemoved
                   ? (isEn ? 'Removed from current public poster version to prevent compromising future patent filings.' : '已從目前編輯的公開海報版本中移除，避免影響後續專利申請安排。')
                   : c.clues.mingExplainedRules
-                  ? (isEn ? 'Involves <strong>pending patent application arrangements</strong>; public timing not yet settled. Team Lead A-Ming suggests removing from this release or deferring submission.' : '涉及<strong>尚待確認的專利申請安排</strong>，公開時點在本章尚未定案。阿明組長建議先從本次公開版移除，或暫緩整份投稿。')
+                  ? (isEn ? 'Involves <strong>pending patent application arrangements</strong>; public timing not yet settled. Team Lead A-Ming suggests removing from this release.' : '涉及<strong>尚待確認的專利申請安排</strong>，公開時點在本章尚未定案。阿明組長建議先從本次公開版移除。')
                   : (isEn ? 'Involves <strong>pending patent arrangements</strong> (timing unconfirmed). Hint: Consult <strong>Team Lead A-Ming in office</strong>.' : '涉及<strong>尚待確認的專利申請安排</strong>（公開時點待確認）。提示：可先找<strong>辦公區的阿明組長</strong>確認處理方式。')
               }
             </p>
@@ -1362,10 +1363,14 @@
           ${statusBannerHtml}
 
           <div class="pc-actions">
-            <button class="pixel-btn" id="btn-poster-goto-submit" type="button">${isEn ? '📤 Proceed to File Submission / Deferral →' : '📤 前往選擇檔案提交／暫緩 →'}</button>
+            ${
+              hasApproved || c.misuploaded
+                ? `<button class="pixel-btn primary" id="btn-poster-goto-submit" type="button">${isEn ? '📤 Proceed to Online Poster Submission →' : '📤 前往線上提交海報檔案 →'}</button>`
+                : ''
+            }
             ${
               c.outcome === 'in_progress'
-                ? `<button class="pixel-btn primary" id="btn-poster-send-review" type="button">${isEn ? `📨 Submit Current Version (${workingVer.id}) to Lead A-Ming for Approval` : `📨 送交目前版本 (${workingVer.id}) 給阿明組長確認`}</button>`
+                ? `<button class="pixel-btn ${workingIssues.length === 0 && workingVer.status !== 'pending_review' ? 'primary' : ''}" id="btn-poster-send-review" type="button">${isEn ? `📨 Submit Current Version (${workingVer.id}) to Lead A-Ming for Approval` : `📨 送交目前版本 (${workingVer.id}) 給阿明組長確認`}</button>`
                 : ''
             }
           </div>
@@ -1427,7 +1432,6 @@
             ${
               c.outcome === 'in_progress'
                 ? `
-                  <button class="pixel-btn warn" id="btn-poster-defer" type="button">${isEn ? '⏸ Defer Submission (Matters pending confirmation)' : '⏸ 暫緩上傳（尚有待確認事項）'}</button>
                   <button class="pixel-btn ${chosenApproved ? 'primary' : 'danger'}" id="btn-poster-upload" type="button">${isEn ? `📤 Submit Selected File (${chosenVer.id})` : `📤 提交選取檔案 (${chosenVer.id})`}</button>
                 `
                 : `<span class="status-badge ${c.outcome === 'submitted_approved' ? 'ok' : c.outcome === 'deferred' ? 'warn' : 'danger'}">
@@ -1447,7 +1451,7 @@
         </div>
         <div class="poster-tabs">
           <button class="poster-tab-btn ${activeTab === 'edit' ? 'active' : ''}" id="tab-poster-edit" type="button">${isEn ? '🎨 Figure Review & Version Diff' : '🎨 海報編輯與版本比較'}</button>
-          <button class="poster-tab-btn ${activeTab === 'submit' ? 'active' : ''}" id="tab-poster-submit" type="button">${isEn ? `📤 Version History & Submission (${c.versions.length} ver)` : `📤 版本紀錄與提交投稿 (${c.versions.length} 版)`}</button>
+          <button class="poster-tab-btn ${activeTab === 'submit' ? 'active' : ''} ${!hasApproved && !c.misuploaded ? 'disabled' : ''}" id="tab-poster-submit" type="button" ${!hasApproved && !c.misuploaded ? 'style="opacity:0.65;"' : ''}>${isEn ? `📤 Version History & Submission (${c.versions.length} ver)` : `📤 版本紀錄與提交投稿 (${c.versions.length} 版)`}${!hasApproved && !c.misuploaded ? ' 🔒' : ''}</button>
         </div>
         ${tabContentHtml}
       `;
@@ -1475,6 +1479,17 @@
         render();
       };
       $('tab-poster-submit').onclick = () => {
+        if (!hasApproved && !c.misuploaded) {
+          window.BS.Audio.alert();
+          window.BS.UI.showToast(
+            isEn
+              ? '⚠️ Poster not approved yet! Please edit figures (replace Fig 2, remove Fig 3) and submit to Lead A-Ming for confirmation first.'
+              : '⚠️ 海報尚未經阿明組長核准！請先完成圖片整理（替換圖二、移除圖三）並送交組長確認。',
+            true,
+            4000
+          );
+          return;
+        }
         activeTab = 'submit';
         window.BS.Audio.select();
         render();
@@ -1546,11 +1561,13 @@
           };
         }
 
-        $('btn-poster-goto-submit').onclick = () => {
-          activeTab = 'submit';
-          window.BS.Audio.select();
-          render();
-        };
+        if ($('btn-poster-goto-submit')) {
+          $('btn-poster-goto-submit').onclick = () => {
+            activeTab = 'submit';
+            window.BS.Audio.select();
+            render();
+          };
+        }
 
         if ($('btn-poster-send-review')) {
           $('btn-poster-send-review').onclick = () => {
@@ -2226,8 +2243,8 @@
     const titleEl = $('lookup-title');
     if (titleEl) {
       titleEl.textContent = isEn
-        ? '🗂️ 1F Lab Area — Identify 3 Data Cards with A-Wen'
-        : '🗂️ 1F 實驗區 — 和阿文一起辨識三組資料卡';
+        ? '🗂️ 2F Lab Area — Identify 3 Data Cards with A-Wen'
+        : '🗂️ 2F 量測實驗區 — 和阿文一起辨識三組資料卡';
     }
 
     let idx = c.currentCardIdx || 0;
@@ -3037,8 +3054,11 @@
           <h3>🏢 ${isEn ? 'Dual-Floor Route & Mission Guidance' : '兩層樓動線與任務指引'}</h3>
           <ul style="margin:6px 0 0; padding-left:18px;">
             <li>${isEn
-              ? '<strong>1F Lab</strong>: Find colleague A-Wen to identify 3 data cards (reproduction log, condition optimization, patented device).'
-              : '<strong>1F 實驗區</strong>：找同事阿文辨識三組資料卡（公開方法重現、量測條件優化、已申請專利之裝置）。'}</li>
+              ? '<strong>1F Lobby</strong>: Chat with Xiao-Qing to learn about tomorrow\'s R&D inventory task.'
+              : '<strong>1F 大廳</strong>：與小晴對話，瞭解明天的研發成果盤點任務。'}</li>
+            <li>${isEn
+              ? '<strong>2F Lab</strong>: Find colleague A-Wen to identify 3 data cards (reproduction log, condition optimization, patented device).'
+              : '<strong>2F 量測實驗區</strong>：找同事阿文辨識三組資料卡（公開方法重現、量測條件優化、已申請專利之裝置）。'}</li>
             <li>${isEn
               ? '<strong>2F Office</strong>: Visit Duty PC to review R&D Records Inventory (5 fields & data clusters); update inventory upon receiving Team Lead A-Ming\'s patent publication notice.'
               : '<strong>2F 辦公區</strong>：到值班電腦確認研發成果清單（五欄位落實與群組管理），收到阿明組長專利公開通知後及時更新清單。'}</li>
@@ -3051,7 +3071,7 @@
         <div class="section-card">
           <h3>🔍 ${isEn ? 'Current Progress Status' : '目前進度狀態'}</h3>
           <ul style="margin:6px 0 0; padding-left:18px;">
-            <li>${c.cardsCompleted ? '✅' : '⬜'} <strong>${isEn ? '1F Data Card Identification' : '1F 資料卡辨識'}</strong>：${c.cardsCompleted ? (isEn ? 'All 3 data cards identified!' : '三組資料卡已辨識完成！') : (isEn ? 'Pending identification with A-Wen at 1F Lab.' : '尚未找 1F 實驗區阿文辨識三組資料卡。')}</li>
+            <li>${c.cardsCompleted ? '✅' : '⬜'} <strong>${isEn ? '2F Data Card Identification' : '2F 資料卡辨識'}</strong>：${c.cardsCompleted ? (isEn ? 'All 3 data cards identified!' : '三組資料卡已辨識完成！') : (isEn ? 'Pending identification with A-Wen at 2F Lab.' : '尚未找 2F 量測實驗區阿文辨識三組資料卡。')}</li>
             <li>${c.draftSaved ? '✅' : '⬜'} <strong>${isEn ? '2F Inventory Draft Saved' : '2F 清單草稿儲存'}</strong>：${c.draftSaved ? (isEn ? '5-field inventory draft saved at Duty PC.' : '已在值班電腦確認五欄位清單草稿。') : (isEn ? 'Pending saving draft at 2F Duty PC.' : '尚未在 2F 值班電腦儲存清單草稿。')}</li>
             <li>${c.updatedSaved ? '✅' : '⬜'} <strong>${isEn ? '2F Patent Publication Update' : '2F 專利公開更新'}</strong>：${c.updatedSaved ? (isEn ? 'Updated device status accurately; preserved undisclosed know-how.' : '已精準更新量測裝置公開狀態，並保留未公開 know-how。') : (isEn ? 'Pending patent publication update.' : '尚未更新專利公開狀態。')}</li>
             <li>${c.verifiedWithQing ? '✅' : '⬜'} <strong>${isEn ? '2F Xiao-Qing Verification' : '2F 小晴核對'}</strong>：${c.verifiedWithQing ? (isEn ? 'Verified with Xiao-Qing; ready for handover!' : '已與小晴核對完成，可隨時交班！') : (isEn ? 'Pending verification with Xiao-Qing at 2F Office.' : '尚未找 2F 辦公區小晴核對清單。')}</li>
@@ -3110,14 +3130,14 @@
           <h3>📌 ${isEn ? 'Chapter 2 "Night Before Submission" Tasks' : '第二章「投稿前一晚」待辦'}</h3>
           <ul style="margin:6px 0 0; padding-left:18px;">
             <li>${isEn
-              ? '<strong>Office PC (Poster Draft)</strong>: Inspect 3 figures, compare version diffs, submit for review or defer submission.'
-              : '<strong>辦公區電腦（海報草稿）</strong>：檢視三張示意圖、比較版本差異，決定送審提交或暫緩投稿。'}</li>
+              ? '<strong>Office PC (Poster Draft)</strong>: Inspect 3 figures, compare version diffs, replace Fig 2 & remove Fig 3, then submit for review.'
+              : '<strong>辦公區電腦（海報草稿）</strong>：檢視三張示意圖、完成圖片整理（替換圖二、移除圖三）並送交阿明組長核准後提交。'}</li>
             <li><strong>${isEn ? 'Working Version' : '目前作業版本'}</strong>：<code>${wv.filename}</code>（${wm.text}）</li>
             <li><strong>${isEn ? 'Submission Progress' : '投稿進度'}</strong>：${
               c.outcome === 'in_progress'
                 ? c.pendingReviewVersionId
                   ? (isEn ? 'Submitted for review; consult Team Lead A-Ming in Office' : '已送審，請找辦公區阿明組長確認核准')
-                  : (isEn ? 'Reviewing (Organize for review or choose to defer)' : '審閱整理中（可整理送審或選擇暫緩投稿）')
+                  : (isEn ? 'Reviewing (Organize figures, replace Fig 2 & remove Fig 3, then send for review)' : '審閱整理中（請替換圖二並移除圖三，送交組長審核）')
                 : c.outcome === 'submitted_approved'
                 ? (isEn ? '✅ Submitted approved version; return to Duty Desk for handover' : '✅ 已提交核准版本，請回值班桌填寫交班紀錄')
                 : c.outcome === 'deferred'

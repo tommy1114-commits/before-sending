@@ -287,7 +287,7 @@
       const c = state.ch4;
       statusPill.classList.remove('hidden');
       if (!c.cardsCompleted) {
-        statusPill.textContent = isEn ? 'Goal: Check 3 data cards with A-Wen on 1F' : '目標：在 1F 實驗區找同事阿文辨識三組資料卡';
+        statusPill.textContent = isEn ? 'Goal: Review 3 cards with A-Wen in 2F Lab' : '目標：至 2F 實驗區找阿文辨識資料卡';
       } else if (player.floor === 1) {
         statusPill.textContent = isEn ? '▲ Go up to 2F office to review inventory' : '▲ 請走樓梯上 2F 辦公區，到值班電腦確認清單';
       } else if (!c.updatedSaved) {
@@ -974,7 +974,7 @@
       'poster-title': isEn ? '💻 2F Office PC — Symposium Poster System' : '💻 2F 辦公區電腦 — 研討會海報編輯與投稿系統',
       'marking-title': isEn ? '🏷️ 2F Office — Document Confidentiality Marking' : '🏷️ 2F 辦公區 — 文件機密標示與版面預覽工作台',
       'record-title': isEn ? '📋 2F Duty PC — R&D Records Inventory' : '📋 2F 值班電腦 — 研發成果清單管理系統',
-      'cards-title': isEn ? '🔍 1F Lab — R&D Data Cards Review' : '🔍 1F 實驗區 — 星空計畫三組研發成果資料卡',
+      'cards-title': isEn ? '🔍 2F Lab — R&D Data Cards Review' : '🔍 2F 量測實驗區 — 星空計畫三組研發成果資料卡',
       'lookup-title': isEn ? '📁 2F Lab — Lab Record Computer' : '📁 2F 實驗區 — 實驗紀錄路徑對照',
       'cam-title': isEn ? '📸 1F Lab — Visitor Photography Framing' : '📸 1F 管制實驗區 — 訪客相機取景預覽',
       'camera-title': isEn ? '📸 1F Lab — Visitor Photography Framing' : '📸 1F 管制實驗區 — 訪客相機取景預覽',
@@ -1273,13 +1273,19 @@
     } else if (currentChapter === 4 && state && state.ch4) {
       const c = state.ch4;
       if (!c.cardsCompleted) {
-        $('nearby-hint').textContent = isEn
-          ? '1F Lab · Talk to colleague A-Wen to identify 3 data cards'
-          : '目前在 1F 實驗區 · 請走向右側同事阿文辨識三組資料卡';
+        if (player.floor === 1) {
+          $('nearby-hint').textContent = isEn
+            ? '1F Lobby · ▲ Take stairs on the left up to 2F Lab to find A-Wen'
+            : '目前在 1F 大廳 · ▲ 請往左走樓梯上 2F 量測實驗區找阿文';
+        } else {
+          $('nearby-hint').textContent = isEn
+            ? '2F Lab · Talk to colleague A-Wen to identify 3 data cards'
+            : '目前在 2F 量測實驗區 · 請向阿文辨識三組資料卡';
+        }
       } else if (player.floor === 1) {
         $('nearby-hint').textContent = isEn
-          ? '1F Lab · ▲ Take stairs on the left up to 2F office'
-          : '目前在 1F 實驗區 · ▲ 請往左走樓梯上 2F 辦公區';
+          ? '1F Lobby · ▲ Take stairs on the left up to 2F office'
+          : '目前在 1F 大廳 · ▲ 請往左走樓梯上 2F 辦公區';
       } else if (!c.updatedSaved) {
         $('nearby-hint').textContent = isEn
           ? '2F Office · Review & save inventory at duty PC (top-left)'

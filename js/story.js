@@ -1461,8 +1461,8 @@
             {
               speaker: '負責人 阿明組長',
               portrait: 'lead',
-              text: '③ 圖三「測試條件與結果摘要」：涉及尚待確認的專利申請安排，如果太早公開可能影響專利新穎性。今晚公開時點還沒辦法確定，你可以先把它從這次公開版本移除；或者若認為資訊不足，也可以選擇暫緩投稿。',
-              text_en: '③ Figure 3 "Test Conditions & Result Summary": Involves pending patent application arrangements; disclosing too early could jeopardize patent novelty. Since public timing cannot be settled tonight, remove it from this release, or defer submission if information is insufficient.'
+              text: '③ 圖三「測試條件與結果摘要」：涉及尚待確認的專利申請安排，如果太早公開可能影響專利新穎性。今晚公開時點還沒辦法確定，請先把它從這次公開版本移除。',
+              text_en: '③ Figure 3 "Test Conditions & Result Summary": Involves pending patent application arrangements; disclosing too early could jeopardize patent novelty. Since public timing cannot be settled tonight, please remove it from this release.'
             }
           ]);
         }
@@ -1555,8 +1555,8 @@
           {
             speaker: '值班桌（交班紀錄簿）',
             portrait: 'desk',
-            text: '研討會海報還沒做出決定喔！\n請先到辦公區電腦檢視海報草稿，並向實驗區的阿文與辦公區的阿明組長確認後，再決定「核准後提交」或「暫緩上傳」。',
-            text_en: 'A decision on the symposium poster has not been reached!\nPlease inspect the draft at the office PC, verify with A-Wen in the lab and Team Lead A-Ming in the office, and then choose "Submit Approved Version" or "Defer Submission".'
+            text: '研討會海報尚未完成核准送審與提交喔！\n請先到辦公區電腦檢視海報草稿，並向實驗區阿文與阿明組長確認後完成送審與提交。',
+            text_en: 'The symposium poster has not been approved and submitted yet!\nPlease inspect the draft at the PC, verify with A-Wen and Lead A-Ming, and submit the approved version.'
           }
         ]);
         return;
@@ -2272,18 +2272,18 @@
     function playCh4Intro() {
       window.BS.UI.startDialogue([
         {
-          speaker: '同事 阿文（1F 實驗區）',
-          speaker_en: 'Colleague: A-Wen (1F Lab)',
-          portrait: 'colleague',
-          text: '阿文在 1F 實驗區拿出同一個虛構量測計畫（星空計畫）的三組資料，對小安說：\n「這三組資料都是同一個計畫做的。小晴明天要盤點，你幫我看看哪些需要列進研發成果清單？她要知道去哪裡找，還有該找誰問。」',
-          text_en: 'In 1F lab, A-Wen presents 3 data sets from the StarSky Project and says:\n"These are all from the same project. Xiao-Qing will inventory them tomorrow. Which ones should go into the R&D Records Inventory? She needs to know where to find them and who to ask."'
+          speaker: '盤點同事 小晴（1F 大廳）',
+          speaker_en: 'Colleague: Xiao-Qing (1F Lobby)',
+          portrait: 'qing',
+          text: '小晴在 1F 大廳拿著研發成果清單筆記，對小安說：\n「小安！明天我要進行星空計畫的研發成果清單盤點。阿文在 2F 量測實驗區手上有三組資料卡，但他不確定哪些要列入清單受控、哪些只要留作一般紀錄。\n你能不能先走樓梯上 2F 實驗室找阿文，幫忙確認一下這三組資料卡？我等等也上去 2F 辦公室準備資料，確認好後再到 2F 電腦彙整清單喔！」',
+          text_en: 'Xiao-Qing holds an inventory notepad in the 1F Lobby and says to Xiao-An:\n"Xiao-An! Tomorrow I need to conduct the R&D Records Inventory for Project StarSky. A-Wen is in the 2F Lab with three data sets, but he is unsure which should be inventoried for controlled protection. Could you take the stairs to the 2F Lab to help him review the three data cards? I will head up to the 2F Office as well—once checked, let\'s compile the inventory at the 2F PC!"'
         },
         {
           speaker: '小安',
           speaker_en: 'Xiao-An',
           portrait: 'player',
-          text: '好！同一計畫可能同時包含公開資訊、未公開 know-how 和專利申請資料。我們一起看這三張資料卡，確認各自該如何判斷！',
-          text_en: 'Great! A single project can encompass public information, undisclosed know-how, and patent filings. Let us examine the 3 data cards to classify each properly!'
+          text: '沒問題！同一研發計畫可能同時包含公開資訊、未公開 know-how 和專利申請資料。我這就走樓梯上 2F 量測實驗區找阿文確認！',
+          text_en: 'No problem! A single project can encompass public information, undisclosed know-how, and patent filings. I will head up the stairs to 2F Measurement Lab to check with A-Wen!'
         }
       ], () => {
         ctx.refreshHUD();
@@ -2347,10 +2347,10 @@
       if (!c.cardsCompleted) {
         window.BS.UI.startDialogue([
           {
-            speaker: '同事 阿文（1F 實驗區）',
+            speaker: '同事 阿文（2F 實驗區）',
             portrait: 'colleague',
-            text: '來，這是星空計畫的三張資料卡。我們逐張看看：哪些只要留作一般紀錄、哪些要以資料群組列入清單受控保護！',
-            text_en: "Here are the three data cards for Project StarSky. Let's examine each: which are kept as general records, and which should be inventoried as data groups for controlled protection!",
+            text: '嗨小安！小晴有跟你說了吧？這是星空計畫的三張資料卡。我們逐張看看：哪些只要留作一般紀錄、哪些要以資料群組列入清單受控保護！',
+            text_en: "Hi Xiao-An! Xiao-Qing must have mentioned it. Here are the three data cards for Project StarSky. Let's examine each: which are kept as general records, and which should be inventoried as data groups for controlled protection!",
             choices: [
               {
                 label: '🗂️ 查看三張資料卡並完成判斷',
@@ -2358,13 +2358,16 @@
                 onSelect: () => {
                   window.BS.UI.openDataCardsModal(state, {
                     onComplete: () => {
+                      if (ctx && ctx.moveNpcTo) {
+                        ctx.moveNpcTo('npc_qing', 2, 5, 11, 'left', true);
+                      }
                       ctx.refreshHUD();
                       window.BS.UI.startDialogue([
                         {
-                          speaker: '同事 阿文（1F 實驗區）',
+                          speaker: '同事 阿文（2F 實驗區）',
                           portrait: 'colleague',
-                          text: '太清楚了！同一研究計畫下，公開資訊、自研 know-how 跟專利申請資料的界線完全分明了。走吧，請走樓梯上 2F 辦公區的值班電腦，把這份清單確認並存檔！',
-                          text_en: 'Crystal clear! Under the same project, the boundaries between public information, proprietary know-how, and patent filings are completely distinct. Now head up to the 2F Duty PC to review and save the inventory!'
+                          text: '太清楚了！同一研究計畫下，公開資訊、自研 know-how 跟專利申請資料的界線完全分明了。\n小晴剛剛已經先去 2F 辦公室了，請到旁邊 2F 辦公區的值班電腦，把這份清單確認並存檔！',
+                          text_en: 'Crystal clear! Under the same project, the boundaries between public information, proprietary know-how, and patent filings are completely distinct.\nXiao-Qing has headed to the 2F Office. Please go to the 2F Duty PC nearby to review and save the inventory!'
                         }
                       ], () => {
                         ctx.refreshHUD();
@@ -2386,10 +2389,10 @@
 
       window.BS.UI.startDialogue([
         {
-          speaker: '同事 阿文（1F 實驗區）',
+          speaker: '同事 阿文（2F 實驗區）',
           portrait: 'colleague',
-          text: '三組資料卡我們都已經辨識完畢囉！請往左走樓梯上 2F 辦公區，到值班電腦確認清單草稿並存檔。',
-          text_en: "We've classified all three data cards! Head left up the stairs to the 2F Duty PC to review and save the draft inventory."
+          text: '三組資料卡我們都已經辨識完畢囉！請到旁邊 2F 辦公區的值班電腦確認清單草稿並存檔。',
+          text_en: "We've classified all three data cards! Head over to the Duty PC in the 2F Office area to review and save the draft inventory."
         }
       ]);
     }
@@ -2401,8 +2404,8 @@
           {
             speaker: '2F 值班電腦（研發成果清單）',
             portrait: 'monitor',
-            text: '電腦畫面上顯示星空計畫研發成果清單草稿。\n※ 請先在 1F 實驗區找同事阿文查看三組資料卡，完成辨識後再來確認清單！',
-            text_en: 'The screen displays the Project StarSky R&D Records Inventory draft.\n* Please visit colleague A-Wen in 1F Lab first to examine the three data cards before reviewing the inventory!'
+            text: '電腦畫面上顯示星空計畫研發成果清單草稿。\n※ 請先在 2F 量測實驗區找同事阿文查看三組資料卡，完成辨識後再來確認清單！',
+            text_en: 'The screen displays the Project StarSky R&D Records Inventory draft.\n* Please visit colleague A-Wen in 2F Lab first to examine the three data cards before reviewing the inventory!'
           }
         ]);
         return;
@@ -2421,10 +2424,10 @@
       if (!c.cardsCompleted) {
         window.BS.UI.startDialogue([
           {
-            speaker: '盤點同事 小晴（2F 辦公區）',
+            speaker: '盤點同事 小晴',
             portrait: 'qing',
-            text: '嗨小安！明天我要盤點星空計畫的研發成果資料。你先去 1F 實驗區幫阿文看看資料卡，確認好哪些要列入清單再來找我喔！',
-            text_en: "Hi Xiao-An! I'm conducting an inventory of Project StarSky R&D records tomorrow. Help A-Wen check the data cards in 1F Lab first, and come back once you've determined what to include!"
+            text: '嗨小安！明天我要盤點星空計畫的研發成果資料。請先走樓梯上 2F 量測實驗區幫阿文看資料卡，確認好哪些要列入清單受控再來找我喔！',
+            text_en: "Hi Xiao-An! I'm conducting an inventory of Project StarSky R&D records tomorrow. Take the stairs to 2F Lab to help A-Wen check the data cards first, and come back once you've determined what to include!"
           }
         ]);
         return;
@@ -2468,26 +2471,26 @@
           portrait: 'qing',
           text:
             '小安，清單整理得太清楚了！我來跟你核對明天的盤點重點：\n\n' +
-            '1. **需要盤點的資料**：星空計畫量測相關研發成果，依資料群組管理，清楚明瞭！\n' +
-            '2. **存放位置與負責人**：各資料群組分別指引至受控資料夾，負責人皆為阿文，明天找資料與詢問完全沒問題。\n' +
-            '3. **公開與保護界線**：\n' +
+            '1. 【需要盤點的資料】：星空計畫量測相關研發成果，依資料群組管理，清楚明瞭！\n' +
+            '2. 【存放位置與負責人】：各資料群組分別指引至受控資料夾，負責人皆為阿文，明天找資料與詢問完全沒問題。\n' +
+            '3. 【公開與保護界線】：\n' +
             '   • 量測裝置申請資料已標記公開，並註明僅涵蓋公開文件內容；\n' +
             '   • 量測裝置調校紀錄未納入申請，明確保留為未公開 know-how 繼續受控；\n' +
             '   • 條件優化紀錄亦維持內部保護，公開與保密界線絲毫不混淆！\n\n' +
             '今天的研發成果清單任務大成功！',
           text_en:
             'Xiao-An, the inventory is organized so clearly! Let me review tomorrow\'s inventory focus with you:\n\n' +
-            '1. **Records to Inventory**: StarSky measurement-related R&D records managed by data groups, crystal clear!\n' +
-            '2. **Storage Locations & Persons Responsible**: Each data group points to access-controlled folders with A-Wen as Person Responsible; locating files or asking questions tomorrow will be completely seamless.\n' +
-            '3. **Public vs. Protected Boundaries**:\n' +
+            '1. [Records to Inventory]: StarSky measurement-related R&D records managed by data groups, crystal clear!\n' +
+            '2. [Storage Locations & Persons Responsible]: Each data group points to access-controlled folders with A-Wen as Person Responsible; locating files or asking questions tomorrow will be completely seamless.\n' +
+            '3. [Public vs. Protected Boundaries]:\n' +
             '   • Measurement device application docs marked public, explicitly noting coverage only of published documents;\n' +
             '   • Device calibration notes omitted from application, clearly preserved as undisclosed know-how under control;\n' +
             '   • Condition optimization records also maintained under internal protection—zero confusion between public and confidential!\n\n' +
             'Today\'s R&D Records Inventory task is a total success!',
           choices: [
             {
-              label: '🏆 填寫第三章交班紀錄並完成本章',
-              label_en: '🏆 Fill in handover notes & complete chapter',
+              label: '🏆 填寫第四章交班紀錄並完成本章',
+              label_en: '🏆 Complete Ch4 Handover Notes & Finish Chapter',
               onSelect: () => completeCh4Handover(state)
             },
             {
