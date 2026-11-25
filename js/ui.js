@@ -1221,7 +1221,7 @@
           f2StatusBadge =
             displayVer.status === 'approved'
               ? `<span class="diff-badge safe">${isEn ? 'Approved Public' : '已核准公開'}</span>`
-              : `<span class="diff-badge warn">${isEn ? 'Alternative Fig · Pending approval' : '可送審替代圖・待隨版核准'}</span>`;
+              : `<span class="diff-badge warn">${isEn ? 'Alternative Fig · Pending approval' : '可送審替代圖・待阿明組長核准'}</span>`;
         } else {
           f2StatusBadge = c.clues.wenExplainedFig2
             ? `<span class="diff-badge danger">${isEn ? 'Partner Meeting Only · Not Approved' : '合作會議用・未核准公開'}</span>`
@@ -2739,11 +2739,14 @@
 
     const c = state.ch5;
     let activeDocIdx = c.currentDocIdx || 0;
+    let lastRenderedDocIdx = -1;
 
-    function render() {
+    function render(forceScrollTop = false) {
       const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
       const body = $('marking-body');
-      const prevScrollTop = body ? body.scrollTop : 0;
+      const isDocChanged = (lastRenderedDocIdx !== activeDocIdx) || forceScrollTop;
+      const prevScrollTop = (!isDocChanged && body) ? body.scrollTop : 0;
+      lastRenderedDocIdx = activeDocIdx;
       const doc = c.docs[activeDocIdx];
       const allCompleted = c.markingCompleted;
 
@@ -2888,7 +2891,18 @@
 
           ${
             feedback
-              ? `<div class="marking-feedback-box ${doc.isCorrect ? 'success' : 'error'}">${feedback}</div>`
+              ? `
+                <div class="marking-feedback-box ${doc.isCorrect ? 'success' : 'error'}">
+                  <div>${feedback}</div>
+                  ${doc.isCorrect && activeDocIdx < c.docs.length - 1 ? `
+                    <div style="margin-top:10px; display:flex; align-items:center; gap:8px;">
+                      <button class="pixel-btn primary" id="btn-goto-next-doc" type="button" style="padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer;">
+                        👉 ${isEn ? 'Proceed to Next Document' : '前往下一份文件'} (${activeDocIdx + 2}/${c.docs.length}) ▶
+                      </button>
+                    </div>
+                  ` : ''}
+                </div>
+              `
               : `<div style="font-size:12px; color:#64748b;">${isEn ? 'Select an option above based on content and purpose. Wrong choices receive specific feedback and can be retried immediately!' : '請依內容與用途點選上方選項。若選錯，系統會給予具體回饋並可當場重新選擇！'}</div>`
           }
         </div>
@@ -2922,7 +2936,7 @@
           window.BS.Audio.select();
           activeDocIdx = Number(btn.dataset.idx);
           c.currentDocIdx = activeDocIdx;
-          render();
+          render(true);
         };
       });
 
@@ -2932,7 +2946,7 @@
         if (!res.isCorrect) {
           window.BS.Audio.alert();
         }
-        render();
+        render(false);
       };
 
       $('btn-mark-conf').onclick = () => {
@@ -2941,8 +2955,19 @@
         if (!res.isCorrect) {
           window.BS.Audio.alert();
         }
-        render();
+        render(false);
       };
+
+      if ($('btn-goto-next-doc')) {
+        $('btn-goto-next-doc').onclick = () => {
+          if (activeDocIdx < c.docs.length - 1) {
+            window.BS.Audio.select();
+            activeDocIdx++;
+            c.currentDocIdx = activeDocIdx;
+            render(true);
+          }
+        };
+      }
 
       if ($('btn-prev-doc')) {
         $('btn-prev-doc').onclick = () => {
@@ -2950,7 +2975,7 @@
             window.BS.Audio.select();
             activeDocIdx--;
             c.currentDocIdx = activeDocIdx;
-            render();
+            render(true);
           }
         };
       }
@@ -2961,7 +2986,7 @@
             window.BS.Audio.select();
             activeDocIdx++;
             c.currentDocIdx = activeDocIdx;
-            render();
+            render(true);
           }
         };
       }
@@ -2991,8 +3016,15 @@
         };
       }
 
-      if (prevScrollTop > 0 && body) {
-        body.scrollTop = prevScrollTop;
+      if (body) {
+        if (isDocChanged) {
+          body.scrollTop = 0;
+          requestAnimationFrame(() => {
+            if (body) body.scrollTop = 0;
+          });
+        } else if (prevScrollTop > 0) {
+          body.scrollTop = prevScrollTop;
+        }
       }
     }
 
