@@ -594,6 +594,34 @@
       return;
     }
 
+    // Scroll active modal window with keyboard ArrowUp/Down, W/S, PageUp/Down
+    if (modal) {
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+        if (window.BS.UI.scrollActiveModal(-80)) {
+          e.preventDefault();
+          return;
+        }
+      }
+      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        if (window.BS.UI.scrollActiveModal(80)) {
+          e.preventDefault();
+          return;
+        }
+      }
+      if (e.key === 'PageUp') {
+        if (window.BS.UI.scrollActiveModal(-280)) {
+          e.preventDefault();
+          return;
+        }
+      }
+      if (e.key === 'PageDown') {
+        if (window.BS.UI.scrollActiveModal(280)) {
+          e.preventDefault();
+          return;
+        }
+      }
+    }
+
     if (window.BS.UI.handleDialogueKey(e.key)) {
       e.preventDefault();
       return;
@@ -679,6 +707,14 @@
           return;
         }
         if (window.BS.UI.isOverlayOpen()) {
+          if (modal && modal !== 'pause') {
+            if (dir === 'up') {
+              if (window.BS.UI.scrollActiveModal(-80)) return;
+            }
+            if (dir === 'down') {
+              if (window.BS.UI.scrollActiveModal(80)) return;
+            }
+          }
           if (dir === 'up') window.BS.UI.handleDialogueKey('ArrowUp');
           if (dir === 'down') window.BS.UI.handleDialogueKey('ArrowDown');
           return;
@@ -1120,10 +1156,11 @@
   const MOVE_SPEED = 0.135;
   const NPC_MOVE_SPEED = 0.065;
 
-  function updateFade() {
+  function updateFade(timeScale = 1) {
     if (!fade.active) return;
+    const fadeSpeed = 0.14 * timeScale;
     if (fade.phase === 'out') {
-      fade.alpha += 0.14;
+      fade.alpha += fadeSpeed;
       if (fade.alpha >= 1) {
         fade.alpha = 1;
         const p = fade.pending;
@@ -1134,7 +1171,7 @@
         fade.phase = 'in';
       }
     } else {
-      fade.alpha -= 0.14;
+      fade.alpha -= fadeSpeed;
       if (fade.alpha <= 0) {
         fade.alpha = 0;
         fade.active = false;
@@ -1145,14 +1182,14 @@
     }
   }
 
-  function updateNPCs() {
+  function updateNPCs(timeScale = 1) {
     if (fade.active || window.BS.UI.isOverlayOpen()) return;
 
     for (const npc of npcs) {
       if (npc.floor !== player.floor) continue;
 
       if (npc.moving) {
-        npc.moveProgress += NPC_MOVE_SPEED;
+        npc.moveProgress += NPC_MOVE_SPEED * timeScale;
         if (npc.moveProgress >= 1) {
           npc.x = npc.toX;
           npc.y = npc.toY;
@@ -1213,9 +1250,9 @@
     }
   }
 
-  function update() {
+  function update(timeScale = 1) {
     tick++;
-    updateFade();
+    updateFade(timeScale);
 
     const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
 
@@ -1227,9 +1264,9 @@
     }
 
     if (!fade.active && !window.BS.UI.isOverlayOpen()) {
-      updateNPCs();
+      updateNPCs(timeScale);
       if (player.moving) {
-        player.moveProgress += MOVE_SPEED;
+        player.moveProgress += MOVE_SPEED * timeScale;
         if (player.moveProgress >= 1) {
           player.x = player.toX;
           player.y = player.toY;
@@ -1405,19 +1442,44 @@
 
     if (currentChapter === 1) {
       const vNpc = npcs.find((n) => n.id === 'npc_visitor');
+      const leadNpc = npcs.find((n) => n.id === 'npc_lead');
       const emailUrgent = state.email.misshared && (!state.email.linkRevoked || !state.email.reportedToLead);
       const emailPending = state.email.status === 'unread' || state.email.status === 'read' || state.email.status === 'holding';
       const visitorWaiting1F = vNpc && vNpc.floor === 1 && state.visitor.status === 'waiting';
+      const visitorResolved = window.BS.State.isVisitorResolved(state);
       const handoverReady = window.BS.State.canHandover(state) && !state.handoverDone;
 
       if (player.floor === 2) {
+        // 工作電腦提示
         if (state.email.misshared && !state.email.linkRevoked) {
           drawQuestBubble(3, 8.5, '!', '#ef4444', '#ffffff');
-        } else if (state.email.misshared && state.email.linkRevoked && !state.email.reportedToLead) {
-          drawQuestBubble(8, 16.5, '!', '#ef4444', '#ffffff');
         } else if (emailPending) {
           drawQuestBubble(3, 8.5, '!', '#f59e0b', '#1e293b');
         }
+
+        // 阿明組長驚嘆號提示（若需通報或尚未諮詢過組長）
+        if (leadNpc && leadNpc.floor === 2) {
+          if (state.email.misshared && state.email.linkRevoked && !state.email.reportedToLead) {
+            drawNpcBubble(leadNpc, '!', '#ef4444', '#ffffff');
+          } else if (!state.clues.mingExplainedScope) {
+            drawNpcBubble(leadNpc, '!', '#f59e0b', '#1e293b');
+          }
+        }
+
+        // 2F 實驗區未整理的物品驚嘆號提示（白板、電腦螢幕、樣品架）
+        // 只要訪客尚未完成拍照，或訪客已在實驗區，未收妥的項目一律亮驚嘆號提示
+        if (!visitorResolved || state.visitor.status === 'in_lab') {
+          if (!state.labItems.whiteboard) {
+            drawQuestBubble(9, 0.7, '!', '#f59e0b', '#1e293b');
+          }
+          if (!state.labItems.monitor) {
+            drawQuestBubble(12, 2.3, '!', '#f59e0b', '#1e293b');
+          }
+          if (!state.labItems.samples) {
+            drawQuestBubble(9.5, 6.3, '!', '#f59e0b', '#1e293b');
+          }
+        }
+
         if (vNpc && vNpc.floor === 2 && state.visitor.status === 'in_lab') {
           drawNpcBubble(vNpc, '!', '#38bdf8', '#0f172a');
         }
@@ -1428,8 +1490,10 @@
           drawQuestBubble(3, 11.5, '✓', '#22c55e', '#ffffff');
         }
       } else {
+        // 1F 大廳
         if (visitorWaiting1F) {
-          drawNpcBubble(vNpc, '!', '#38bdf8', '#0f172a');
+          if (vNpc) drawNpcBubble(vNpc, '!', '#38bdf8', '#0f172a');
+          drawQuestBubble(7, 10.3, '!', '#f59e0b', '#1e293b');
         }
         if (emailUrgent) {
           drawQuestBubble(2.5, 2.5, '▲', '#ef4444', '#ffffff');
@@ -1600,8 +1664,18 @@
     }
   }
 
-  function loop() {
-    update();
+  let lastLoopTime = 0;
+  function loop(timestamp) {
+    const now = typeof timestamp === 'number' ? timestamp : performance.now();
+    if (!lastLoopTime) lastLoopTime = now;
+    const rawDt = now - lastLoopTime;
+    lastLoopTime = now;
+    // Bound dt between 0 and 100ms to avoid huge jumps on tab switch
+    const dt = Math.min(Math.max(rawDt, 0), 100);
+    // Reference: 60 FPS => 16.6667ms per frame
+    const timeScale = dt > 0 ? (dt / 16.6667) : 1;
+
+    update(timeScale);
     render();
     requestAnimationFrame(loop);
   }

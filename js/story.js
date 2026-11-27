@@ -819,14 +819,14 @@
       }
 
       choices.push({
-        label: '引導在「1F 大廳形象牆指定角度」拍照（核准範圍）',
-        label_en: 'Guide to photo at 1F Lobby Logo Wall (Approved spot)',
+        label: '📸 引導在「1F 大廳形象牆指定角度」拍照（推薦・核准拍照區，無需整理實驗區）',
+        label_en: '📸 Guide to photo at 1F Lobby Logo Wall (Recommended: Approved spot, no lab clean-up needed)',
         onSelect: () => launchCh1Camera(state, 'entrance')
       });
 
       choices.push({
-        label: '陪同上「2F 實驗區」查看取景畫面並拍攝',
-        label_en: 'Escort to 2F Lab, inspect camera framing preview and shoot',
+        label: '⚠️ 陪同上「2F 實驗區」拍照（注意：須先至 2F 收妥白板／螢幕／樣品，否則會洩漏機密！）',
+        label_en: '⚠️ Escort to 2F Lab (Caution: Must clear whiteboard, lock screens, and stow samples to avoid trade secret leaks!)',
         onSelect: () => {
           v.status = 'in_lab';
           ctx.advanceTime(2);

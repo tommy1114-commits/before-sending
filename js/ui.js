@@ -3971,10 +3971,40 @@
     });
   }
 
+  function scrollActiveModal(deltaY) {
+    if (!activeModal) return false;
+    const bodyMap = {
+      pc: $('pc-body'),
+      poster: $('poster-body'),
+      offboard: $('offboard-body'),
+      checklist: $('checklist-body'),
+      marking: $('marking-body'),
+      clues: $('clues-body'),
+      endings: $('endings-body'),
+      characters: $('characters-body'),
+      handover: $('handover-body'),
+      dataCards: $('datacards-body'),
+      camera: $('camera-body')
+    };
+    let target = bodyMap[activeModal];
+    if (!target) {
+      const activeWin = document.querySelector('.modal-window:not(.hidden), .pixel-window:not(.hidden)');
+      if (activeWin) {
+        target = activeWin.querySelector('.window-body, .pc-body, .modal-body, .card-grid') || activeWin;
+      }
+    }
+    if (target) {
+      target.scrollBy({ top: deltaY, behavior: 'smooth' });
+      return true;
+    }
+    return false;
+  }
+
   window.BS.UI = {
     bindStaticHandlers,
     isOverlayOpen,
     getActiveModal: () => activeModal,
+    scrollActiveModal,
     closeDialogue,
     closeAllModals,
     showToast,
