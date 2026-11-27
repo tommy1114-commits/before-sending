@@ -1443,11 +1443,14 @@
     if (currentChapter === 1) {
       const vNpc = npcs.find((n) => n.id === 'npc_visitor');
       const leadNpc = npcs.find((n) => n.id === 'npc_lead');
+      const wenNpc = npcs.find((n) => n.id === 'npc_colleague');
       const emailUrgent = state.email.misshared && (!state.email.linkRevoked || !state.email.reportedToLead);
       const emailPending = state.email.status === 'unread' || state.email.status === 'read' || state.email.status === 'holding';
       const visitorWaiting1F = vNpc && vNpc.floor === 1 && state.visitor.status === 'waiting';
       const visitorResolved = window.BS.State.isVisitorResolved(state);
       const handoverReady = window.BS.State.canHandover(state) && !state.handoverDone;
+      const talkedToWen = Boolean(state.clues && state.clues.meetingVersion);
+      const visitorInLab = state.visitor && state.visitor.status === 'in_lab';
 
       if (player.floor === 2) {
         // 工作電腦提示
@@ -1457,18 +1460,23 @@
           drawQuestBubble(3, 8.5, '!', '#f59e0b', '#1e293b');
         }
 
+        // 同事阿文驚嘆號提示（尚未確認會議圖版本前提醒交談）
+        if (wenNpc && wenNpc.floor === 2 && !talkedToWen) {
+          drawNpcBubble(wenNpc, '!', '#38bdf8', '#0f172a');
+        }
+
         // 阿明組長驚嘆號提示（若需通報或尚未諮詢過組長）
         if (leadNpc && leadNpc.floor === 2) {
           if (state.email.misshared && state.email.linkRevoked && !state.email.reportedToLead) {
             drawNpcBubble(leadNpc, '!', '#ef4444', '#ffffff');
-          } else if (!state.clues.mingExplainedScope) {
+          } else if (!state.clues.ndaScope) {
             drawNpcBubble(leadNpc, '!', '#f59e0b', '#1e293b');
           }
         }
 
         // 2F 實驗區未整理的物品驚嘆號提示（白板、電腦螢幕、樣品架）
-        // 只要訪客尚未完成拍照，或訪客已在實驗區，未收妥的項目一律亮驚嘆號提示
-        if (!visitorResolved || state.visitor.status === 'in_lab') {
+        // 依需求：主角跟阿文講完話後（阿文提醒實驗區需要清場），或訪客已進實驗區時才出現！
+        if ((talkedToWen || visitorInLab) && !visitorResolved) {
           if (!state.labItems.whiteboard) {
             drawQuestBubble(9, 0.7, '!', '#f59e0b', '#1e293b');
           }
@@ -1480,7 +1488,7 @@
           }
         }
 
-        if (vNpc && vNpc.floor === 2 && state.visitor.status === 'in_lab') {
+        if (vNpc && vNpc.floor === 2 && visitorInLab) {
           drawNpcBubble(vNpc, '!', '#38bdf8', '#0f172a');
         }
         if (visitorWaiting1F) {
