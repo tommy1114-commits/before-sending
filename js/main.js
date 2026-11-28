@@ -524,6 +524,7 @@
   let lastMenuNavTime = 0;
 
   window.addEventListener('keydown', (e) => {
+    if (isTitleVisible() && (e.key === 'Tab' || e.target.closest?.('.title-feedback'))) return;
     if (fade.active) return;
 
     // GBA START (Esc / P)
@@ -933,6 +934,31 @@
     });
   }
 
+  $('feedback-copy').addEventListener('click', async () => {
+    const email = $('feedback-email');
+    const status = $('feedback-status');
+    const t = window.BS.I18n.t;
+    status.textContent = '';
+
+    try {
+      await navigator.clipboard.writeText(email.textContent.trim());
+    } catch {
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(email);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      try {
+        if (!document.execCommand('copy')) throw new Error('Copy command failed');
+        selection.removeAllRanges();
+      } catch {
+        status.textContent = t('feedbackCopyFailed');
+        return;
+      }
+    }
+    status.textContent = t('feedbackCopied');
+  });
+
   function applyLanguageUI() {
     const isEn = window.BS && window.BS.I18n && window.BS.I18n.getLang() === 'en';
     const t = window.BS.I18n ? window.BS.I18n.t : (k, fallback) => fallback || k;
@@ -946,6 +972,10 @@
     if (subEn) subEn.textContent = t('gameTitleSub');
     const footer = document.querySelector('.title-menu-footer');
     if (footer) footer.textContent = t('titleFooter');
+    $('feedback-heading').textContent = t('feedbackHeading');
+    $('feedback-invitation').textContent = t('feedbackInvitation');
+    $('feedback-copy').textContent = t('feedbackCopy');
+    $('feedback-status').textContent = '';
     const toggleText = $('lang-toggle-text');
     if (toggleText) toggleText.textContent = t('langToggleText');
 

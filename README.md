@@ -125,11 +125,11 @@
 
 ## 部署到 GitHub Pages（直接上傳）
 
-在 `營業秘密game/before-sending/` 資料夾中，已為您整理好所有已去除多餘嵌套、立即可上傳的乾淨檔案。
+本資料夾內的檔案可直接上傳至 GitHub Pages。
 
 ### 部署步驟
 1. 在 GitHub 上建立一個新的公開倉庫（Repository，例如 `before-sending-game`）。
-2. 將 `before-sending/` 資料夾內的**所有檔案與子資料夾直接上傳到該倉庫的根目錄**：
+2. 將 `直接上傳github` 資料夾內的**所有檔案與子資料夾直接上傳到該倉庫的根目錄**：
    - `index.html`
    - `README.md`
    - `audio/`
